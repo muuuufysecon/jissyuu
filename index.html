@@ -20,6 +20,12 @@
   .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; }
+  /* 文字色を黒で統一（実習/見学/挨拶/巡回チップの文字色は除外） */
+  body, body * { color: #000 !important; }
+  .text-yellow-900 { color: rgb(113 63 18) !important; }
+  .text-pink-900 { color: rgb(131 24 67) !important; }
+  .text-green-900 { color: rgb(20 83 45) !important; }
+  .text-blue-900 { color: rgb(30 58 138) !important; }
 </style>
 
 <!-- React 18 / lucide-react を ESM CDN 経由で読み込むための importmap -->
