@@ -1365,19 +1365,19 @@ function App() {
 
         {currentView === 'list' ? (
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fadeIn">
-            <div className="overflow-x-auto">
+            <div className="overflow-auto max-h-[65vh]">
               <table className="w-full text-left border-collapse table-auto">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold select-none">
-                    <th className="p-4 min-w-[90px]">生徒情報</th>
-                    <th className="p-4 min-w-[140px]">実習先 &amp; 実習期間</th>
-                    <th className="p-4 min-w-[100px]">事前電話</th>
-                    <th className="p-4 min-w-[120px]"><span className="leading-tight">連絡票・<br />実施計画配付</span></th>
-                    <th className="p-4 min-w-[100px]">事前挨拶</th>
-                    <th className="p-4 min-w-[140px]">巡回予定</th>
-                    <th className="p-4 min-w-[100px]">生徒お礼状</th>
-                    <th className="p-4 min-w-[100px]">教師お礼状</th>
-                    <th className="p-4 text-center">操作</th>
+                  <tr className="text-slate-600 text-xs font-bold select-none">
+                    <th className="p-4 min-w-[90px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">生徒情報</th>
+                    <th className="p-4 min-w-[140px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">実習先 &amp; 実習期間</th>
+                    <th className="p-4 min-w-[100px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">事前電話</th>
+                    <th className="p-4 min-w-[120px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]"><span className="leading-tight">連絡票・<br />実施計画配付</span></th>
+                    <th className="p-4 min-w-[100px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">事前挨拶</th>
+                    <th className="p-4 min-w-[140px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">巡回予定</th>
+                    <th className="p-4 min-w-[100px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">生徒お礼状</th>
+                    <th className="p-4 min-w-[100px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">教師お礼状</th>
+                    <th className="p-4 text-center sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">操作</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-500 text-xs text-slate-700">
