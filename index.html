@@ -1305,7 +1305,7 @@ function App() {
 
                       return (
                         <tr key={s.id} className={`hover:bg-slate-50/80 transition-colors group ${isMyStudent ? 'bg-indigo-50/30' : ''}`}>
-                          <td className="p-4">
+                          <td className="p-4 align-top">
                             <div className="flex items-center gap-2">
                               {isMyStudent && <span className="w-1.5 h-6 rounded bg-indigo-600 shrink-0"></span>}
                               <div>
@@ -1316,7 +1316,7 @@ function App() {
                               </div>
                             </div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 align-top">
                             <div className="font-bold text-slate-900 flex items-center gap-1.5 flex-wrap">
                               <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold border shrink-0 ${s.internshipType === 'observation' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-indigo-50 text-indigo-700 border-indigo-200'}`}>{s.internshipType === 'observation' ? '👁️ 見学' : '💼 実習'}</span>
                               <span>{s.location || '（未設定）'}</span>
@@ -1335,7 +1335,7 @@ function App() {
                               </button>
                             </div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 align-top">
                             <div className="space-y-1.5">
                               <ProgressToggleButton icon={Phone} label={s.phoneStatus === 'completed' ? '連絡済み' : s.phoneStatus === 'none' ? '必要なし' : '未連絡'}
                                 status={s.phoneStatus} palette={phonePalette}
@@ -1347,7 +1347,7 @@ function App() {
                               )}
                             </div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 align-top">
                             <div className="space-y-1.5">
                               <ProgressToggleButton icon={FileText} label={s.docStatus === 'completed' ? '配付済み' : s.docStatus === 'none' ? '配付の必要なし' : '未配付'}
                                 status={s.docStatus} palette={docPalette}
@@ -1359,7 +1359,7 @@ function App() {
                               )}
                             </div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 align-top">
                             <div className="space-y-1.5">
                               <button onClick={() => handleInstantToggle(s, 'greetingStatus', s.greetingStatus)}
                                 className={`w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${greetingPalette}`}>
@@ -1375,7 +1375,7 @@ function App() {
                               {s.greetingVisitor && <div className="text-[9px] text-slate-500 pl-1">引率: {s.greetingVisitor}</div>}
                             </div>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 align-top">
                             <div className="space-y-1.5">
                               <button onClick={() => handleInstantToggle(s, 'patrolStatus', s.patrolStatus)}
                                 className={`w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${patrolPalette}`}>
@@ -1391,12 +1391,12 @@ function App() {
                               {s.patrolVisitor && <div className="text-[9px] text-slate-500 pl-1">巡回者: {s.patrolVisitor}</div>}
                             </div>
                           </td>
-                          <td className="p-4 max-w-[200px]">
+                          <td className="p-4 align-top max-w-[200px]">
                             <p className="text-slate-600 text-xs leading-relaxed line-clamp-3" title={s.notes}>
                               {s.notes || <span className="text-slate-400 italic">特記事項なし</span>}
                             </p>
                           </td>
-                          <td className="p-4">
+                          <td className="p-4 align-top">
                             <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
                               <button onClick={() => setMaterialModalStudentId(s.id)} title="関連資料"
                                 className="relative p-1.5 text-slate-600 hover:text-amber-600 bg-white border border-slate-200 hover:border-amber-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
