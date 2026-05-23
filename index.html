@@ -117,7 +117,7 @@ const STEP_CONFIG = {
   },
   greeting: {
     field: 'greetingStatus',
-    cycle: ['pending', 'scheduled', 'completed'],
+    cycle: ['pending', 'unadjusted', 'scheduled', 'completed'],
     label: '🤝 3. 事前挨拶',
     activeColor: 'bg-teal-600 border-teal-600 text-white shadow-sm'
   },
@@ -1083,7 +1083,7 @@ function App() {
     const target = formatDateKey(year, month, day);
     const events = [];
     filteredStudents.forEach((student) => {
-      if (calendarFilter !== 'student' && student.greetingDate === target) {
+      if (student.greetingDate === target) {
         events.push({
           type: 'greeting',
           label: `挨拶: ${student.name} (${student.greetingTime || '時間未定'})`,
@@ -1187,7 +1187,7 @@ function App() {
     const labelOf = {
       phone:    (s) => s === 'completed' ? '完了'   : s === 'none' ? '不要' : '未完了',
       doc:      (s) => s === 'completed' ? '完了'   : s === 'none' ? '不要' : '未完了',
-      greeting: (s) => s === 'completed' ? '挨拶終了' : s === 'scheduled' ? '挨拶日決定' : '必要なし'
+      greeting: (s) => s === 'completed' ? '挨拶終了' : s === 'scheduled' ? '挨拶日決定' : s === 'unadjusted' ? '未調整' : '必要なし'
     };
     const rows = filteredStudents.map((s) => [
       s.name || '', s.grade ? `${s.grade}年` : '', s.classVal ? `${s.classVal}組` : '', s.teacher || '',
@@ -1365,7 +1365,7 @@ function App() {
 
         {currentView === 'list' ? (
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fadeIn">
-            <div className="overflow-auto max-h-[65vh]">
+            <div className="overflow-auto resize-y max-h-[85vh] min-h-[300px] h-[65vh]">
               <table className="w-full text-left border-collapse table-auto">
                 <thead>
                   <tr className="text-slate-600 text-xs font-bold select-none">
@@ -1396,7 +1396,7 @@ function App() {
                       const zebraBg = idx % 2 === 1 ? 'bg-slate-50/60' : 'bg-white';
                       const phonePalette = s.phoneStatus === 'completed' ? 'bg-indigo-50 border-indigo-200 text-indigo-800 hover:bg-indigo-100/70' : s.phoneStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
                       const docPalette = s.docStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.docStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
-                      const greetingPalette = s.greetingStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.greetingStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
+                      const greetingPalette = s.greetingStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.greetingStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : s.greetingStatus === 'unadjusted' ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
                       const patrolPalette = s.patrolStatus === 'completed' ? 'bg-violet-50 border-violet-200 text-violet-800 hover:bg-violet-100/70' : s.patrolStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
                       const studentThankYouPalette = s.studentThankYouStatus === 'completed' ? 'bg-pink-50 border-pink-200 text-pink-800 hover:bg-pink-100/70' : s.studentThankYouStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
                       const teacherThankYouPalette = s.teacherThankYouStatus === 'completed' ? 'bg-cyan-50 border-cyan-200 text-cyan-800 hover:bg-cyan-100/70' : s.teacherThankYouStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
@@ -1430,7 +1430,7 @@ function App() {
                             </div>
                             <div className="mt-1 flex flex-col items-start gap-1 text-[10px] font-medium">
                               {(s.internshipDates || []).length === 0 && <span className="placeholder-empty mr-1">実習日 未設定</span>}
-                              {(s.internshipDates || []).map((d, idx, arr) => { const palette = s.internshipType === 'observation' ? 'bg-pink-200 border-pink-400 text-pink-900 hover:bg-pink-300' : 'bg-yellow-200 border-yellow-400 text-yellow-900 hover:bg-yellow-300'; return (<span key={d} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-bold ${palette}`}><span>{idx + 1}／{arr.length}　　{formatShortDate(d)}</span><button onClick={() => handleRemoveInternshipDate(s, d)} title="この日を外す" className="hover:bg-white/60 rounded text-slate-500 hover:text-rose-700 leading-none cursor-pointer font-bold">×</button></span>); })}
+                              {(s.internshipDates || []).map((d, idx, arr) => { const palette = s.internshipType === 'observation' ? 'bg-pink-200 border-pink-400 text-pink-900 hover:bg-pink-300' : 'bg-yellow-200 border-yellow-400 text-yellow-900 hover:bg-yellow-300'; return (<span key={d} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-bold ${palette}`}><span>{s.internshipType === 'observation' ? '見学' : (idx + 1) + '／' + arr.length}　　{formatShortDate(d)}</span><button onClick={() => handleRemoveInternshipDate(s, d)} title="この日を外す" className="hover:bg-white/60 rounded text-slate-500 hover:text-rose-700 leading-none cursor-pointer font-bold">×</button></span>); })}
                               <button onClick={() => setDatePickerState({ value: '', title: `${s.name} の実習日を追加`, onSelect: (v) => { if (v) handleAddInternshipDate(s, v); } })}
                                 className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer">
                                 <Plus className="w-3 h-3" />
@@ -1468,14 +1468,16 @@ function App() {
                                 className={`w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${greetingPalette}`}>
                                 <span className="flex items-center gap-1">
                                   <Handshake className="w-3.5 h-3.5 text-slate-500" />
-                                  {s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '挨拶日決定' : '必要なし'}
+                                  {s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '挨拶日決定' : s.greetingStatus === 'unadjusted' ? '未調整' : '必要なし'}
                                 </span>
-                                <span>{s.greetingStatus === 'completed' ? '✔' : s.greetingStatus === 'scheduled' ? '📅' : 'ー'}</span>
+                                <span>{s.greetingStatus === 'completed' ? '✔' : s.greetingStatus === 'scheduled' ? '📅' : s.greetingStatus === 'unadjusted' ? '🕐' : 'ー'}</span>
                               </button>
+                              {s.greetingStatus !== 'pending' && (<>
                               <button onClick={() => setDatePickerState({ value: s.greetingDate || '', title: `${s.name} の事前挨拶日`, onSelect: (v) => { const upd = { greetingDate: v }; if (v && (!s.greetingStatus || s.greetingStatus === 'pending')) upd.greetingStatus = 'scheduled'; persistPartial(s.id, upd); } })}
                                 className="text-[10px] font-semibold pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">📅 日時: <span className={s.greetingDate ? 'text-slate-700' : 'text-slate-400 italic'}>{s.greetingDate ? formatShortDate(s.greetingDate) : '未設定（タップ）'}</span></button>
                               {s.greetingTime    && <div className="text-[9px] text-slate-500 pl-1">時間: {s.greetingTime}</div>}
                               {s.greetingVisitor && <div className="text-[9px] text-slate-500 pl-1">引率: {s.greetingVisitor}</div>}
+                              </>)}
                             </div>
                           </td>
                           <td className="p-4 align-top">
@@ -1745,7 +1747,7 @@ function App() {
                 <div className="text-xs text-slate-400 font-bold">実習日({(sd.internshipDates || []).length}日)</div>
                 <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] font-medium">
                   {(sd.internshipDates || []).length === 0 && <span className="placeholder-empty mr-1">実習日 未設定</span>}
-                  {(sd.internshipDates || []).map((d, idx, arr) => { const palette = sd.internshipType === 'observation' ? 'bg-pink-200 border-pink-400 text-pink-900 hover:bg-pink-300' : 'bg-yellow-200 border-yellow-400 text-yellow-900 hover:bg-yellow-300'; return (<span key={d} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-bold ${palette}`}><span>{idx + 1}／{arr.length}　　{formatShortDate(d)}</span><button onClick={() => handleRemoveInternshipDate(sd, d)} title="この日を外す" className="hover:bg-white/60 rounded text-slate-500 hover:text-rose-700 leading-none cursor-pointer font-bold">×</button></span>); })}
+                  {(sd.internshipDates || []).map((d, idx, arr) => { const palette = sd.internshipType === 'observation' ? 'bg-pink-200 border-pink-400 text-pink-900 hover:bg-pink-300' : 'bg-yellow-200 border-yellow-400 text-yellow-900 hover:bg-yellow-300'; return (<span key={d} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-bold ${palette}`}><span>{sd.internshipType === 'observation' ? '見学' : (idx + 1) + '／' + arr.length}　　{formatShortDate(d)}</span><button onClick={() => handleRemoveInternshipDate(sd, d)} title="この日を外す" className="hover:bg-white/60 rounded text-slate-500 hover:text-rose-700 leading-none cursor-pointer font-bold">×</button></span>); })}
                   <button onClick={() => setDatePickerState({ value: '', title: `${sd.name} の実習日を追加`, onSelect: (v) => { if (v) handleAddInternshipDate(sd, v); } })} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer"><Plus className="w-3 h-3" /><span>追加</span></button>
                 </div>
               </div>
@@ -1771,13 +1773,13 @@ function App() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-500 flex items-center gap-1"><Handshake className="w-3.5 h-3.5 text-teal-600" />事前挨拶訪問</span>
-                  <button onClick={() => handleInstantToggle(sd, 'greetingStatus', sd.greetingStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.greetingStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : sd.greetingStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>{sd.greetingStatus === 'completed' ? '挨拶終了' : sd.greetingStatus === 'scheduled' ? '挨拶日決定' : '必要なし'}</button>
+                  <button onClick={() => handleInstantToggle(sd, 'greetingStatus', sd.greetingStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.greetingStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : sd.greetingStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100' : sd.greetingStatus === 'unadjusted' ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>{sd.greetingStatus === 'completed' ? '挨拶終了' : sd.greetingStatus === 'scheduled' ? '挨拶日決定' : sd.greetingStatus === 'unadjusted' ? '未調整' : '必要なし'}</button>
                 </div>
-                <div className="p-2 bg-emerald-50/40 border border-emerald-100 text-emerald-900 rounded-lg text-xs font-semibold space-y-1">
+                {sd.greetingStatus !== 'pending' && (<div className="p-2 bg-emerald-50/40 border border-emerald-100 text-emerald-900 rounded-lg text-xs font-semibold space-y-1">
                   <button onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: `${sd.name} の挨拶予定日`, onSelect: (v) => { const upd = { greetingDate: v }; if (v && (!sd.greetingStatus || sd.greetingStatus === 'pending')) upd.greetingStatus = 'scheduled'; persistPartial(sd.id, upd); } })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">📅 挨拶予定: <span className={sd.greetingDate ? '' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : '未設定(タップ)'}</span></button>
                   <button onClick={() => setTextEditState({ value: sd.greetingTime || '', title: '挨拶予定時間を編集', label: '時間(例: 13:30)', onSave: (v) => persistPartial(sd.id, { greetingTime: v }) })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">⏰ 時間: <span className={sd.greetingTime ? '' : 'text-slate-400 italic'}>{sd.greetingTime || '未設定(タップ)'}</span></button>
                   <button onClick={() => setTextEditState({ value: sd.greetingVisitor || '', title: '引率教員を編集', label: '引率教員', onSave: (v) => persistPartial(sd.id, { greetingVisitor: v }) })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">👤 引率教員: <span className={sd.greetingVisitor ? '' : 'text-slate-400 italic'}>{sd.greetingVisitor || '未設定(タップ)'}</span></button>
-                </div>
+                </div>)}
               </div>
 
               <div className="space-y-1.5">
