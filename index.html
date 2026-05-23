@@ -884,9 +884,9 @@ function App() {
     await persistPartial(student.id, { internshipDates: next });
   };
 
-  const handleAddPatrol = async (student, date, time) => {
+  const handleAddPatrol = async (student, date, time, teacher) => {
     const current = student.patrols || [];
-    const next = [...current, { id: 'p-' + Date.now(), date, time: time || '', done: false }].sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+    const next = [...current, { id: 'p-' + Date.now(), date, time: time || '', teacher: teacher || '', done: false }].sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
     recordUpdate(student.id, { patrols: current }, { patrols: next });
     await persistPartial(student.id, { patrols: next });
   };
@@ -1098,7 +1098,7 @@ function App() {
           if (p.date !== target) return;
           events.push({
             type: 'patrol',
-            label: `巡回: ${student.name}${p.time ? ` (${p.time})` : ''}`,
+            label: `巡回: ${student.name}${p.teacher ? ' / ' + p.teacher : ''}${p.time ? ` (${p.time})` : ''}`,
             student,
             color: p.done
               ? 'bg-blue-300 border-blue-500 text-blue-900 hover:bg-blue-400'
@@ -1195,7 +1195,7 @@ function App() {
       labelOf.phone(s.phoneStatus), s.phoneDate || '',
       labelOf.doc(s.docStatus), s.docDate || '',
       labelOf.greeting(s.greetingStatus), s.greetingDate || '', s.greetingTime || '', s.greetingVisitor || '',
-      (s.patrols || []).map((p) => `${p.date}${p.time ? ' ' + p.time : ''}${p.done ? '(済)' : ''}`).join(' / '), (s.patrols || []).filter((p) => p.done).length,
+      (s.patrols || []).map((p) => `${p.teacher ? p.teacher + ' ' : ''}${p.date}${p.time ? ' ' + p.time : ''}${p.done ? '(済)' : ''}`).join(' / '), (s.patrols || []).filter((p) => p.done).length,
       s.notes || ''
     ]);
     const csv = [
@@ -1364,8 +1364,8 @@ function App() {
         </div>
 
         {currentView === 'list' ? (
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fadeIn">
-            <div className="overflow-auto resize-y max-h-[85vh] min-h-[300px] h-[65vh]">
+          <div key="view-list" className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fadeIn">
+            <div key="list-scroll" className="overflow-auto resize-y max-h-[85vh] min-h-[300px] h-[65vh]">
               <table className="w-full text-left border-collapse table-auto">
                 <thead>
                   <tr className="text-slate-600 text-xs font-bold select-none">
@@ -1483,8 +1483,8 @@ function App() {
                           <td className="p-4 align-top">
                             <div className="flex flex-col items-start gap-1 text-[10px] font-medium">
                               {(s.patrols || []).length === 0 && <span className="placeholder-empty mr-1">巡回 未設定</span>}
-                              {(s.patrols || []).map((p) => (<label key={p.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer"><input type="checkbox" checked={!!p.done} onChange={() => handleTogglePatrol(s, p.id)} className="cursor-pointer accent-violet-600" /><span className={`font-bold ${p.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>{formatShortDate(p.date)}{p.time ? `　${p.time}` : ''}</span><button onClick={(e) => { e.preventDefault(); handleRemovePatrol(s, p.id); }} title="削除" className="text-slate-400 hover:text-rose-600 leading-none cursor-pointer font-bold">×</button></label>))}
-                              <button onClick={() => setDatePickerState({ value: '', title: `${s.name} の巡回日を追加`, onSelect: (v) => { if (!v) return; setTextEditState({ value: '', title: '巡回時間を入力', label: '時間 (例: 10:00 ※空欄可)', onSave: (t) => handleAddPatrol(s, v, t) }); } })} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer"><Plus className="w-3 h-3" /><span>追加</span></button>
+                              {(s.patrols || []).map((p) => (<label key={p.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer"><input type="checkbox" checked={!!p.done} onChange={() => handleTogglePatrol(s, p.id)} className="cursor-pointer accent-violet-600" /><span className={`font-bold ${p.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>{p.teacher ? p.teacher + '　' : ''}{formatShortDate(p.date)}{p.time ? `　${p.time}` : ''}</span><button onClick={(e) => { e.preventDefault(); handleRemovePatrol(s, p.id); }} title="削除" className="text-slate-400 hover:text-rose-600 leading-none cursor-pointer font-bold">×</button></label>))}
+                              <button onClick={() => setDatePickerState({ value: '', title: `${s.name} の巡回日を追加`, onSelect: (v) => { if (!v) return; setTextEditState({ value: myTeacherName || '', title: '巡回担当教員を入力', label: '担当教員 (空欄可)', onSave: (te) => setTimeout(() => setTextEditState({ value: '', title: '巡回時間を入力', label: '時間 (例: 10:00 ※空欄可)', onSave: (t) => handleAddPatrol(s, v, t, te) }), 0) }); } })} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer"><Plus className="w-3 h-3" /><span>追加</span></button>
                             </div>
                           </td>
                           <td className="p-4 align-top">
@@ -1543,7 +1543,7 @@ function App() {
             </div>
           </div>
         ) : currentView === 'calendar' ? (
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col animate-fadeIn">
+          <div key="view-calendar" className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col animate-fadeIn">
             <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <button onClick={handlePrevMonth} className="p-1.5 hover:bg-slate-200 bg-white border border-slate-200 rounded-lg text-slate-700 transition-all cursor-pointer">
@@ -1634,7 +1634,7 @@ function App() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4 animate-fadeIn">
+          <div key="view-kanban" className="space-y-4 animate-fadeIn">
             <div className="bg-white p-3 border border-slate-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm">
               <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
                 <LayoutGrid className="w-4 h-4 text-indigo-600" />
@@ -1786,7 +1786,7 @@ function App() {
                 <div className="text-xs text-slate-400 font-bold flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-violet-500" />指導巡回</div>
                 <div className="flex flex-wrap items-center gap-1 text-[11px] font-medium">
                   {(sd.patrols || []).length === 0 && <span className="placeholder-empty mr-1">巡回 未設定</span>}
-                  {(sd.patrols || []).map((p) => (<label key={p.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer"><input type="checkbox" checked={!!p.done} onChange={() => handleTogglePatrol(sd, p.id)} className="cursor-pointer accent-violet-600" /><span className={`font-bold ${p.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>{formatShortDate(p.date)}{p.time ? `　${p.time}` : ''}</span><button onClick={(e) => { e.preventDefault(); handleRemovePatrol(sd, p.id); }} title="削除" className="text-slate-400 hover:text-rose-600 leading-none cursor-pointer font-bold">×</button></label>))}
+                  {(sd.patrols || []).map((p) => (<label key={p.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer"><input type="checkbox" checked={!!p.done} onChange={() => handleTogglePatrol(sd, p.id)} className="cursor-pointer accent-violet-600" /><span className={`font-bold ${p.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>{p.teacher ? p.teacher + '　' : ''}{formatShortDate(p.date)}{p.time ? `　${p.time}` : ''}</span><button onClick={(e) => { e.preventDefault(); handleRemovePatrol(sd, p.id); }} title="削除" className="text-slate-400 hover:text-rose-600 leading-none cursor-pointer font-bold">×</button></label>))}
                   <button onClick={() => setDatePickerState({ value: '', title: `${sd.name} の巡回日を追加`, onSelect: (v) => { if (!v) return; setTextEditState({ value: '', title: '巡回時間を入力', label: '時間 (例: 10:00 ※空欄可)', onSave: (t) => handleAddPatrol(sd, v, t) }); } })} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer"><Plus className="w-3 h-3" /><span>追加</span></button>
                 </div>
               </div>
