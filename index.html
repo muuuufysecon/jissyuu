@@ -58,7 +58,7 @@ import {
   Plus, Search, Settings, Database, AlertTriangle, Check, CheckCircle2,
   Clock, Phone, FileText, Calendar, User, Filter, RotateCcw, RotateCw, HelpCircle,
   Info, Copy, Trash2, Edit, AlertCircle, Share2, BookOpen, Key, ChevronDown, CheckCircle, Download,
-  ChevronLeft, ChevronRight, List, LayoutGrid, SlidersHorizontal, Handshake, Paperclip
+  ChevronLeft, ChevronRight, List, LayoutGrid, SlidersHorizontal, Handshake, Paperclip, Upload
 } from 'lucide-react';
 
 // =============================================================================
@@ -643,6 +643,65 @@ const SelectEditModal = ({ state, onClose }) => {
   );
 };
 
+const BulkImportModal = ({ onClose, onCommit, onAlert, defaultTeacher }) => {
+  const HEADERS = ['氏名','学年','組','担当教員','実習先','種別','実習日','事前電話','お知らせ','挨拶日','挨拶時間','引率','巡回','備考'];
+  const [text, setText] = useState('');
+  const [parsed, setParsed] = useState(null);
+  const [errors, setErrors] = useState([]);
+  const fileRef = useRef(null);
+  const parseLine = (line, sep) => { const result = []; let cur = ''; let inQuote = false; for (let i = 0; i < line.length; i++) { const c = line[i]; if (inQuote) { if (c === '"' && line[i+1] === '"') { cur += '"'; i++; } else if (c === '"') inQuote = false; else cur += c; } else { if (c === '"') inQuote = true; else if (c === sep) { result.push(cur); cur = ''; } else cur += c; } } result.push(cur); return result; };
+  const parseInput = (raw) => { const trimmed = raw.replace(/^﻿/, '').replace(/^\s+|\s+$/g, ''); if (!trimmed) { setParsed(null); setErrors([]); return; } const lines = trimmed.split(/\r?\n/).filter((l) => l.trim().length > 0); if (lines.length === 0) { setParsed(null); setErrors([]); return; } const sep = lines[0].includes('\t') ? '\t' : ','; const header = parseLine(lines[0], sep).map((h) => h.trim()); const headerMap = HEADERS.map((h) => header.indexOf(h)); const localErrors = []; headerMap.forEach((idx, i) => { if (idx === -1 && ['氏名','実習先'].includes(HEADERS[i])) localErrors.push(`必須列「${HEADERS[i]}」が見つかりません。`); }); const rows = []; for (let li = 1; li < lines.length; li++) { const cols = parseLine(lines[li], sep); const get = (idx) => idx === -1 ? '' : (cols[idx] || '').trim(); const name = get(headerMap[0]); if (!name) continue; const typeRaw = get(headerMap[5]); const dates = get(headerMap[6]).split(/[\/,、]/).map((d) => d.trim()).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)); const phoneRaw = get(headerMap[7]); const docRaw = get(headerMap[8]); const greetingDate = get(headerMap[9]); const patrols = get(headerMap[12]).split(/[\/、]/).map((p) => p.trim()).filter(Boolean).map((p, i) => { const cleaned = p.replace('(済)', '').replace('（済）', '').trim(); const parts = cleaned.split(/\s+/).filter(Boolean); const date = parts.find((x) => /^\d{4}-\d{2}-\d{2}$/.test(x)) || ''; const time = parts.find((x) => /^\d{1,2}:\d{2}$/.test(x)) || ''; const teacher = parts.filter((x) => x !== date && x !== time).join(' '); return { id: 'p-imp-' + Date.now() + '-' + li + '-' + i, date, time, teacher, done: /[\(（]済[\)）]/.test(p) }; }).filter((p) => p.date); rows.push({ name, grade: get(headerMap[1]).replace(/年/g, ''), classVal: get(headerMap[2]).replace(/組/g, ''), teacher: get(headerMap[3]) || defaultTeacher || '', location: get(headerMap[4]), internshipType: typeRaw === '見学' ? 'observation' : 'internship', internshipDates: dates, phoneStatus: phoneRaw === '完了' ? 'completed' : phoneRaw === '不要' ? 'none' : 'pending', phoneDate: '', docStatus: docRaw === '完了' ? 'completed' : docRaw === '不要' ? 'none' : 'pending', docDate: '', greetingStatus: greetingDate ? 'scheduled' : 'pending', greetingDate, greetingTime: get(headerMap[10]), greetingVisitor: get(headerMap[11]), patrols, studentThankYouStatus: 'pending', studentThankYouDate: '', teacherThankYouStatus: 'pending', teacherThankYouDate: '', notes: get(headerMap[13]), materials: [] }); } setErrors(localErrors); setParsed(rows); };
+  const handleFile = (e) => { const f = e.target.files?.[0]; if (!f) return; const reader = new FileReader(); reader.onload = () => { const txt = String(reader.result); setText(txt); parseInput(txt); if (fileRef.current) fileRef.current.value = ''; }; reader.readAsText(f, 'UTF-8'); };
+  const handleDownloadTemplate = () => { const samples = [ ['田中 太郎','3','1','鈴木 先生','株式会社サンプル','実習','2026-06-01/2026-06-02/2026-06-03/2026-06-04/2026-06-05','未完了','未完了','2026-05-20','13:30','鈴木 先生','2026-06-02 10:00 佐藤 先生','配慮事項なし'], ['佐藤 花子','3','2','鈴木 先生','グリーンファーム','見学','2026-06-08/2026-06-09','完了','完了','','','','','長靴持参'] ]; const csv = [HEADERS.join(','), ...samples.map((s) => s.map((v) => `"${v.replace(/"/g, '""')}"`).join(','))].join('\r\n'); const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = '現場実習_一括登録テンプレート.csv'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); };
+  return (
+    <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden animate-scaleIn flex flex-col max-h-[90vh]">
+        <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Upload className="w-4 h-4 text-indigo-600" /><span>まとめて登録（CSV / TSV 取り込み）</span></h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
+        </div>
+        <div className="p-5 space-y-3 overflow-y-auto">
+          <div className="p-3 bg-indigo-50/30 border border-indigo-100 rounded-xl text-xs text-slate-700 leading-relaxed space-y-2">
+            <div className="font-bold text-indigo-800">📋 使い方</div>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>下の「テンプレートDL」ボタンでCSVを保存し、Excel等で記入</li>
+              <li>記入済みファイルを「ファイル読込」、または内容をコピーして下の欄に貼り付け（Excelからの貼り付けも可）</li>
+              <li>プレビューを確認して「全件登録」を実行</li>
+            </ol>
+            <div className="text-[11px] text-slate-600 leading-relaxed">
+              <strong>列：</strong>{HEADERS.join(' / ')}<br />
+              <strong>種別：</strong>「実習」または「見学」　<strong>状況：</strong>「完了」「未完了」「不要」<br />
+              <strong>実習日：</strong>YYYY-MM-DD 形式を「/」または「,」で区切り　<strong>巡回：</strong>「日付 時間 担当教員」を「/」で区切り（例: 2026-06-02 10:00 佐藤 先生）
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={handleDownloadTemplate} className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"><Download className="w-3.5 h-3.5" />テンプレートDL</button>
+            <label className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"><Paperclip className="w-3.5 h-3.5" />ファイル読込(.csv/.tsv)<input ref={fileRef} type="file" accept=".csv,.tsv,.txt" onChange={handleFile} className="hidden" /></label>
+            <button onClick={() => { setText(''); setParsed(null); setErrors([]); }} className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-sm"><RotateCcw className="w-3.5 h-3.5" />クリア</button>
+          </div>
+          <textarea value={text} onChange={(e) => { setText(e.target.value); parseInput(e.target.value); }} rows={8} placeholder="ここにCSV/TSVを貼り付け（1行目はヘッダー）" className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+          {errors.length > 0 && (<div className="p-2 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-800 space-y-1">{errors.map((e, i) => <div key={i}>⚠ {e}</div>)}</div>)}
+          {parsed && parsed.length > 0 && (
+            <div className="border border-slate-200 rounded-xl overflow-hidden">
+              <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-between"><span>プレビュー: <span className="text-indigo-700">{parsed.length}名</span></span><span className="text-[10px] text-slate-500 font-medium">下の「全件登録」で確定します</span></div>
+              <div className="overflow-auto max-h-64">
+                <table className="w-full text-[10px]">
+                  <thead className="bg-slate-50 sticky top-0"><tr className="text-slate-600 font-bold border-b border-slate-200"><th className="p-1.5 text-left">氏名</th><th className="p-1.5 text-left">学年/組</th><th className="p-1.5 text-left">担当教員</th><th className="p-1.5 text-left">実習先</th><th className="p-1.5 text-left">種別</th><th className="p-1.5 text-left">実習日</th><th className="p-1.5 text-left">電話</th><th className="p-1.5 text-left">配付</th><th className="p-1.5 text-left">挨拶日</th><th className="p-1.5 text-left">巡回</th></tr></thead>
+                  <tbody className="divide-y divide-slate-200">{parsed.map((r, i) => (<tr key={i} className="hover:bg-slate-50"><td className="p-1.5 font-bold text-slate-800">{r.name}</td><td className="p-1.5">{r.grade}年{r.classVal}組</td><td className="p-1.5">{r.teacher}</td><td className="p-1.5">{r.location}</td><td className="p-1.5">{r.internshipType === 'observation' ? '見学' : '実習'}</td><td className="p-1.5">{r.internshipDates.length}日</td><td className="p-1.5">{r.phoneStatus === 'completed' ? '完了' : r.phoneStatus === 'none' ? '不要' : '未完了'}</td><td className="p-1.5">{r.docStatus === 'completed' ? '完了' : r.docStatus === 'none' ? '不要' : '未完了'}</td><td className="p-1.5">{r.greetingDate || '-'}</td><td className="p-1.5">{r.patrols.length}件</td></tr>))}</tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2 shrink-0">
+          <button onClick={onClose} className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold cursor-pointer">キャンセル</button>
+          <button onClick={() => { if (!parsed || parsed.length === 0) { onAlert('登録するデータがありません。テンプレートに沿って入力してください。'); return; } onCommit(parsed); }} disabled={!parsed || parsed.length === 0 || errors.length > 0} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${parsed && parsed.length > 0 && errors.length === 0 ? 'bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-sm' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>全件登録 ({parsed?.length || 0}名)</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // =============================================================================
 // メインコンポーネント
 // =============================================================================
@@ -678,6 +737,7 @@ function App() {
   const [materialPreview, setMaterialPreview] = useState(null);
   const [textEditState, setTextEditState] = useState(null);
   const [selectEditState, setSelectEditState] = useState(null);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
 
   const openAddModal = async (initialInternshipDates = []) => {
     setIsLoading(true);
@@ -1215,6 +1275,34 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
+  const handleBulkImport = async (rows) => {
+    setIsLoading(true);
+    try {
+      if (connectionStatus === 'connected' && window.firebase) {
+        const db = window.firebase.app().firestore();
+        const ref = db.collection('rooms').doc(roomKey).collection('students');
+        const created = [];
+        for (const r of rows) {
+          const docRef = await ref.add(r);
+          created.push({ id: docRef.id, ...r });
+        }
+        created.forEach((s) => recordCreate(s));
+      } else {
+        const created = rows.map((r, i) => ({ id: 'local-' + Date.now() + '-' + i, ...r }));
+        const updated = [...students, ...created];
+        setStudents(updated);
+        localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
+        created.forEach((s) => recordCreate(s));
+      }
+      setIsBulkImportOpen(false);
+      showAlert(`${rows.length}名を一括登録しました。`);
+    } catch (e) {
+      showAlert(`一括登録に失敗しました: ${e.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
 
@@ -1344,6 +1432,13 @@ function App() {
                 title="取り消した操作をやり直して一つ進めます">
                 <RotateCw className={`w-4 h-4 ${redo.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
                 <span>進む</span>
+              </button>
+
+              <button onClick={() => setIsBulkImportOpen(true)}
+                className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-800 border border-indigo-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                title="CSV/TSVを使って複数の生徒を一括で登録します">
+                <Upload className="w-4 h-4 text-indigo-600" />
+                <span>一括登録</span>
               </button>
 
               <button onClick={handleExportExcel}
@@ -1698,6 +1793,8 @@ function App() {
             </div>
           </div>
         )}
+      {isBulkImportOpen && (<BulkImportModal onClose={() => setIsBulkImportOpen(false)} onCommit={handleBulkImport} onAlert={showAlert} defaultTeacher={myTeacherName} />)}
+
       </main>
 
       <footer className="bg-white border-t border-slate-200 py-6 px-4 mt-12 shrink-0">
