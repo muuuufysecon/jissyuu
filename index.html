@@ -575,6 +575,53 @@ const DatePickerModal = ({ value, title, onSelect, onClose, allowClear = true })
   );
 };
 
+const TextEditModal = ({ state, onClose }) => {
+  const [v, setV] = useState(state?.value || '');
+  useEffect(() => { setV(state?.value || ''); }, [state]);
+  if (!state) return null;
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-scaleIn">
+        <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Edit className="w-4 h-4 text-indigo-600" /><span>{state.title}</span></h3>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
+        </div>
+        <div className="p-4 space-y-2">
+          {state.label && <label className="block text-[11px] font-bold text-slate-600">{state.label}</label>}
+          {state.multiline ? (
+            <textarea autoFocus value={v} onChange={(e) => setV(e.target.value)} rows={5} className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 leading-relaxed" />
+          ) : (
+            <input type="text" autoFocus value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { state.onSave(v); onClose(); } }} className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+          )}
+        </div>
+        <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+          <button type="button" onClick={onClose} className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold cursor-pointer">キャンセル</button>
+          <button type="button" onClick={() => { state.onSave(v); onClose(); }} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer">保存</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SelectEditModal = ({ state, onClose }) => {
+  if (!state) return null;
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-xs w-full overflow-hidden animate-scaleIn">
+        <div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-900">{state.title}</h3>
+          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
+        </div>
+        <div className="p-2 space-y-1">
+          {state.options.map(([val, lbl]) => (
+            <button key={val} type="button" onClick={() => { state.onSave(val); onClose(); }} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold cursor-pointer ${state.value === val ? 'bg-indigo-600 text-white' : 'hover:bg-slate-100 text-slate-700'}`}>{lbl}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // =============================================================================
 // メインコンポーネント
 // =============================================================================
@@ -594,6 +641,7 @@ function App() {
   const [kanbanStep, setKanbanStep] = useState('phone');
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
+  const [calendarFilter, setCalendarFilter] = useState('all'); // 'all' | 'teacher' | 'student'
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -607,6 +655,8 @@ function App() {
   });
   const [materialModalStudentId, setMaterialModalStudentId] = useState(null);
   const [materialPreview, setMaterialPreview] = useState(null);
+  const [textEditState, setTextEditState] = useState(null);
+  const [selectEditState, setSelectEditState] = useState(null);
 
   const openAddModal = (initialInternshipDates = []) => {
     setEditingStudent(null);
@@ -935,7 +985,7 @@ function App() {
     const target = formatDateKey(year, month, day);
     const events = [];
     filteredStudents.forEach((student) => {
-      if (student.greetingDate === target) {
+      if (calendarFilter !== 'student' && student.greetingDate === target) {
         events.push({
           type: 'greeting',
           label: `🤝 挨拶: ${student.name} (${student.greetingTime || '時間未定'})`,
@@ -945,7 +995,7 @@ function App() {
             : 'bg-teal-100 border-teal-300 text-teal-800 hover:bg-teal-200 animate-pulse'
         });
       }
-      if (student.patrolDate === target) {
+      if (calendarFilter !== 'student' && student.patrolDate === target) {
         events.push({
           type: 'patrol',
           label: `🚗 巡回: ${student.name} (${student.patrolTime || '時間未定'})`,
@@ -956,7 +1006,7 @@ function App() {
         });
       }
       const info = computeInternshipDayInfo(student, target);
-      if (info) {
+      if (info && calendarFilter !== 'teacher') {
         const isObs = student.internshipType === 'observation';
         const isStart = info.dayNumber === 1;
         const isEnd = info.totalDays > 1 && info.dayNumber === info.totalDays;
@@ -1276,15 +1326,16 @@ function App() {
                   ) : filteredStudents.length === 0 ? (
                     <tr><td colSpan={8} className="p-12 text-center text-slate-500 font-medium">条件に一致する実習対象生徒が見つかりません。</td></tr>
                   ) : (
-                    filteredStudents.map((s) => {
+                    filteredStudents.map((s, idx) => {
                       const isMyStudent = myTeacherName && s.teacher === myTeacherName;
+                      const zebraBg = idx % 2 === 1 ? 'bg-slate-50/60' : 'bg-white';
                       const phonePalette = s.phoneStatus === 'completed' ? 'bg-indigo-50 border-indigo-200 text-indigo-800 hover:bg-indigo-100/70' : s.phoneStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
                       const docPalette = s.docStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.docStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
                       const greetingPalette = s.greetingStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.greetingStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
                       const patrolPalette = s.patrolStatus === 'completed' ? 'bg-violet-50 border-violet-200 text-violet-800 hover:bg-violet-100/70' : s.patrolStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
 
                       return (
-                        <tr key={s.id} className={`hover:bg-slate-50/80 transition-colors group ${isMyStudent ? 'bg-indigo-50/30' : ''}`}>
+                        <tr key={s.id} className={`hover:bg-slate-50/80 transition-colors group ${isMyStudent ? 'bg-indigo-50/30' : zebraBg}`}>
                           <td className="p-4 align-top">
                             <div className="flex items-center gap-2">
                               {isMyStudent && <span className="w-1.5 h-6 rounded bg-indigo-600 shrink-0"></span>}
@@ -1381,7 +1432,7 @@ function App() {
                                   <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{s.materials.length}</span>
                                 )}
                               </button>
-                              <button onClick={() => openEditModal(s)} title="編集"
+                              <button onClick={() => setSelectedStudentDetail(s)} title="詳細・編集"
                                 className="p-1.5 text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 hover:border-indigo-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
                                 <Edit className="w-4 h-4" />
                               </button>
@@ -1417,6 +1468,11 @@ function App() {
               </div>
               <div className="flex items-center gap-3">
                 <button onClick={handleToday} className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer">今月</button>
+                <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                  {[['all','全表示'],['student','💼 生徒の予定'],['teacher','🤝 教師の予定']].map(([key, label]) => (
+                    <button key={key} onClick={() => setCalendarFilter(key)} className={`px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-all ${calendarFilter === key ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>{label}</button>
+                  ))}
+                </div>
                 <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold">
                   <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-indigo-50 border border-indigo-200 rounded-md block"></span><span>💼 実習</span></span>
                   <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-amber-50 border border-amber-300 rounded-md block"></span><span>👁️ 見学</span></span>
@@ -1566,132 +1622,123 @@ function App() {
         </div>
       </footer>
 
-      {/* 詳細モーダル */}
-      {selectedStudentDetail && (
+      {/* 詳細・編集モーダル(各項目タップで編集ポップアップ) */}
+      {selectedStudentDetail && (() => { const sd = students.find((s) => s.id === selectedStudentDetail.id) || selectedStudentDetail; return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden text-slate-800 animate-scaleIn">
-            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden text-slate-800 animate-scaleIn max-h-[90vh] flex flex-col">
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <User className="w-5 h-5 text-indigo-600" />
                 <span>実習生 詳細情報</span>
+                <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold border border-indigo-100">タップで編集</span>
               </h3>
               <button onClick={() => setSelectedStudentDetail(null)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto">
               <div>
                 <div className="text-xs text-slate-400 font-bold">生徒情報（学年・組）</div>
-                <div className="text-base font-extrabold text-slate-950 mt-0.5">
-                  {selectedStudentDetail.name}
-                  <span className="text-xs font-normal text-slate-500 ml-2">
-                    ({selectedStudentDetail.grade ? `${selectedStudentDetail.grade}年` : ''}{selectedStudentDetail.classVal ? `${selectedStudentDetail.classVal}組` : ''})
-                  </span>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <button onClick={() => setTextEditState({ value: sd.name || '', title: '生徒氏名を編集', label: '氏名(イニシャル推奨)', onSave: (v) => persistPartial(sd.id, { name: v }) })} className="text-base font-extrabold text-slate-950 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-transparent hover:border-indigo-200">{sd.name || '(未設定)'}</button>
+                  <button onClick={() => setSelectEditState({ value: sd.grade || '3', title: '学年を選択', options: [['1','1年'],['2','2年'],['3','3年'],['other','他']], onSave: (v) => persistPartial(sd.id, { grade: v }) })} className="text-xs font-bold text-slate-700 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-slate-200 hover:border-indigo-200">{sd.grade ? `${sd.grade}年` : '学年'}</button>
+                  <button onClick={() => setTextEditState({ value: sd.classVal || '', title: '組を編集', label: '組(数字)', onSave: (v) => persistPartial(sd.id, { classVal: v }) })} className="text-xs font-bold text-slate-700 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-slate-200 hover:border-indigo-200">{sd.classVal ? `${sd.classVal}組` : '組'}</button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-xs text-slate-400 font-bold">担当教員</div>
-                  <div className="text-sm font-bold text-slate-900 mt-0.5">{selectedStudentDetail.teacher || '未設定'}</div>
+                  <button onClick={() => setTextEditState({ value: sd.teacher || '', title: '担当教員を編集', label: '担当教員', onSave: (v) => persistPartial(sd.id, { teacher: v }) })} className="w-full text-left text-sm font-bold text-slate-900 mt-1 hover:bg-indigo-50 px-2 py-1 rounded-lg cursor-pointer border border-transparent hover:border-indigo-200">{sd.teacher || <span className="text-slate-400 italic font-normal">未設定(タップ)</span>}</button>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-400 font-bold">実習先 / 実習期間</div>
-                  <div className="text-sm font-bold text-slate-900 mt-0.5">
-                    {selectedStudentDetail.location || '未設定'}<br />
-                    <span className="text-[10px] text-slate-500 font-normal">
-                      {(selectedStudentDetail.internshipDates || []).length > 0 ? `${selectedStudentDetail.internshipDates.length}日間: ${formatShortDate(selectedStudentDetail.internshipDates[0])} 〜 ${formatShortDate(selectedStudentDetail.internshipDates[selectedStudentDetail.internshipDates.length - 1])}` : '実習日 未設定'}
-                    </span>
+                  <div className="text-xs text-slate-400 font-bold flex items-center justify-between gap-1">
+                    <span>実習先 / 活動種別</span>
+                    <button onClick={() => setSelectEditState({ value: sd.internshipType || 'internship', title: '活動種別を選択', options: [['internship','💼 実習'],['observation','👁️ 見学']], onSave: (v) => persistPartial(sd.id, { internshipType: v }) })} className={`text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer border ${sd.internshipType === 'observation' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'}`}>{sd.internshipType === 'observation' ? '👁️ 見学' : '💼 実習'}</button>
                   </div>
+                  <button onClick={() => setTextEditState({ value: sd.location || '', title: '実習先を編集', label: '企業・事業所名', onSave: (v) => persistPartial(sd.id, { location: v }) })} className="w-full text-left text-sm font-bold text-slate-900 mt-1 hover:bg-indigo-50 px-2 py-1 rounded-lg cursor-pointer border border-transparent hover:border-indigo-200">{sd.location || <span className="text-slate-400 italic font-normal">未設定(タップ)</span>}</button>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs text-slate-400 font-bold">実習日({(sd.internshipDates || []).length}日)</div>
+                <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] font-medium">
+                  {(sd.internshipDates || []).length === 0 && <span className="text-slate-400 italic mr-1">実習日 未設定</span>}
+                  {(sd.internshipDates || []).map((d, idx, arr) => { const isStart = idx === 0; const isEnd = idx === arr.length - 1 && arr.length > 1; const palette = sd.internshipType === 'observation' ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100' : isStart ? 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200' : isEnd ? 'bg-indigo-100 border-indigo-300 text-indigo-900 hover:bg-indigo-200' : 'bg-indigo-50 border-indigo-200 text-indigo-900 hover:bg-indigo-100'; return (<span key={d} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-bold ${palette}`}><span>{idx + 1}/{arr.length} {formatShortDate(d)}</span><button onClick={() => handleRemoveInternshipDate(sd, d)} title="この日を外す" className="hover:bg-white/60 rounded text-slate-500 hover:text-rose-700 leading-none cursor-pointer font-bold">×</button></span>); })}
+                  <button onClick={() => setDatePickerState({ value: '', title: `${sd.name} の実習日を追加`, onSelect: (v) => { if (v) handleAddInternshipDate(sd, v); } })} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer"><Plus className="w-3 h-3" /><span>追加</span></button>
                 </div>
               </div>
 
               <hr className="border-slate-100" />
 
-              {[
-                {
-                  icon: Phone, iconColor: 'text-indigo-500', label: '事前電話連絡',
-                  text: selectedStudentDetail.phoneStatus === 'completed' ? `連絡済み (${formatShortDate(selectedStudentDetail.phoneDate)})` : selectedStudentDetail.phoneStatus === 'none' ? '必要なし' : '未連絡',
-                  palette: selectedStudentDetail.phoneStatus === 'completed' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : selectedStudentDetail.phoneStatus === 'none' ? 'bg-slate-100 text-slate-600' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                },
-                {
-                  icon: FileText, iconColor: 'text-emerald-500', label: '保護者お知らせ',
-                  text: selectedStudentDetail.docStatus === 'completed' ? `配付済み (${formatShortDate(selectedStudentDetail.docDate)})` : selectedStudentDetail.docStatus === 'none' ? '配付の必要なし' : '未配付',
-                  palette: selectedStudentDetail.docStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : selectedStudentDetail.docStatus === 'none' ? 'bg-slate-100 text-slate-600' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                }
-              ].map(({ icon: Icon, iconColor, label, text, palette }) => (
-                <div key={label} className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-500 flex items-center gap-1">
-                      <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
-                      {label}
-                    </span>
-                    <span className={`px-2 py-0.5 rounded-md font-bold ${palette}`}>{text}</span>
-                  </div>
-                </div>
-              ))}
-
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-500 flex items-center gap-1">
-                    <Handshake className="w-3.5 h-3.5 text-teal-600" />
-                    事前挨拶訪問
-                  </span>
-                  <span className={`px-2 py-0.5 rounded-md font-bold ${selectedStudentDetail.greetingStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : selectedStudentDetail.greetingStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-slate-100 text-slate-600'}`}>
-                    {selectedStudentDetail.greetingStatus === 'completed' ? '訪問終了' : selectedStudentDetail.greetingStatus === 'scheduled' ? '日程確定' : '未調整'}
-                  </span>
+                  <span className="font-bold text-slate-500 flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-indigo-500" />事前電話連絡</span>
+                  <button onClick={() => handleInstantToggle(sd, 'phoneStatus', sd.phoneStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.phoneStatus === 'completed' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100' : sd.phoneStatus === 'none' ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200' : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'}`}>{sd.phoneStatus === 'completed' ? '連絡済み' : sd.phoneStatus === 'none' ? '必要なし' : '未連絡'}</button>
                 </div>
-                {(selectedStudentDetail.greetingDate || selectedStudentDetail.greetingTime || selectedStudentDetail.greetingVisitor) && (
-                  <div className="p-2 bg-emerald-50 border border-emerald-100 text-emerald-900 rounded-lg text-xs font-semibold">
-                    {selectedStudentDetail.greetingDate    && <div>📅 挨拶予定: {formatShortDate(selectedStudentDetail.greetingDate)}</div>}
-                    {selectedStudentDetail.greetingTime    && <div>⏰ 時間: {selectedStudentDetail.greetingTime}</div>}
-                    {selectedStudentDetail.greetingVisitor && <div>引率教員: {selectedStudentDetail.greetingVisitor}</div>}
-                  </div>
-                )}
+                {sd.phoneStatus === 'completed' && (<button onClick={() => setDatePickerState({ value: sd.phoneDate || '', title: `${sd.name} の電話連絡日`, onSelect: (v) => persistPartial(sd.id, { phoneDate: v }) })} className="text-[11px] text-slate-600 hover:text-indigo-700 hover:underline cursor-pointer block text-left pl-5">📅 連絡日: {sd.phoneDate ? formatShortDate(sd.phoneDate) : <span className="text-slate-400 italic">未設定(タップ)</span>}</button>)}
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-500 flex items-center gap-1"><FileText className="w-3.5 h-3.5 text-emerald-500" />保護者お知らせ</span>
+                  <button onClick={() => handleInstantToggle(sd, 'docStatus', sd.docStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.docStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : sd.docStatus === 'none' ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200' : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'}`}>{sd.docStatus === 'completed' ? '配付済み' : sd.docStatus === 'none' ? '必要なし' : '未配付'}</button>
+                </div>
+                {sd.docStatus === 'completed' && (<button onClick={() => setDatePickerState({ value: sd.docDate || '', title: `${sd.name} の配付日`, onSelect: (v) => persistPartial(sd.id, { docDate: v }) })} className="text-[11px] text-slate-600 hover:text-indigo-700 hover:underline cursor-pointer block text-left pl-5">📅 配付日: {sd.docDate ? formatShortDate(sd.docDate) : <span className="text-slate-400 italic">未設定(タップ)</span>}</button>)}
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-500 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-violet-500" />
-                    指導巡回
-                  </span>
-                  <span className={`px-2 py-0.5 rounded-md font-bold ${selectedStudentDetail.patrolStatus === 'completed' ? 'bg-violet-50 text-violet-700 border border-violet-200' : selectedStudentDetail.patrolStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-slate-100 text-slate-600'}`}>
-                    {selectedStudentDetail.patrolStatus === 'completed' ? '巡回終了' : selectedStudentDetail.patrolStatus === 'scheduled' ? '巡回確定' : '未確定'}
-                  </span>
+                  <span className="font-bold text-slate-500 flex items-center gap-1"><Handshake className="w-3.5 h-3.5 text-teal-600" />事前挨拶訪問</span>
+                  <button onClick={() => handleInstantToggle(sd, 'greetingStatus', sd.greetingStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.greetingStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : sd.greetingStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>{sd.greetingStatus === 'completed' ? '訪問終了' : sd.greetingStatus === 'scheduled' ? '日程確定' : '未調整'}</button>
                 </div>
-                {(selectedStudentDetail.patrolDate || selectedStudentDetail.patrolTime) && (
-                  <div className="p-2 bg-violet-50 border border-violet-100 text-violet-900 rounded-lg text-xs font-semibold space-y-1">
-                    {selectedStudentDetail.patrolDate    && <div>📅 巡回予定日: {formatShortDate(selectedStudentDetail.patrolDate)}</div>}
-                    {selectedStudentDetail.patrolTime    && <div>⏰ 時間: {selectedStudentDetail.patrolTime}</div>}
-                    {selectedStudentDetail.patrolVisitor && <div>巡回教員: {selectedStudentDetail.patrolVisitor}</div>}
-                  </div>
-                )}
+                <div className="p-2 bg-emerald-50/40 border border-emerald-100 text-emerald-900 rounded-lg text-xs font-semibold space-y-1">
+                  <button onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: `${sd.name} の挨拶予定日`, onSelect: (v) => { const upd = { greetingDate: v }; if (v && (!sd.greetingStatus || sd.greetingStatus === 'pending')) upd.greetingStatus = 'scheduled'; persistPartial(sd.id, upd); } })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">📅 挨拶予定: <span className={sd.greetingDate ? '' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : '未設定(タップ)'}</span></button>
+                  <button onClick={() => setTextEditState({ value: sd.greetingTime || '', title: '挨拶予定時間を編集', label: '時間(例: 13:30)', onSave: (v) => persistPartial(sd.id, { greetingTime: v }) })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">⏰ 時間: <span className={sd.greetingTime ? '' : 'text-slate-400 italic'}>{sd.greetingTime || '未設定(タップ)'}</span></button>
+                  <button onClick={() => setTextEditState({ value: sd.greetingVisitor || '', title: '引率教員を編集', label: '引率教員', onSave: (v) => persistPartial(sd.id, { greetingVisitor: v }) })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">👤 引率教員: <span className={sd.greetingVisitor ? '' : 'text-slate-400 italic'}>{sd.greetingVisitor || '未設定(タップ)'}</span></button>
+                </div>
               </div>
 
-              {selectedStudentDetail.notes && (
-                <div className="space-y-1">
-                  <div className="text-xs text-slate-400 font-bold">特記事項・配慮事項</div>
-                  <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 border border-slate-200 p-2.5 rounded-xl">{selectedStudentDetail.notes}</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-500 flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-violet-500" />指導巡回</span>
+                  <button onClick={() => handleInstantToggle(sd, 'patrolStatus', sd.patrolStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.patrolStatus === 'completed' ? 'bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100' : sd.patrolStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>{sd.patrolStatus === 'completed' ? '巡回終了' : sd.patrolStatus === 'scheduled' ? '巡回確定' : '未確定'}</button>
                 </div>
-              )}
+                <div className="p-2 bg-violet-50/40 border border-violet-100 text-violet-900 rounded-lg text-xs font-semibold space-y-1">
+                  <button onClick={() => setDatePickerState({ value: sd.patrolDate || '', title: `${sd.name} の巡回予定日`, onSelect: (v) => { const upd = { patrolDate: v }; if (v && (!sd.patrolStatus || sd.patrolStatus === 'pending')) upd.patrolStatus = 'scheduled'; persistPartial(sd.id, upd); } })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">📅 巡回予定: <span className={sd.patrolDate ? '' : 'text-slate-400 italic'}>{sd.patrolDate ? formatShortDate(sd.patrolDate) : '未設定(タップ)'}</span></button>
+                  <button onClick={() => setTextEditState({ value: sd.patrolTime || '', title: '巡回予定時間を編集', label: '時間(例: 10:00〜11:30)', onSave: (v) => persistPartial(sd.id, { patrolTime: v }) })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">⏰ 時間: <span className={sd.patrolTime ? '' : 'text-slate-400 italic'}>{sd.patrolTime || '未設定(タップ)'}</span></button>
+                  <button onClick={() => setTextEditState({ value: sd.patrolVisitor || '', title: '巡回訪問教員を編集', label: '訪問教員', onSave: (v) => persistPartial(sd.id, { patrolVisitor: v }) })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">👤 巡回教員: <span className={sd.patrolVisitor ? '' : 'text-slate-400 italic'}>{sd.patrolVisitor || '未設定(タップ)'}</span></button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-xs text-slate-400 font-bold">特記事項・配慮事項</div>
+                <button onClick={() => setTextEditState({ value: sd.notes || '', title: '特記事項・配慮事項を編集', label: '備考', multiline: true, onSave: (v) => persistPartial(sd.id, { notes: v }) })} className="w-full text-left text-xs text-slate-700 leading-relaxed bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 p-2.5 rounded-xl cursor-pointer min-h-[44px]">{sd.notes || <span className="text-slate-400 italic">タップして入力</span>}</button>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100">
+                <button onClick={() => setMaterialModalStudentId(sd.id)} className="w-full px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer">
+                  <Paperclip className="w-4 h-4" />
+                  <span>関連資料を開く</span>
+                  {(sd.materials?.length || 0) > 0 && (<span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{sd.materials.length}件</span>)}
+                </button>
+              </div>
             </div>
 
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between">
-              <button onClick={() => { const id = selectedStudentDetail.id; setSelectedStudentDetail(null); handleDeleteStudent(id); }}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between shrink-0">
+              <button onClick={() => { const id = sd.id; setSelectedStudentDetail(null); handleDeleteStudent(id); }}
                 className="px-3 py-2 text-rose-600 hover:bg-rose-50 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1">
                 <Trash2 className="w-4 h-4" />
                 削除する
               </button>
-              <div className="flex gap-2">
-                <button onClick={() => { const target = selectedStudentDetail; setSelectedStudentDetail(null); openEditModal(target); }}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer">編集する</button>
-                <button onClick={() => setSelectedStudentDetail(null)}
-                  className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">閉じる</button>
-              </div>
+              <button onClick={() => setSelectedStudentDetail(null)}
+                className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">閉じる</button>
             </div>
           </div>
         </div>
-      )}
+      ); })()}
+
+      <TextEditModal state={textEditState} onClose={() => setTextEditState(null)} />
+      <SelectEditModal state={selectEditState} onClose={() => setSelectEditState(null)} />
 
       {/* 追加・編集モーダル */}
       {isAddEditOpen && (
