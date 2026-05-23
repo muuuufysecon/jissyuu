@@ -1294,48 +1294,50 @@ function App() {
               <table className="w-full text-left border-collapse table-auto">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold select-none">
-                    <th className="p-4 min-w-[180px]">
-                      <div className="group/info flex items-center gap-1.5 flex-wrap">
+                    <th className="p-4 min-w-[90px]">
+                      <div className="group/col flex flex-col items-start gap-1">
                         <span>生徒情報</span>
-                        <button title="学年で絞り込み" onClick={() => setSelectEditState({ value: filterGrade, title: '学年で絞り込み', options: [['all','すべて'],['1','1年'],['2','2年'],['3','3年']], onSave: (v) => setFilterGrade(v) })} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-opacity ${filterGrade !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/info:opacity-100'}`}><span>学年</span><ChevronDown className="w-3 h-3" /></button>
-                        <button title="組で絞り込み" onClick={() => setSelectEditState({ value: filterClass, title: '組で絞り込み', options: [['all','すべて'],['1','1組'],['2','2組'],['3','3組'],['4','4組']], onSave: (v) => setFilterClass(v) })} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-opacity ${filterClass !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/info:opacity-100'}`}><span>組</span><ChevronDown className="w-3 h-3" /></button>
+                        <div className="flex items-center gap-1">
+                          <button title="学年で絞り込み" onClick={() => setSelectEditState({ value: filterGrade, title: '学年で絞り込み', options: [['all','すべて'],['1','1年'],['2','2年'],['3','3年']], onSave: (v) => setFilterGrade(v) })} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-opacity ${filterGrade !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><span>学年</span><ChevronDown className="w-3 h-3" /></button>
+                          <button title="組で絞り込み" onClick={() => setSelectEditState({ value: filterClass, title: '組で絞り込み', options: [['all','すべて'],['1','1組'],['2','2組'],['3','3組'],['4','4組']], onSave: (v) => setFilterClass(v) })} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-opacity ${filterClass !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><span>組</span><ChevronDown className="w-3 h-3" /></button>
+                        </div>
                       </div>
                     </th>
                     <th className="p-4 min-w-[180px]">実習先 &amp; 実習期間</th>
-                    <th className="p-4 min-w-[150px]">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                    <th className="p-4 min-w-[100px]">
+                      <div className="group/col flex flex-col items-start gap-1">
                         <span>事前電話</span>
-                        <button title="事前電話で絞り込み" onClick={() => setSelectEditState({ value: filterPhoneStatus, title: '事前電話で絞り込み', options: [['all','すべて'],['pending','未完了(要電話)'],['completed','電話連絡済'],['none','連絡不要']], onSave: (v) => setFilterPhoneStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterPhoneStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                        <button title="事前電話で絞り込み" onClick={() => setSelectEditState({ value: filterPhoneStatus, title: '事前電話で絞り込み', options: [['all','すべて'],['pending','未完了(要電話)'],['completed','電話連絡済'],['none','連絡不要']], onSave: (v) => setFilterPhoneStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterPhoneStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
-                    <th className="p-4 min-w-[150px]">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span>保護者お知らせ</span>
-                        <button title="保護者お知らせで絞り込み" onClick={() => setSelectEditState({ value: filterDocStatus, title: '保護者お知らせで絞り込み', options: [['all','すべて'],['pending','未提出 / 未配付'],['completed','提出/回収済'],['none','不要']], onSave: (v) => setFilterDocStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterDocStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                    <th className="p-4 min-w-[120px]">
+                      <div className="group/col flex flex-col items-start gap-1">
+                        <span className="leading-tight">連絡票・<br />実施計画配付</span>
+                        <button title="連絡票・実施計画配付で絞り込み" onClick={() => setSelectEditState({ value: filterDocStatus, title: '連絡票・実施計画配付で絞り込み', options: [['all','すべて'],['pending','未提出 / 未配付'],['completed','提出/回収済'],['none','不要']], onSave: (v) => setFilterDocStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterDocStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
-                    <th className="p-4 min-w-[160px]">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                    <th className="p-4 min-w-[100px]">
+                      <div className="group/col flex flex-col items-start gap-1">
                         <span>事前挨拶</span>
-                        <button title="事前挨拶で絞り込み" onClick={() => setSelectEditState({ value: filterGreetingStatus, title: '事前挨拶で絞り込み', options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/調整済'],['completed','挨拶終了']], onSave: (v) => setFilterGreetingStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterGreetingStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                        <button title="事前挨拶で絞り込み" onClick={() => setSelectEditState({ value: filterGreetingStatus, title: '事前挨拶で絞り込み', options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/調整済'],['completed','挨拶終了']], onSave: (v) => setFilterGreetingStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterGreetingStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
-                    <th className="p-4 min-w-[160px]">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                    <th className="p-4 min-w-[100px]">
+                      <div className="group/col flex flex-col items-start gap-1">
                         <span>巡回予定</span>
-                        <button title="巡回で絞り込み" onClick={() => setSelectEditState({ value: filterPatrolStatus, title: '巡回で絞り込み', options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/巡回調整済'],['completed','巡回終了']], onSave: (v) => setFilterPatrolStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterPatrolStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                        <button title="巡回で絞り込み" onClick={() => setSelectEditState({ value: filterPatrolStatus, title: '巡回で絞り込み', options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/巡回調整済'],['completed','巡回終了']], onSave: (v) => setFilterPatrolStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterPatrolStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
-                    <th className="p-4 min-w-[140px]">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                    <th className="p-4 min-w-[100px]">
+                      <div className="group/col flex flex-col items-start gap-1">
                         <span>生徒お礼状</span>
-                        <button title="生徒お礼状で絞り込み" onClick={() => setSelectEditState({ value: filterStudentThankYouStatus, title: '生徒お礼状で絞り込み', options: [['all','すべて'],['pending','未送付'],['completed','送付済'],['none','不要']], onSave: (v) => setFilterStudentThankYouStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterStudentThankYouStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                        <button title="生徒お礼状で絞り込み" onClick={() => setSelectEditState({ value: filterStudentThankYouStatus, title: '生徒お礼状で絞り込み', options: [['all','すべて'],['pending','未送付'],['completed','送付済'],['none','不要']], onSave: (v) => setFilterStudentThankYouStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterStudentThankYouStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
-                    <th className="p-4 min-w-[140px]">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                    <th className="p-4 min-w-[100px]">
+                      <div className="group/col flex flex-col items-start gap-1">
                         <span>教師お礼状</span>
-                        <button title="教師お礼状で絞り込み" onClick={() => setSelectEditState({ value: filterTeacherThankYouStatus, title: '教師お礼状で絞り込み', options: [['all','すべて'],['pending','未送付'],['completed','送付済'],['none','不要']], onSave: (v) => setFilterTeacherThankYouStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterTeacherThankYouStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                        <button title="教師お礼状で絞り込み" onClick={() => setSelectEditState({ value: filterTeacherThankYouStatus, title: '教師お礼状で絞り込み', options: [['all','すべて'],['pending','未送付'],['completed','送付済'],['none','不要']], onSave: (v) => setFilterTeacherThankYouStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterTeacherThankYouStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
                     <th className="p-4 max-w-[200px]">備考・配慮事項</th>
