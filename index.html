@@ -683,13 +683,41 @@ function App() {
   const [textEditState, setTextEditState] = useState(null);
   const [selectEditState, setSelectEditState] = useState(null);
 
-  const openAddModal = (initialInternshipDates = []) => {
-    setEditingStudent(null);
-    setFormDates({
+  const openAddModal = async (initialInternshipDates = []) => {
+    pushHistory(students);
+    setIsLoading(true);
+    const defaults = {
+      name: '', grade: '', classVal: '', teacher: myTeacherName || '',
+      location: '', internshipType: 'internship',
       internshipDates: [...initialInternshipDates],
-      phoneDate: '', docDate: '', greetingDate: '', patrolDate: ''
-    });
-    setIsAddEditOpen(true);
+      phoneStatus: 'pending', phoneDate: '',
+      docStatus: 'pending', docDate: '',
+      greetingStatus: 'pending', greetingDate: '', greetingTime: '', greetingVisitor: '',
+      patrolStatus: 'pending', patrolDate: '', patrolTime: '', patrolVisitor: '',
+      studentThankYouStatus: 'pending', studentThankYouDate: '',
+      teacherThankYouStatus: 'pending', teacherThankYouDate: '',
+      notes: '', materials: []
+    };
+    let newStudent;
+    if (connectionStatus === 'connected' && window.firebase) {
+      try {
+        const db = window.firebase.app().firestore();
+        const ref = db.collection('rooms').doc(roomKey).collection('students');
+        const docRef = await ref.add(defaults);
+        newStudent = { id: docRef.id, ...defaults };
+      } catch (e) {
+        showAlert(`新規登録に失敗しました: ${e.message}`);
+        setIsLoading(false);
+        return;
+      }
+    } else {
+      newStudent = { id: 'local-' + Date.now(), ...defaults };
+      const updated = [...students, newStudent];
+      setStudents(updated);
+      localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
+    }
+    setIsLoading(false);
+    setSelectedStudentDetail(newStudent);
   };
 
   const openEditModal = (student) => {
