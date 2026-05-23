@@ -74,7 +74,7 @@ const MOCK_STUDENTS = [
     phoneStatus: 'completed', phoneDate: '2026-05-10',
     docStatus: 'completed', docDate: '2026-05-08',
     greetingStatus: 'completed', greetingDate: '2026-05-12', greetingTime: '13:30', greetingVisitor: '鈴木 先生',
-    patrolStatus: 'scheduled', patrolDate: '2026-05-20', patrolTime: '10:00 〜 11:30', patrolVisitor: '鈴木 先生',
+    patrols: [{ id: 'p1-1', date: '2026-05-20', time: '10:00', done: false }],
     notes: 'アレルギー特になし。挨拶時は制服着用必須。'
   },
   {
@@ -85,7 +85,7 @@ const MOCK_STUDENTS = [
     phoneStatus: 'pending', phoneDate: '',
     docStatus: 'completed', docDate: '2026-05-09',
     greetingStatus: 'scheduled', greetingDate: '2026-05-15', greetingTime: '10:00', greetingVisitor: '鈴木 先生',
-    patrolStatus: 'pending', patrolDate: '2026-05-25', patrolTime: '14:00 〜 15:00', patrolVisitor: '鈴木 先生',
+    patrols: [{ id: 'p2-1', date: '2026-05-25', time: '14:00', done: false }],
     notes: 'コミュニケーションに少し緊張が見られるため配慮。'
   },
   {
@@ -97,7 +97,7 @@ const MOCK_STUDENTS = [
     phoneStatus: 'completed', phoneDate: '2026-05-12',
     docStatus: 'pending', docDate: '',
     greetingStatus: 'pending', greetingDate: '', greetingTime: '', greetingVisitor: '',
-    patrolStatus: 'pending', patrolDate: '', patrolTime: '', patrolVisitor: '',
+    patrols: [],
     notes: '長靴と軍手持参。熱中症対策の帽子が必要。'
   }
 ];
@@ -120,12 +120,6 @@ const STEP_CONFIG = {
     cycle: ['pending', 'scheduled', 'completed'],
     label: '🤝 3. 事前挨拶',
     activeColor: 'bg-teal-600 border-teal-600 text-white shadow-sm'
-  },
-  patrol: {
-    field: 'patrolStatus',
-    cycle: ['pending', 'scheduled', 'completed'],
-    label: '🚗 4. 指導巡回',
-    activeColor: 'bg-violet-600 border-violet-600 text-white shadow-sm'
   },
   studentThankYou: {
     field: 'studentThankYouStatus', dateField: 'studentThankYouDate',
@@ -694,7 +688,7 @@ function App() {
       phoneStatus: 'pending', phoneDate: '',
       docStatus: 'pending', docDate: '',
       greetingStatus: 'pending', greetingDate: '', greetingTime: '', greetingVisitor: '',
-      patrolStatus: 'pending', patrolDate: '', patrolTime: '', patrolVisitor: '',
+      patrols: [],
       studentThankYouStatus: 'pending', studentThankYouDate: '',
       teacherThankYouStatus: 'pending', teacherThankYouDate: '',
       notes: '', materials: []
@@ -890,6 +884,27 @@ function App() {
     await persistPartial(student.id, { internshipDates: next });
   };
 
+  const handleAddPatrol = async (student, date, time) => {
+    const current = student.patrols || [];
+    const next = [...current, { id: 'p-' + Date.now(), date, time: time || '', done: false }].sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+    recordUpdate(student.id, { patrols: current }, { patrols: next });
+    await persistPartial(student.id, { patrols: next });
+  };
+
+  const handleRemovePatrol = async (student, patrolId) => {
+    const current = student.patrols || [];
+    const next = current.filter((p) => p.id !== patrolId);
+    recordUpdate(student.id, { patrols: current }, { patrols: next });
+    await persistPartial(student.id, { patrols: next });
+  };
+
+  const handleTogglePatrol = async (student, patrolId) => {
+    const current = student.patrols || [];
+    const next = current.map((p) => p.id === patrolId ? { ...p, done: !p.done } : p);
+    recordUpdate(student.id, { patrols: current }, { patrols: next });
+    await persistPartial(student.id, { patrols: next });
+  };
+
   const handleAddMaterial = async (material) => {
     const target = students.find((s) => s.id === materialModalStudentId);
     if (!target) return;
@@ -988,7 +1003,7 @@ function App() {
         case 'phone_pending':    if (s.phoneStatus && s.phoneStatus !== 'pending') return false; break;
         case 'doc_pending':      if (s.docStatus && s.docStatus !== 'pending') return false; break;
         case 'greeting_pending': if (s.greetingStatus === 'completed') return false; break;
-        case 'patrol_pending':   if (s.patrolStatus === 'completed') return false; break;
+        case 'patrol_pending':   if ((s.patrols || []).length > 0 && (s.patrols || []).every((p) => p.done)) return false; break;
         default: break;
       }
 
@@ -997,7 +1012,7 @@ function App() {
       if (filterPhoneStatus !== 'all' && (s.phoneStatus || 'pending') !== filterPhoneStatus) return false;
       if (filterDocStatus !== 'all' && (s.docStatus || 'pending') !== filterDocStatus) return false;
       if (filterGreetingStatus !== 'all' && (s.greetingStatus || 'pending') !== filterGreetingStatus) return false;
-      if (filterPatrolStatus !== 'all' && (s.patrolStatus || 'pending') !== filterPatrolStatus) return false;
+      if (filterPatrolStatus !== 'all') { const ps = s.patrols || []; const hasUnchecked = ps.some((p) => !p.done); const allDone = ps.length > 0 && !hasUnchecked; if (filterPatrolStatus === 'pending' && !(ps.length === 0 || hasUnchecked)) return false; if (filterPatrolStatus === 'completed' && !allDone) return false; }
       if (filterStudentThankYouStatus !== 'all' && (s.studentThankYouStatus || 'pending') !== filterStudentThankYouStatus) return false;
       if (filterTeacherThankYouStatus !== 'all' && (s.teacherThankYouStatus || 'pending') !== filterTeacherThankYouStatus) return false;
 
@@ -1016,7 +1031,7 @@ function App() {
     const phoneDone    = students.filter((s) => s.phoneStatus === 'completed' || s.phoneStatus === 'none').length;
     const docDone      = students.filter((s) => s.docStatus   === 'completed' || s.docStatus   === 'none').length;
     const greetingDone = students.filter((s) => s.greetingStatus === 'completed').length;
-    const patrolDone   = students.filter((s) => s.patrolStatus   === 'completed').length;
+    const patrolDone   = students.filter((s) => { const ps = s.patrols || []; return ps.length > 0 && ps.every((p) => p.done); }).length;
     return {
       total,
       phonePercent:    Math.round((phoneDone    / total) * 100),
@@ -1026,7 +1041,7 @@ function App() {
       phonePendingCount:    students.filter((s) => s.phoneStatus === 'pending').length,
       docPendingCount:      students.filter((s) => s.docStatus   === 'pending').length,
       greetingPendingCount: students.filter((s) => s.greetingStatus === 'pending' || s.greetingStatus === 'scheduled').length,
-      patrolPendingCount:   students.filter((s) => s.patrolStatus   === 'pending' || s.patrolStatus   === 'scheduled').length
+      patrolPendingCount:   students.filter((s) => (s.patrols || []).some((p) => !p.done)).length
     };
   }, [students]);
 
@@ -1078,14 +1093,17 @@ function App() {
             : 'bg-green-200 border-green-400 text-green-900 hover:bg-green-300'
         });
       }
-      if (calendarFilter !== 'student' && student.patrolDate === target) {
-        events.push({
-          type: 'patrol',
-          label: `巡回: ${student.name} (${student.patrolTime || '時間未定'})`,
-          student,
-          color: student.patrolStatus === 'completed'
-            ? 'bg-blue-300 border-blue-500 text-blue-900 hover:bg-blue-400'
-            : 'bg-blue-200 border-blue-400 text-blue-900 hover:bg-blue-300 animate-pulse'
+      if (calendarFilter !== 'student') {
+        (student.patrols || []).forEach((p) => {
+          if (p.date !== target) return;
+          events.push({
+            type: 'patrol',
+            label: `巡回: ${student.name}${p.time ? ` (${p.time})` : ''}`,
+            student,
+            color: p.done
+              ? 'bg-blue-300 border-blue-500 text-blue-900 hover:bg-blue-400'
+              : 'bg-blue-200 border-blue-400 text-blue-900 hover:bg-blue-300'
+          });
         });
       }
       const info = computeInternshipDayInfo(student, target);
@@ -1163,14 +1181,13 @@ function App() {
       '事前電話状況', '電話連絡完了日',
       '保護者お知らせ状況', 'お知らせ回収日',
       '事前挨拶状況', '挨拶訪問日', '挨拶予定時間', '挨拶引率教員',
-      '巡回指導状況', '巡回日', '巡回予定時間', '巡回訪問教員',
+      '巡回予定一覧', '巡回完了件数',
       '特記事項・配慮事項'
     ];
     const labelOf = {
       phone:    (s) => s === 'completed' ? '完了'   : s === 'none' ? '不要' : '未完了',
       doc:      (s) => s === 'completed' ? '完了'   : s === 'none' ? '不要' : '未完了',
-      greeting: (s) => s === 'completed' ? '訪問終了' : s === 'scheduled' ? '日程確定' : '未確定',
-      patrol:   (s) => s === 'completed' ? '巡回終了' : s === 'scheduled' ? '日程確定' : '未確定'
+      greeting: (s) => s === 'completed' ? '訪問終了' : s === 'scheduled' ? '日程確定' : '未確定'
     };
     const rows = filteredStudents.map((s) => [
       s.name || '', s.grade ? `${s.grade}年` : '', s.classVal ? `${s.classVal}組` : '', s.teacher || '',
@@ -1178,7 +1195,7 @@ function App() {
       labelOf.phone(s.phoneStatus), s.phoneDate || '',
       labelOf.doc(s.docStatus), s.docDate || '',
       labelOf.greeting(s.greetingStatus), s.greetingDate || '', s.greetingTime || '', s.greetingVisitor || '',
-      labelOf.patrol(s.patrolStatus), s.patrolDate || '', s.patrolTime || '', s.patrolVisitor || '',
+      (s.patrols || []).map((p) => `${p.date}${p.time ? ' ' + p.time : ''}${p.done ? '(済)' : ''}`).join(' / '), (s.patrols || []).filter((p) => p.done).length,
       s.notes || ''
     ]);
     const csv = [
@@ -1381,10 +1398,10 @@ function App() {
                         <button title="事前挨拶で絞り込み" onClick={() => setSelectEditState({ value: filterGreetingStatus, title: '事前挨拶で絞り込み', options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/調整済'],['completed','挨拶終了']], onSave: (v) => setFilterGreetingStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterGreetingStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
-                    <th className="p-4 min-w-[100px]">
+                    <th className="p-4 min-w-[140px]">
                       <div className="group/col flex flex-col items-start gap-1">
                         <span>巡回予定</span>
-                        <button title="巡回で絞り込み" onClick={() => setSelectEditState({ value: filterPatrolStatus, title: '巡回で絞り込み', options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/巡回調整済'],['completed','巡回終了']], onSave: (v) => setFilterPatrolStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterPatrolStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                        <button title="巡回で絞り込み" onClick={() => setSelectEditState({ value: filterPatrolStatus, title: '巡回で絞り込み', options: [['all','すべて'],['pending','未終了あり'],['completed','すべて終了']], onSave: (v) => setFilterPatrolStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border transition-opacity ${filterPatrolStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/col:opacity-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
                     <th className="p-4 min-w-[100px]">
@@ -1501,19 +1518,10 @@ function App() {
                             </div>
                           </td>
                           <td className="p-4 align-top">
-                            <div className="space-y-1.5">
-                              <button onClick={() => handleInstantToggle(s, 'patrolStatus', s.patrolStatus)}
-                                className={`w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${patrolPalette}`}>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5 text-slate-500" />
-                                  {s.patrolStatus === 'completed' ? '巡回終了' : s.patrolStatus === 'scheduled' ? '巡回確定' : '巡回未定'}
-                                </span>
-                                <span>{s.patrolStatus === 'completed' ? '✔' : s.patrolStatus === 'scheduled' ? '⏰' : 'ー'}</span>
-                              </button>
-                              <button onClick={() => setDatePickerState({ value: s.patrolDate || '', title: `${s.name} の指導巡回日`, onSelect: (v) => { const upd = { patrolDate: v }; if (v && (!s.patrolStatus || s.patrolStatus === 'pending')) upd.patrolStatus = 'scheduled'; persistPartial(s.id, upd); } })}
-                                className="text-[10px] font-semibold pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">📅 巡回: <span className={s.patrolDate ? 'text-slate-700' : 'text-slate-400 italic'}>{s.patrolDate ? formatShortDate(s.patrolDate) : '未設定（タップ）'}</span></button>
-                              {s.patrolTime    && <div className="text-[9px] text-indigo-700 font-mono bg-indigo-50 px-1 rounded border border-indigo-100 w-fit pl-1">{s.patrolTime}</div>}
-                              {s.patrolVisitor && <div className="text-[9px] text-slate-500 pl-1">巡回者: {s.patrolVisitor}</div>}
+                            <div className="flex flex-col items-start gap-1 text-[10px] font-medium">
+                              {(s.patrols || []).length === 0 && <span className="placeholder-empty mr-1">巡回 未設定</span>}
+                              {(s.patrols || []).map((p) => (<label key={p.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer"><input type="checkbox" checked={!!p.done} onChange={() => handleTogglePatrol(s, p.id)} className="cursor-pointer accent-violet-600" /><span className={`font-bold ${p.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>{formatShortDate(p.date)}{p.time ? `　${p.time}` : ''}</span><button onClick={(e) => { e.preventDefault(); handleRemovePatrol(s, p.id); }} title="削除" className="text-slate-400 hover:text-rose-600 leading-none cursor-pointer font-bold">×</button></label>))}
+                              <button onClick={() => setDatePickerState({ value: '', title: `${s.name} の巡回日を追加`, onSelect: (v) => { if (!v) return; setTextEditState({ value: '', title: '巡回時間を入力', label: '時間 (例: 10:00 ※空欄可)', onSave: (t) => handleAddPatrol(s, v, t) }); } })} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer"><Plus className="w-3 h-3" /><span>追加</span></button>
                             </div>
                           </td>
                           <td className="p-4 align-top">
