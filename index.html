@@ -738,6 +738,7 @@ function App() {
   const [textEditState, setTextEditState] = useState(null);
   const [selectEditState, setSelectEditState] = useState(null);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
 
   const openAddModal = async (initialInternshipDates = []) => {
     setIsLoading(true);
@@ -1303,6 +1304,46 @@ function App() {
     }
   };
 
+  const toggleSelectAll = () => {
+    if (filteredStudents.length > 0 && selectedIds.size === filteredStudents.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredStudents.map((s) => s.id)));
+    }
+  };
+
+  const toggleSelectOne = (id) => {
+    setSelectedIds((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    showConfirm(`選択中の${selectedIds.size}名の進捗データを削除してもよろしいですか？「戻る」ボタンで取り消せます。`, async () => {
+      const targets = students.filter((s) => selectedIds.has(s.id));
+      setIsLoading(true);
+      try {
+        if (connectionStatus === 'connected' && window.firebase) {
+          const db = window.firebase.app().firestore();
+          for (const t of targets) {
+            await db.collection('rooms').doc(roomKey).collection('students').doc(t.id).delete();
+            recordDelete(t);
+          }
+        } else {
+          const updated = students.filter((s) => !selectedIds.has(s.id));
+          setStudents(updated);
+          localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
+          targets.forEach((t) => recordDelete(t));
+        }
+        setSelectedIds(new Set());
+        showAlert(`${targets.length}名を削除しました。`);
+      } catch (e) {
+        showAlert(`一括削除に失敗しました: ${e.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
 
@@ -1460,10 +1501,20 @@ function App() {
 
         {currentView === 'list' ? (
           <div key="view-list" className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fadeIn">
+            {selectedIds.size > 0 && (
+              <div className="px-4 py-2.5 bg-indigo-50 border-b border-indigo-200 flex flex-wrap items-center justify-between gap-2 animate-slideDown">
+                <span className="text-xs font-bold text-indigo-800 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" />{selectedIds.size}名を選択中</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setSelectedIds(new Set())} className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg cursor-pointer shadow-sm">選択解除</button>
+                  <button onClick={handleBulkDelete} className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 cursor-pointer shadow-sm"><Trash2 className="w-3.5 h-3.5" />選択した{selectedIds.size}名を削除</button>
+                </div>
+              </div>
+            )}
             <div key="list-scroll" className="overflow-auto resize-y max-h-[85vh] min-h-[300px] h-[65vh]">
               <table className="w-full text-left border-collapse table-auto">
                 <thead>
                   <tr className="text-slate-600 text-xs font-bold select-none">
+                    <th className="p-3 w-10 sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)] text-center"><input type="checkbox" checked={filteredStudents.length > 0 && selectedIds.size === filteredStudents.length} ref={(el) => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < filteredStudents.length; }} onChange={toggleSelectAll} className="cursor-pointer accent-indigo-600 w-4 h-4" title="表示中の全件を選択 / 解除" /></th>
                     <th className="p-4 min-w-[90px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">生徒情報</th>
                     <th className="p-4 min-w-[140px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">実習先 &amp; 実習期間</th>
                     <th className="p-4 min-w-[100px] sticky top-0 z-20 bg-slate-50 border-b border-slate-200 shadow-[0_1px_0_0_rgb(226_232_240)]">事前電話</th>
@@ -1477,14 +1528,14 @@ function App() {
                 </thead>
                 <tbody className="divide-y divide-slate-500 text-xs text-slate-700">
                   {isLoading ? (
-                    <tr><td colSpan={9} className="p-12 text-center text-slate-500 font-medium">
+                    <tr><td colSpan={10} className="p-12 text-center text-slate-500 font-medium">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <span className="w-8 h-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin inline-block"></span>
                         <span className="text-slate-600">データを同期しています...</span>
                       </div>
                     </td></tr>
                   ) : filteredStudents.length === 0 ? (
-                    <tr><td colSpan={9} className="p-12 text-center text-slate-500 font-medium">条件に一致する実習対象生徒が見つかりません。</td></tr>
+                    <tr><td colSpan={10} className="p-12 text-center text-slate-500 font-medium">条件に一致する実習対象生徒が見つかりません。</td></tr>
                   ) : (
                     filteredStudents.map((s, idx) => {
                       const isMyStudent = myTeacherName && s.teacher === myTeacherName;
@@ -1497,7 +1548,8 @@ function App() {
                       const teacherThankYouPalette = s.teacherThankYouStatus === 'completed' ? 'bg-cyan-50 border-cyan-200 text-cyan-800 hover:bg-cyan-100/70' : s.teacherThankYouStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
 
                       return (
-                        <tr key={s.id} className={`hover:bg-slate-50/80 transition-colors group ${isMyStudent ? 'bg-indigo-50/30' : zebraBg}`}>
+                        <tr key={s.id} className={`hover:bg-slate-50/80 transition-colors group ${selectedIds.has(s.id) ? 'bg-indigo-50/60' : isMyStudent ? 'bg-indigo-50/30' : zebraBg}`}>
+                          <td className="p-3 align-top text-center"><input type="checkbox" checked={selectedIds.has(s.id)} onChange={() => toggleSelectOne(s.id)} className="cursor-pointer accent-indigo-600 w-4 h-4" /></td>
                           <td className="p-4 align-top">
                             <div className="flex items-start gap-2">
                               {isMyStudent && <span className="w-1.5 h-6 rounded bg-indigo-600 shrink-0"></span>}
