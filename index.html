@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>現場実習進捗マネージャー v3.4</title>
+
+<!-- Tailwind v4 (browser build) -->
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+<!-- カスタムアニメーション + スクロールバー -->
+<style>
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.96) } to { opacity: 1; transform: scale(1) } }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
+  .animate-fadeIn { animation: fadeIn 0.25s ease-out }
+  .animate-scaleIn { animation: scaleIn 0.2s ease-out }
+  .animate-slideDown { animation: slideDown 0.2s ease-out }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; }
+</style>
+
+<!-- React 18 / lucide-react を ESM CDN 経由で読み込むための importmap -->
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.3.1?external=react",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?external=react",
+    "lucide-react": "https://esm.sh/lucide-react@0.460.0?external=react"
+  }
+}
+</script>
+
+<!-- Babel Standalone: ブラウザで JSX をトランスパイル -->
+<script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-type="module" data-presets="react">
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
+import {
+  Plus, Search, Settings, Database, AlertTriangle, Check, CheckCircle2,
+  Clock, Phone, FileText, Calendar, User, Filter, RotateCcw, RotateCw, HelpCircle,
+  Info, Copy, Trash2, Edit, AlertCircle, Share2, BookOpen, Key, ChevronDown, CheckCircle, Download,
+  ChevronLeft, ChevronRight, List, LayoutGrid, SlidersHorizontal, Handshake
+} from 'lucide-react';
+
+// =============================================================================
+// 定数 / Constants
+// =============================================================================
+
+const MOCK_STUDENTS = [
+  {
+    id: 'mock-1', name: 'O.H.', grade: '3', classVal: '1',
+    location: '第一物産 配送センター',
+    internshipStartDate: '2026-05-18', internshipEndDate: '2026-05-29',
+    teacher: '鈴木 先生',
+    phoneStatus: 'completed', phoneDate: '2026-05-10',
+    docStatus: 'completed', docDate: '2026-05-08',
+    greetingStatus: 'completed', greetingDate: '2026-05-12', greetingTime: '13:30', greetingVisitor: '鈴木 先生',
+    patrolStatus: 'scheduled', patrolDate: '2026-05-20', patrolTime: '10:00 〜 11:30', patrolVisitor: '鈴木 先生',
+    notes: 'アレルギー特になし。挨拶時は制服着用必須。'
+  },
+  {
+    id: 'mock-2', name: 'K.S.', grade: '3', classVal: '1',
+    location: 'ハッピーワーク 介護福祉施設',
+    internshipStartDate: '2026-05-18', internshipEndDate: '2026-05-29',
+    teacher: '鈴木 先生',
+    phoneStatus: 'pending', phoneDate: '',
+    docStatus: 'completed', docDate: '2026-05-09',
+    greetingStatus: 'scheduled', greetingDate: '2026-05-15', greetingTime: '10:00', greetingVisitor: '鈴木 先生',
+    patrolStatus: 'pending', patrolDate: '2026-05-25', patrolTime: '14:00 〜 15:00', patrolVisitor: '鈴木 先生',
+    notes: 'コミュニケーションに少し緊張が見られるため配慮。'
+  },
+  {
+    id: 'mock-3', name: 'S.K.', grade: '3', classVal: '2',
+    location: 'グリーンファーム 秋田',
+    internshipStartDate: '2026-06-01', internshipEndDate: '2026-06-12',
+    teacher: '佐藤 先生',
+    phoneStatus: 'completed', phoneDate: '2026-05-12',
+    docStatus: 'pending', docDate: '',
+    greetingStatus: 'pending', greetingDate: '', greetingTime: '', greetingVisitor: '',
+    patrolStatus: 'pending', patrolDate: '', patrolTime: '', patrolVisitor: '',
+    notes: '長靴と軍手持参。熱中症対策の帽子が必要。'
+  }
+];
+
+const STEP_CONFIG = {
+  phone: {
+    field: 'phoneStatus', dateField: 'phoneDate',
+    cycle: ['pending', 'completed', 'none'],
+    label: '📞 1. 事前電話連絡',
+    activeColor: 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+  },
+  doc: {
+    field: 'docStatus', dateField: 'docDate',
+    cycle: ['pending', 'completed', 'none'],
+    label: '📄 2. 保護者お知らせ',
+    activeColor: 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
+  },
+  greeting: {
+    field: 'greetingStatus',
+    cycle: ['pending', 'scheduled', 'completed'],
+    label: '🤝 3. 事前挨拶',
+    activeColor: 'bg-teal-600 border-teal-600 text-white shadow-sm'
+  },
+  patrol: {
+    field: 'patrolStatus',
+    cycle: ['pending', 'scheduled', 'completed'],
+    label: '🚗 4. 指導巡回',
+    activeColor: 'bg-violet-600 border-violet-600 text-white shadow-sm'
+  }
+};
+
+const FIELD_TO_STEP = Object.fromEntries(
+  Object.entries(STEP_CONFIG).map(([k, c]) => [c.field, k])
+);
+
+const KANBAN_COL_TEMPLATE = {
+  pending:   { title: '未完了 / 要対応',    styles: 'border-rose-200 bg-rose-50/20 text-rose-800' },
+  none:      { title: '対象外 / 不要',      styles: 'border-slate-200 bg-slate-50 text-slate-700' },
+  completed: { title: '完了',                styles: 'border-emerald-200 bg-emerald-50/20 text-emerald-800' },
+  scheduled: { title: '日程決定 / 調整済',   styles: 'border-sky-200 bg-sky-50/20 text-sky-800' }
+};
+
+// =============================================================================
+// ユーティリティ / Utilities
+// =============================================================================
+
+const getTodayString = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const formatDateKey = (year, month, day) =>
+  `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+const loadFirebaseSDK = () => new Promise((resolve, reject) => {
+  if (window.firebase) return resolve(window.firebase);
+  const urls = [
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js',
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js'
+  ];
+  const load = (i) => {
+    if (i >= urls.length) return resolve(window.firebase);
+    const s = document.createElement('script');
+    s.src = urls[i];
+    s.onload = () => load(i + 1);
+    s.onerror = () => reject(new Error(`Firebase SDK の読み込みに失敗しました: ${urls[i]}`));
+    document.head.appendChild(s);
+  };
+  load(0);
+});
+
+const nextStatus = (stepKey, currentStatus) => {
+  const cycle = STEP_CONFIG[stepKey].cycle;
+  const idx = cycle.indexOf(currentStatus);
+  return cycle[(idx + 1) % cycle.length] || cycle[0];
+};
+
+const buildStepUpdate = (stepKey, newStatus) => {
+  const cfg = STEP_CONFIG[stepKey];
+  const update = { [cfg.field]: newStatus };
+  if (cfg.dateField) {
+    update[cfg.dateField] = newStatus === 'completed' ? getTodayString() : '';
+  }
+  return update;
+};
+
+// =============================================================================
+// カスタムフック / Hooks
+// =============================================================================
+
+function useFirestoreSync(firebaseConfigStr, roomKey) {
+  const [students, setStudents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState('local');
+  const [connectionError, setConnectionError] = useState('');
+  const unsubscribeRef = useRef(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLocal = () => {
+      const stored = localStorage.getItem(`local_students_${roomKey}`);
+      try {
+        if (stored) {
+          setStudents(JSON.parse(stored));
+        } else {
+          setStudents(MOCK_STUDENTS);
+          localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(MOCK_STUDENTS));
+        }
+      } catch {
+        setStudents(MOCK_STUDENTS);
+      }
+    };
+
+    const init = async () => {
+      setIsLoading(true);
+      setConnectionError('');
+
+      if (!firebaseConfigStr.trim()) {
+        if (!active) return;
+        loadLocal();
+        setConnectionStatus('local');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setConnectionStatus('connecting');
+        let configObj;
+        try { configObj = JSON.parse(firebaseConfigStr); }
+        catch { throw new Error('Configの形式(JSON)が正しくありません。'); }
+
+        const fb = await loadFirebaseSDK();
+        const app = fb.apps.length ? fb.app() : fb.initializeApp(configObj);
+        const db = app.firestore();
+        await app.auth().signInAnonymously();
+
+        if (unsubscribeRef.current) unsubscribeRef.current();
+
+        const queryRef = db.collection('rooms').doc(roomKey).collection('students');
+        unsubscribeRef.current = queryRef.onSnapshot(
+          (snap) => {
+            if (!active) return;
+            const list = [];
+            snap.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+            setStudents(list);
+            setConnectionStatus('connected');
+            setIsLoading(false);
+            setConnectionError('');
+          },
+          (error) => {
+            if (!active) return;
+            setConnectionStatus('error');
+            setConnectionError(`Firestoreへのアクセスに失敗しました。ルール等を確認してください。(詳細: ${error.message})`);
+            setIsLoading(false);
+          }
+        );
+      } catch (err) {
+        if (!active) return;
+        setConnectionStatus('error');
+        setConnectionError(err.message || 'Firebaseの接続に失敗しました。');
+        setIsLoading(false);
+        loadLocal();
+      }
+    };
+
+    init();
+    return () => {
+      active = false;
+      if (unsubscribeRef.current) unsubscribeRef.current();
+    };
+  }, [firebaseConfigStr, roomKey]);
+
+  return { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError };
+}
+
+function useHistory(limit = 10) {
+  const [history, setHistory] = useState([]);
+  const [redo, setRedo] = useState([]);
+
+  const push = useCallback((snapshot) => {
+    const cloned = JSON.parse(JSON.stringify(snapshot));
+    setHistory((prev) => {
+      const next = [...prev, cloned];
+      if (next.length > limit) next.shift();
+      return next;
+    });
+    setRedo([]);
+  }, [limit]);
+
+  const popUndo = useCallback((current) => {
+    if (!history.length) return null;
+    const last = history[history.length - 1];
+    setHistory((h) => h.slice(0, -1));
+    setRedo((r) => {
+      const next = [...r, JSON.parse(JSON.stringify(current))];
+      if (next.length > limit) next.shift();
+      return next;
+    });
+    return last;
+  }, [history, limit]);
+
+  const popRedo = useCallback((current) => {
+    if (!redo.length) return null;
+    const last = redo[redo.length - 1];
+    setRedo((r) => r.slice(0, -1));
+    setHistory((h) => {
+      const next = [...h, JSON.parse(JSON.stringify(current))];
+      if (next.length > limit) next.shift();
+      return next;
+    });
+    return last;
+  }, [redo, limit]);
+
+  return { history, redo, push, popUndo, popRedo };
+}
+
+function useDialog() {
+  const [alertState, setAlertState] = useState(null);
+  const [confirmState, setConfirmState] = useState(null);
+
+  const showAlert = useCallback((message) => setAlertState({ message }), []);
+  const showConfirm = useCallback((message, onConfirm) => {
+    setConfirmState({
+      message,
+      onConfirm: () => { onConfirm(); setConfirmState(null); },
+      onCancel: () => setConfirmState(null)
+    });
+  }, []);
+  const closeAlert = useCallback(() => setAlertState(null), []);
+
+  return { alertState, confirmState, showAlert, showConfirm, closeAlert };
+}
+
+// =============================================================================
+// 共通サブコンポーネント
+// =============================================================================
+
+const ConnectionBadge = ({ status, roomKey }) => {
+  if (status === 'connected') {
+    return (
+      <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">
+        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>クラウド接続中</span>
+        <span className="bg-emerald-100/80 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-mono">合言葉: {roomKey}</span>
+      </div>
+    );
+  }
+  if (status === 'connecting') {
+    return (
+      <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 text-indigo-800 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">
+        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></span>
+        <span>接続中...</span>
+      </div>
+    );
+  }
+  if (status === 'error') {
+    return (
+      <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-800 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm animate-bounce">
+        <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+        <span>接続エラー</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">
+      <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+      <span>お試しデモ(端末保存)</span>
+      <span className="bg-amber-100/80 text-amber-800 px-2 py-0.5 rounded text-[10px] font-mono">合言葉: {roomKey}</span>
+    </div>
+  );
+};
+
+const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, barColor, iconColor }) => (
+  <button
+    onClick={onClick}
+    className={`text-left bg-white border rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm ${active ? 'border-amber-500 bg-amber-50/50 ring-2 ring-amber-400' : 'border-slate-200 hover:border-slate-300'}`}
+  >
+    <div>
+      <p className="text-xs text-slate-500 font-bold flex items-center gap-1">
+        {label}
+        {pendingCount > 0 && (
+          <span className="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
+            {label.includes('電話') ? `未連絡 ${pendingCount}` : `未完了 ${pendingCount}`}
+          </span>
+        )}
+      </p>
+      <div className="flex items-baseline gap-1.5 mt-1">
+        <span className="text-2xl font-extrabold text-slate-900">{percent}%</span>
+        <span className="text-xs text-slate-500 font-bold">完了</span>
+      </div>
+      <div className="w-32 bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+        <div className={`${barColor} h-full rounded-full transition-all duration-500`} style={{ width: `${percent}%` }}></div>
+      </div>
+    </div>
+    <div className={`p-3 rounded-xl border ${active ? 'bg-amber-100 border-amber-200 text-amber-700' : `bg-slate-50 border-slate-200 ${iconColor}`}`}>
+      <Icon className="w-5 h-5" />
+    </div>
+  </button>
+);
+
+const ProgressToggleButton = ({ icon: Icon, label, status, palette, onClick, suffix }) => (
+  <button
+    onClick={onClick}
+    className={`w-full py-1.5 px-2.5 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${palette}`}
+  >
+    <span className="flex items-center gap-1">
+      <Icon className="w-3.5 h-3.5" />
+      {label}
+    </span>
+    <span>{suffix}</span>
+  </button>
+);
+
+// =============================================================================
+// メインコンポーネント
+// =============================================================================
+
+function App() {
+  const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => localStorage.getItem('school_firebase_config') || '');
+  const [roomKey, setRoomKey] = useState(() => localStorage.getItem('school_room_key') || '3-1');
+  const [tempRoomKey, setTempRoomKey] = useState(roomKey);
+  const [myTeacherName, setMyTeacherName] = useState(() => localStorage.getItem('my_teacher_name') || '');
+
+  const { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError } =
+    useFirestoreSync(firebaseConfigStr, roomKey);
+  const { history, redo, push: pushHistory, popUndo, popRedo } = useHistory(10);
+  const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
+
+  const [currentView, setCurrentView] = useState('list');
+  const [kanbanStep, setKanbanStep] = useState('phone');
+  const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isAddEditOpen, setIsAddEditOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
+  const [draggingStudentId, setDraggingStudentId] = useState(null);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterProgress, setFilterProgress] = useState('all');
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [filterGrade, setFilterGrade] = useState('all');
+  const [filterClass, setFilterClass] = useState('all');
+  const [filterPhoneStatus, setFilterPhoneStatus] = useState('all');
+  const [filterDocStatus, setFilterDocStatus] = useState('all');
+  const [filterGreetingStatus, setFilterGreetingStatus] = useState('all');
+  const [filterPatrolStatus, setFilterPatrolStatus] = useState('all');
+
+  const persistPartial = async (studentId, partial) => {
+    if (connectionStatus === 'connected' && window.firebase) {
+      try {
+        const db = window.firebase.app().firestore();
+        await db.collection('rooms').doc(roomKey).collection('students').doc(studentId).update(partial);
+      } catch (e) {
+        showAlert(`リアルタイム更新に失敗しました: ${e.message}`);
+      }
+    } else {
+      const updated = students.map((s) => s.id === studentId ? { ...s, ...partial } : s);
+      setStudents(updated);
+      localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
+    }
+  };
+
+  const restoreSnapshot = async (snapshot, successMessage) => {
+    setIsLoading(true);
+    if (connectionStatus === 'connected' && window.firebase) {
+      try {
+        const db = window.firebase.app().firestore();
+        const batch = db.batch();
+        const collectionRef = db.collection('rooms').doc(roomKey).collection('students');
+        const currentIds = students.map((s) => s.id);
+        const nextIds = snapshot.map((s) => s.id);
+        snapshot.forEach((student) => {
+          const data = { ...student };
+          delete data.id;
+          batch.set(collectionRef.doc(student.id), data);
+        });
+        currentIds.forEach((id) => {
+          if (!nextIds.includes(id)) batch.delete(collectionRef.doc(id));
+        });
+        await batch.commit();
+        showAlert(successMessage);
+      } catch (e) {
+        showAlert(`データの差し戻しに失敗しました: ${e.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setStudents(snapshot);
+      localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(snapshot));
+      setIsLoading(false);
+      showAlert(successMessage);
+    }
+  };
+
+  const handleUndo = async () => {
+    const prev = popUndo(students);
+    if (prev) await restoreSnapshot(prev, '操作を取り消し、一つ前の状態に戻しました。');
+  };
+
+  const handleRedo = async () => {
+    const next = popRedo(students);
+    if (next) await restoreSnapshot(next, '取り消した操作をやり直しました。');
+  };
+
+  const handleSaveStudent = async (studentData) => {
+    pushHistory(students);
+    setIsLoading(true);
+    const today = getTodayString();
+
+    const prepared = {
+      ...studentData,
+      phoneDate: studentData.phoneStatus === 'completed' && !studentData.phoneDate ? today : studentData.phoneDate,
+      docDate:   studentData.docStatus   === 'completed' && !studentData.docDate   ? today : studentData.docDate
+    };
+
+    if (connectionStatus === 'connected' && window.firebase) {
+      try {
+        const db = window.firebase.app().firestore();
+        const ref = db.collection('rooms').doc(roomKey).collection('students');
+        if (editingStudent) {
+          await ref.doc(editingStudent.id).update(prepared);
+        } else {
+          await ref.add(prepared);
+        }
+        setIsAddEditOpen(false);
+        setEditingStudent(null);
+      } catch (e) {
+        showAlert(`データの保存に失敗しました: ${e.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      let updated = [...students];
+      if (editingStudent) {
+        updated = updated.map((s) => s.id === editingStudent.id ? { ...s, ...prepared } : s);
+      } else {
+        updated.push({ id: 'local-' + Date.now(), ...prepared });
+      }
+      setStudents(updated);
+      localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
+      setIsAddEditOpen(false);
+      setEditingStudent(null);
+      setIsLoading(false);
+    }
+  };
+
+  const handleInstantToggle = async (student, field, currentStatus) => {
+    pushHistory(students);
+    const stepKey = FIELD_TO_STEP[field];
+    if (!stepKey) return;
+    const next = nextStatus(stepKey, currentStatus || 'pending');
+    const update = buildStepUpdate(stepKey, next);
+    await persistPartial(student.id, update);
+  };
+
+  const handleKanbanDrop = async (studentId, targetStatus) => {
+    const student = students.find((s) => s.id === studentId);
+    if (!student) return;
+    const cfg = STEP_CONFIG[kanbanStep];
+    const currentStatus = student[cfg.field] || 'pending';
+    if (currentStatus === targetStatus) return;
+    pushHistory(students);
+    const update = buildStepUpdate(kanbanStep, targetStatus);
+    await persistPartial(studentId, update);
+  };
+
+  const handleDeleteStudent = (studentId) => {
+    showConfirm('この生徒の実習進捗データを削除してもよろしいですか？', async () => {
+      pushHistory(students);
+      setIsLoading(true);
+      if (connectionStatus === 'connected' && window.firebase) {
+        try {
+          const db = window.firebase.app().firestore();
+          await db.collection('rooms').doc(roomKey).collection('students').doc(studentId).delete();
+        } catch (e) {
+          showAlert(`削除に失敗しました: ${e.message}`);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        const updated = students.filter((s) => s.id !== studentId);
+        setStudents(updated);
+        localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
+        setIsLoading(false);
+      }
+    });
+  };
+
+  const handleConfigSubmit = (e) => {
+    e.preventDefault();
+    localStorage.setItem('school_firebase_config', firebaseConfigStr);
+    setIsConfigOpen(false);
+  };
+
+  const handleRoomKeyChange = (e) => {
+    e.preventDefault();
+    if (!tempRoomKey.trim()) return;
+    localStorage.setItem('school_room_key', tempRoomKey.trim());
+    setRoomKey(tempRoomKey.trim());
+    setIsConfigOpen(false);
+  };
+
+  const resetConfig = () => {
+    showConfirm('接続情報を削除してローカルのお試しデモモードに戻しますか？', () => {
+      localStorage.removeItem('school_firebase_config');
+      setFirebaseConfigStr('');
+      setIsConfigOpen(false);
+    });
+  };
+
+  useEffect(() => {
+    if (myTeacherName) localStorage.setItem('my_teacher_name', myTeacherName);
+    else localStorage.removeItem('my_teacher_name');
+  }, [myTeacherName]);
+
+  const filteredStudents = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return students.filter((s) => {
+      const matchSearch = !q ||
+        s.name.toLowerCase().includes(q) ||
+        s.location.toLowerCase().includes(q) ||
+        (s.internshipStartDate && s.internshipStartDate.includes(q)) ||
+        (s.internshipEndDate && s.internshipEndDate.includes(q)) ||
+        (s.teacher && s.teacher.toLowerCase().includes(q)) ||
+        (s.grade && `${s.grade}年`.includes(q)) ||
+        (s.classVal && `${s.classVal}組`.includes(q));
+
+      if (!matchSearch) return false;
+      if (myTeacherName && s.teacher !== myTeacherName) return false;
+
+      switch (filterProgress) {
+        case 'phone_pending':    if (s.phoneStatus && s.phoneStatus !== 'pending') return false; break;
+        case 'doc_pending':      if (s.docStatus && s.docStatus !== 'pending') return false; break;
+        case 'greeting_pending': if (s.greetingStatus === 'completed') return false; break;
+        case 'patrol_pending':   if (s.patrolStatus === 'completed') return false; break;
+        default: break;
+      }
+
+      if (filterGrade !== 'all' && s.grade !== filterGrade) return false;
+      if (filterClass !== 'all' && s.classVal !== filterClass) return false;
+      if (filterPhoneStatus !== 'all' && (s.phoneStatus || 'pending') !== filterPhoneStatus) return false;
+      if (filterDocStatus !== 'all' && (s.docStatus || 'pending') !== filterDocStatus) return false;
+      if (filterGreetingStatus !== 'all' && (s.greetingStatus || 'pending') !== filterGreetingStatus) return false;
+      if (filterPatrolStatus !== 'all' && (s.patrolStatus || 'pending') !== filterPatrolStatus) return false;
+
+      return true;
+    });
+  }, [students, searchQuery, myTeacherName, filterProgress, filterGrade, filterClass,
+      filterPhoneStatus, filterDocStatus, filterGreetingStatus, filterPatrolStatus]);
+
+  const stats = useMemo(() => {
+    const total = students.length;
+    if (total === 0) return {
+      total: 0, phonePercent: 0, docPercent: 0, greetingPercent: 0, patrolPercent: 0,
+      phonePendingCount: 0, docPendingCount: 0, greetingPendingCount: 0, patrolPendingCount: 0
+    };
+    const phoneDone    = students.filter((s) => s.phoneStatus === 'completed' || s.phoneStatus === 'none').length;
+    const docDone      = students.filter((s) => s.docStatus   === 'completed' || s.docStatus   === 'none').length;
+    const greetingDone = students.filter((s) => s.greetingStatus === 'completed').length;
+    const patrolDone   = students.filter((s) => s.patrolStatus   === 'completed').length;
+    return {
+      total,
+      phonePercent:    Math.round((phoneDone    / total) * 100),
+      docPercent:      Math.round((docDone      / total) * 100),
+      greetingPercent: Math.round((greetingDone / total) * 100),
+      patrolPercent:   Math.round((patrolDone   / total) * 100),
+      phonePendingCount:    students.filter((s) => s.phoneStatus === 'pending').length,
+      docPendingCount:      students.filter((s) => s.docStatus   === 'pending').length,
+      greetingPendingCount: students.filter((s) => s.greetingStatus === 'pending' || s.greetingStatus === 'scheduled').length,
+      patrolPendingCount:   students.filter((s) => s.patrolStatus   === 'pending' || s.patrolStatus   === 'scheduled').length
+    };
+  }, [students]);
+
+  const uniqueTeachers = useMemo(() => {
+    const set = new Set();
+    students.forEach((s) => { if (s.teacher) set.add(s.teacher); });
+    return Array.from(set);
+  }, [students]);
+
+  const calendarDays = useMemo(() => {
+    const firstDayIndex = new Date(calendarYear, calendarMonth, 1).getDay();
+    const numberOfDays = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+    const prevMonthDays = new Date(calendarYear, calendarMonth, 0).getDate();
+    const days = [];
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      days.push({
+        day: prevMonthDays - i,
+        month: calendarMonth === 0 ? 11 : calendarMonth - 1,
+        year: calendarMonth === 0 ? calendarYear - 1 : calendarYear,
+        isCurrentMonth: false
+      });
+    }
+    for (let i = 1; i <= numberOfDays; i++) {
+      days.push({ day: i, month: calendarMonth, year: calendarYear, isCurrentMonth: true });
+    }
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({
+        day: i,
+        month: calendarMonth === 11 ? 0 : calendarMonth + 1,
+        year: calendarMonth === 11 ? calendarYear + 1 : calendarYear,
+        isCurrentMonth: false
+      });
+    }
+    return days;
+  }, [calendarYear, calendarMonth]);
+
+  const getEventsForDate = (year, month, day) => {
+    const target = formatDateKey(year, month, day);
+    const events = [];
+    filteredStudents.forEach((student) => {
+      if (student.greetingDate === target) {
+        events.push({
+          type: 'greeting',
+          label: `🤝 挨拶: ${student.name} (${student.greetingTime || '時間未定'})`,
+          student,
+          color: student.greetingStatus === 'completed'
+            ? 'bg-emerald-100 border-emerald-300 text-emerald-800 hover:bg-emerald-200'
+            : 'bg-teal-100 border-teal-300 text-teal-800 hover:bg-teal-200 animate-pulse'
+        });
+      }
+      if (student.patrolDate === target) {
+        events.push({
+          type: 'patrol',
+          label: `🚗 巡回: ${student.name} (${student.patrolTime || '時間未定'})`,
+          student,
+          color: student.patrolStatus === 'completed'
+            ? 'bg-violet-100 border-violet-300 text-violet-800 hover:bg-violet-200'
+            : 'bg-sky-100 border-sky-300 text-sky-800 hover:bg-sky-200 animate-pulse'
+        });
+      }
+      if (student.internshipStartDate && student.internshipEndDate &&
+          target >= student.internshipStartDate && target <= student.internshipEndDate) {
+        events.push({
+          type: 'period',
+          label: `💼 実習中: ${student.name} (${student.location})`,
+          student,
+          color: 'bg-indigo-50 border-indigo-200 text-indigo-900 hover:bg-indigo-100'
+        });
+      }
+    });
+    return events;
+  };
+
+  const hasPeriodEventOnDate = (year, month, day) => {
+    const target = formatDateKey(year, month, day);
+    return filteredStudents.some((s) =>
+      s.internshipStartDate && s.internshipEndDate &&
+      target >= s.internshipStartDate && target <= s.internshipEndDate
+    );
+  };
+
+  const handlePrevMonth = () => {
+    if (calendarMonth === 0) { setCalendarYear((y) => y - 1); setCalendarMonth(11); }
+    else setCalendarMonth((m) => m - 1);
+  };
+  const handleNextMonth = () => {
+    if (calendarMonth === 11) { setCalendarYear((y) => y + 1); setCalendarMonth(0); }
+    else setCalendarMonth((m) => m + 1);
+  };
+  const handleToday = () => {
+    const t = new Date();
+    setCalendarYear(t.getFullYear());
+    setCalendarMonth(t.getMonth());
+  };
+
+  const kanbanColumns = useMemo(() => {
+    const keys = STEP_CONFIG[kanbanStep].cycle.includes('scheduled')
+      ? ['pending', 'scheduled', 'completed']
+      : ['pending', 'none', 'completed'];
+    const cols = keys.map((k) => ({ key: k, ...KANBAN_COL_TEMPLATE[k] }));
+    const groups = Object.fromEntries(keys.map((k) => [k, []]));
+    const field = STEP_CONFIG[kanbanStep].field;
+    filteredStudents.forEach((student) => {
+      const status = student[field] || 'pending';
+      (groups[status] || groups.pending).push(student);
+    });
+    return { cols, groups };
+  }, [filteredStudents, kanbanStep]);
+
+  const clearFilters = () => {
+    setSearchQuery(''); setFilterProgress('all'); setMyTeacherName('');
+    setFilterGrade('all'); setFilterClass('all');
+    setFilterPhoneStatus('all'); setFilterDocStatus('all');
+    setFilterGreetingStatus('all'); setFilterPatrolStatus('all');
+  };
+
+  const hasActiveFilter = filterProgress !== 'all' || searchQuery || myTeacherName ||
+    filterGrade !== 'all' || filterClass !== 'all' ||
+    filterPhoneStatus !== 'all' || filterDocStatus !== 'all' ||
+    filterGreetingStatus !== 'all' || filterPatrolStatus !== 'all';
+
+  const hasAdvancedFilter = filterGrade !== 'all' || filterClass !== 'all' ||
+    filterPhoneStatus !== 'all' || filterDocStatus !== 'all' ||
+    filterGreetingStatus !== 'all' || filterPatrolStatus !== 'all';
+
+  const handleExportExcel = () => {
+    if (filteredStudents.length === 0) {
+      showAlert('出力対象の生徒データがありません。');
+      return;
+    }
+    const headers = [
+      '生徒氏名', '学年', '組', '担当教員', '実習先企業・事業所名', '実習開始日', '実習終了日',
+      '事前電話状況', '電話連絡完了日',
+      '保護者お知らせ状況', 'お知らせ回収日',
+      '事前挨拶状況', '挨拶訪問日', '挨拶予定時間', '挨拶引率教員',
+      '巡回指導状況', '巡回日', '巡回予定時間', '巡回訪問教員',
+      '特記事項・配慮事項'
+    ];
+    const labelOf = {
+      phone:    (s) => s === 'completed' ? '完了'   : s === 'none' ? '不要' : '未完了',
+      doc:      (s) => s === 'completed' ? '完了'   : s === 'none' ? '不要' : '未完了',
+      greeting: (s) => s === 'completed' ? '訪問終了' : s === 'scheduled' ? '日程確定' : '未確定',
+      patrol:   (s) => s === 'completed' ? '巡回終了' : s === 'scheduled' ? '日程確定' : '未確定'
+    };
+    const rows = filteredStudents.map((s) => [
+      s.name || '', s.grade ? `${s.grade}年` : '', s.classVal ? `${s.classVal}組` : '', s.teacher || '',
+      s.location || '', s.internshipStartDate || '', s.internshipEndDate || '',
+      labelOf.phone(s.phoneStatus), s.phoneDate || '',
+      labelOf.doc(s.docStatus), s.docDate || '',
+      labelOf.greeting(s.greetingStatus), s.greetingDate || '', s.greetingTime || '', s.greetingVisitor || '',
+      labelOf.patrol(s.patrolStatus), s.patrolDate || '', s.patrolTime || '', s.patrolVisitor || '',
+      s.notes || ''
+    ]);
+    const csv = [
+      headers.join(','),
+      ...rows.map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    ].join('\r\n');
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const dateStr = new Date().toLocaleDateString('ja-JP').replace(/\//g, '');
+    link.href = url;
+    link.download = `現場実習進捗リスト_${roomKey}_${dateStr}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+
+      <header className="bg-white border-b border-slate-200 shrink-0 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-600 rounded-xl shadow-md">
+              <BookOpen className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習進捗マネージャー</h1>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.4 HTML</span>
+              </div>
+              <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <ConnectionBadge status={connectionStatus} roomKey={roomKey} />
+            <button
+              onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-sm"
+            >
+              <Settings className="w-4 h-4 text-slate-500" />
+              <span>環境設定</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {connectionStatus === 'local' && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs py-2.5 px-4 shadow-sm">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
+            <span className="flex items-center gap-2 text-amber-800">
+              <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
+              現在はPC1台のみの「体験デモ」で稼働しています。他の先生と今すぐリアルタイム同期するには独自設定が必要です。
+            </span>
+            <button
+              onClick={() => setIsConfigOpen(true)}
+              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-[11px] transition-colors shadow-sm shrink-0"
+            >
+              学校のFirebaseに接続する
+            </button>
+          </div>
+        </div>
+      )}
+
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+            <div>
+              <p className="text-xs text-slate-500 font-bold">全登録生徒数</p>
+              <h3 className="text-2xl font-extrabold text-slate-950 mt-1">{stats.total} <span className="text-xs font-normal text-slate-500">名</span></h3>
+            </div>
+            <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+              <User className="w-5 h-5 text-indigo-600" />
+            </div>
+          </div>
+
+          <StatCard icon={Phone} label="事前電話連絡状況" percent={stats.phonePercent} pendingCount={stats.phonePendingCount}
+            active={filterProgress === 'phone_pending'}
+            onClick={() => setFilterProgress(filterProgress === 'phone_pending' ? 'all' : 'phone_pending')}
+            barColor="bg-indigo-600" iconColor="text-indigo-600" />
+          <StatCard icon={FileText} label="保護者お知らせ状況" percent={stats.docPercent} pendingCount={stats.docPendingCount}
+            active={filterProgress === 'doc_pending'}
+            onClick={() => setFilterProgress(filterProgress === 'doc_pending' ? 'all' : 'doc_pending')}
+            barColor="bg-emerald-600" iconColor="text-emerald-600" />
+          <StatCard icon={Handshake} label="事前挨拶 完了状況" percent={stats.greetingPercent} pendingCount={stats.greetingPendingCount}
+            active={filterProgress === 'greeting_pending'}
+            onClick={() => setFilterProgress(filterProgress === 'greeting_pending' ? 'all' : 'greeting_pending')}
+            barColor="bg-emerald-600" iconColor="text-teal-600" />
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-4 shadow-sm">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2.5 flex-1">
+              <div className="relative flex-1 min-w-[180px]">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                <input type="text" placeholder="生徒名、実習先、期間等で検索..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all" />
+              </div>
+
+              <button onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border transition-all ${isFilterPanelOpen || hasAdvancedFilter ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
+                <SlidersHorizontal className="w-4 h-4" />
+                <span>詳細フィルター</span>
+                {hasAdvancedFilter && <span className="w-2 h-2 rounded-full bg-indigo-600"></span>}
+              </button>
+
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
+                <User className="w-3.5 h-3.5 text-slate-500" />
+                <select value={myTeacherName} onChange={(e) => setMyTeacherName(e.target.value)}
+                  className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
+                  <option value="">すべての担当教員</option>
+                  {uniqueTeachers.map((t) => (<option key={t} value={t}>{t}</option>))}
+                  <option value="鈴木 先生">鈴木 先生</option>
+                  <option value="佐藤 先生">佐藤 先生</option>
+                  <option value="高橋 先生">高橋 先生</option>
+                </select>
+              </div>
+
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                {[
+                  { key: 'list',     icon: List,       label: 'リスト一覧' },
+                  { key: 'calendar', icon: Calendar,   label: 'カレンダー' },
+                  { key: 'kanban',   icon: LayoutGrid, label: '進捗かんばん' }
+                ].map(({ key, icon: Icon, label }) => (
+                  <button key={key} onClick={() => setCurrentView(key)}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentView === key ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {hasActiveFilter && (
+                <button onClick={clearFilters} className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                  <RotateCcw className="w-3 h-3" />
+                  <span>解除</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 self-end lg:self-auto">
+              <button onClick={handleUndo} disabled={history.length === 0}
+                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${history.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
+                title="直前の操作を取り消して一つ前に戻します">
+                <RotateCcw className={`w-4 h-4 ${history.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
+                <span>戻る</span>
+                {history.length > 0 && (<span className="ml-0.5 px-1.5 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] rounded-full font-bold">{history.length}</span>)}
+              </button>
+
+              <button onClick={handleRedo} disabled={redo.length === 0}
+                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${redo.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
+                title="取り消した操作をやり直して一つ進めます">
+                <RotateCw className={`w-4 h-4 ${redo.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
+                <span>進む</span>
+                {redo.length > 0 && (<span className="ml-0.5 px-1.5 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] rounded-full font-bold">{redo.length}</span>)}
+              </button>
+
+              <button onClick={handleExportExcel}
+                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 border border-emerald-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                title="表示中の一覧をExcel等で開けるCSVファイルとして保存します">
+                <Download className="w-4 h-4 text-emerald-600" />
+                <span>エクセル</span>
+              </button>
+
+              <button onClick={() => { setEditingStudent(null); setIsAddEditOpen(true); }}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all transform active:scale-95 cursor-pointer">
+                <Plus className="w-4 h-4" />
+                <span>登録</span>
+              </button>
+            </div>
+          </div>
+
+          {isFilterPanelOpen && (
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-2 md:grid-cols-6 gap-3 animate-slideDown">
+              {[
+                { label: '学年',       value: filterGrade,           set: setFilterGrade,           options: [['all','すべて'],['1','1年'],['2','2年'],['3','3年']] },
+                { label: '組',         value: filterClass,           set: setFilterClass,           options: [['all','すべて'],['1','1組'],['2','2組'],['3','3組'],['4','4組']] },
+                { label: '事前電話',   value: filterPhoneStatus,     set: setFilterPhoneStatus,     options: [['all','すべて'],['pending','未完了（要電話）'],['completed','電話連絡済'],['none','連絡不要']] },
+                { label: '保護者お知らせ', value: filterDocStatus,    set: setFilterDocStatus,       options: [['all','すべて'],['pending','未提出 / 未配付'],['completed','提出/回収済'],['none','不要']] },
+                { label: '事前挨拶',   value: filterGreetingStatus,  set: setFilterGreetingStatus,  options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/調整済'],['completed','挨拶終了']] },
+                { label: '巡回・訪問', value: filterPatrolStatus,    set: setFilterPatrolStatus,    options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/巡回調整済'],['completed','巡回終了']] }
+              ].map(({ label, value, set, options }) => (
+                <div key={label}>
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">{label}</label>
+                  <select value={value} onChange={(e) => set(e.target.value)} className="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-xs text-slate-800 focus:outline-none">
+                    {options.map(([v, lbl]) => (<option key={v} value={v}>{lbl}</option>))}
+                  </select>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {currentView === 'list' ? (
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fadeIn">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse table-auto">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold select-none">
+                    <th className="p-4 min-w-[140px]">生徒情報（学年・組）</th>
+                    <th className="p-4 min-w-[100px]">担当教員</th>
+                    <th className="p-4 min-w-[180px]">実習先 &amp; 実習期間</th>
+                    <th className="p-4 min-w-[150px]">事前電話確認</th>
+                    <th className="p-4 min-w-[150px]">保護者お知らせ</th>
+                    <th className="p-4 min-w-[160px]">事前挨拶</th>
+                    <th className="p-4 min-w-[160px]">巡回予定</th>
+                    <th className="p-4 max-w-[200px]">備考・配慮事項</th>
+                    <th className="p-4 text-center">操作</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+                  {isLoading ? (
+                    <tr><td colSpan={9} className="p-12 text-center text-slate-500 font-medium">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <span className="w-8 h-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin inline-block"></span>
+                        <span className="text-slate-600">データを同期しています...</span>
+                      </div>
+                    </td></tr>
+                  ) : filteredStudents.length === 0 ? (
+                    <tr><td colSpan={9} className="p-12 text-center text-slate-500 font-medium">条件に一致する実習対象生徒が見つかりません。</td></tr>
+                  ) : (
+                    filteredStudents.map((s) => {
+                      const isMyStudent = myTeacherName && s.teacher === myTeacherName;
+                      const phonePalette = s.phoneStatus === 'completed' ? 'bg-indigo-50 border-indigo-200 text-indigo-800 hover:bg-indigo-100/70' : s.phoneStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
+                      const docPalette = s.docStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.docStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
+                      const greetingPalette = s.greetingStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.greetingStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
+                      const patrolPalette = s.patrolStatus === 'completed' ? 'bg-violet-50 border-violet-200 text-violet-800 hover:bg-violet-100/70' : s.patrolStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
+
+                      return (
+                        <tr key={s.id} className={`hover:bg-slate-50/80 transition-colors group ${isMyStudent ? 'bg-indigo-50/30' : ''}`}>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              {isMyStudent && <span className="w-1.5 h-6 rounded bg-indigo-600 shrink-0"></span>}
+                              <div>
+                                <div className="font-extrabold text-slate-900 text-sm">{s.name}</div>
+                                <div className="text-[10px] text-slate-500 font-bold mt-0.5">
+                                  {s.grade ? `${s.grade}年` : 'ー'}{s.classVal ? `${s.classVal}組` : 'ー'}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4"><span className="bg-slate-100 text-slate-700 border border-slate-200 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">{s.teacher}</span></td>
+                          <td className="p-4">
+                            <div className="font-bold text-slate-900">{s.location || '（未設定）'}</div>
+                            {s.internshipStartDate && s.internshipEndDate ? (
+                              <div className="mt-1 flex items-center gap-1 text-[10px] text-slate-500 font-medium bg-indigo-50/40 border border-indigo-100 px-1.5 py-0.5 rounded w-fit">
+                                <Calendar className="w-3 h-3 text-indigo-500" />
+                                <span>{s.internshipStartDate} 〜 {s.internshipEndDate}</span>
+                              </div>
+                            ) : (<div className="text-[10px] text-slate-400 italic mt-0.5">期間 未設定</div>)}
+                          </td>
+                          <td className="p-4">
+                            <div className="space-y-1.5">
+                              <ProgressToggleButton icon={Phone} label={s.phoneStatus === 'completed' ? '電話連絡済' : s.phoneStatus === 'none' ? '連絡不要' : '未連絡 (要電話)'}
+                                status={s.phoneStatus} palette={phonePalette}
+                                onClick={() => handleInstantToggle(s, 'phoneStatus', s.phoneStatus)}
+                                suffix={s.phoneStatus === 'completed' ? '✔' : s.phoneStatus === 'none' ? 'ー' : '☎'} />
+                              {s.phoneStatus === 'completed' && s.phoneDate && (<div className="text-[9px] text-slate-500 font-mono pl-1">完了日: {s.phoneDate}</div>)}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="space-y-1.5">
+                              <ProgressToggleButton icon={FileText} label={s.docStatus === 'completed' ? '提出・回収済' : s.docStatus === 'none' ? '不要' : '未提出 / 未回収'}
+                                status={s.docStatus} palette={docPalette}
+                                onClick={() => handleInstantToggle(s, 'docStatus', s.docStatus)}
+                                suffix={s.docStatus === 'completed' ? '✔' : s.docStatus === 'none' ? 'ー' : '⚠'} />
+                              {s.docStatus === 'completed' && s.docDate && (<div className="text-[9px] text-slate-500 font-mono pl-1">提出日: {s.docDate}</div>)}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="space-y-1.5">
+                              <button onClick={() => handleInstantToggle(s, 'greetingStatus', s.greetingStatus)}
+                                className={`w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${greetingPalette}`}>
+                                <span className="flex items-center gap-1">
+                                  <Handshake className="w-3.5 h-3.5 text-slate-500" />
+                                  {s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '挨拶日決定' : '未調整'}
+                                </span>
+                                <span>{s.greetingStatus === 'completed' ? '✔' : s.greetingStatus === 'scheduled' ? '📅' : 'ー'}</span>
+                              </button>
+                              {s.greetingDate    && <div className="text-[10px] font-semibold text-slate-700 pl-1">📅 日時: {s.greetingDate}</div>}
+                              {s.greetingTime    && <div className="text-[9px] text-slate-500 pl-1">時間: {s.greetingTime}</div>}
+                              {s.greetingVisitor && <div className="text-[9px] text-slate-500 pl-1">引率: {s.greetingVisitor}</div>}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="space-y-1.5">
+                              <button onClick={() => handleInstantToggle(s, 'patrolStatus', s.patrolStatus)}
+                                className={`w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${patrolPalette}`}>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5 text-slate-500" />
+                                  {s.patrolStatus === 'completed' ? '巡回終了' : s.patrolStatus === 'scheduled' ? '巡回確定' : '巡回未定'}
+                                </span>
+                                <span>{s.patrolStatus === 'completed' ? '✔' : s.patrolStatus === 'scheduled' ? '⏰' : 'ー'}</span>
+                              </button>
+                              {s.patrolDate    && <div className="text-[10px] font-semibold text-slate-700 pl-1">📅 巡回: {s.patrolDate}</div>}
+                              {s.patrolTime    && <div className="text-[9px] text-indigo-700 font-mono bg-indigo-50 px-1 rounded border border-indigo-100 w-fit pl-1">{s.patrolTime}</div>}
+                              {s.patrolVisitor && <div className="text-[9px] text-slate-500 pl-1">巡回者: {s.patrolVisitor}</div>}
+                            </div>
+                          </td>
+                          <td className="p-4 max-w-[200px]">
+                            <p className="text-slate-600 text-xs leading-relaxed line-clamp-3" title={s.notes}>
+                              {s.notes || <span className="text-slate-400 italic">特記事項なし</span>}
+                            </p>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => { setEditingStudent(s); setIsAddEditOpen(true); }} title="編集"
+                                className="p-1.5 text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 hover:border-indigo-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => handleDeleteStudent(s.id)} title="削除"
+                                className="p-1.5 text-slate-400 hover:text-rose-600 bg-white border border-slate-200 hover:border-rose-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 text-slate-500 text-[11px] flex flex-col sm:flex-row justify-between items-center gap-2">
+              <span>表示中: {filteredStudents.length}名 / 全生徒: {students.length}名</span>
+              <span className="font-semibold text-slate-600">※ 各進捗ボタンをクリックするとその場で進捗状況を切り替えることができます。</span>
+            </div>
+          </div>
+        ) : currentView === 'calendar' ? (
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col animate-fadeIn">
+            <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <button onClick={handlePrevMonth} className="p-1.5 hover:bg-slate-200 bg-white border border-slate-200 rounded-lg text-slate-700 transition-all cursor-pointer">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <h2 className="text-sm font-bold text-slate-900 min-w-[120px] text-center">{calendarYear}年 {calendarMonth + 1}月</h2>
+                <button onClick={handleNextMonth} className="p-1.5 hover:bg-slate-200 bg-white border border-slate-200 rounded-lg text-slate-700 transition-all cursor-pointer">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <button onClick={handleToday} className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer">今月</button>
+                <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
+                  <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-indigo-50 border border-indigo-200 rounded-md block"></span><span>💼 実習期間中</span></span>
+                  <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-emerald-100 border border-emerald-300 rounded-md block"></span><span>🤝 事前挨拶日</span></span>
+                  <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-sky-100 border border-sky-300 rounded-md block"></span><span>🚗 指導巡回日</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-100 text-center text-xs font-bold text-slate-600 py-2 select-none">
+              <div className="text-rose-600">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div className="text-sky-600">土</div>
+            </div>
+
+            <div className="grid grid-cols-7 grid-rows-6 divide-x divide-y divide-slate-200 min-h-[500px] bg-slate-50">
+              {calendarDays.map((cell, index) => {
+                const dayEvents = getEventsForDate(cell.year, cell.month, cell.day);
+                const today = new Date();
+                const isToday = today.getFullYear() === cell.year && today.getMonth() === cell.month && today.getDate() === cell.day;
+                const isInternshipDay = hasPeriodEventOnDate(cell.year, cell.month, cell.day);
+                const dayOfWeek = index % 7;
+
+                return (
+                  <div
+                    key={`${cell.year}-${cell.month}-${cell.day}-${index}`}
+                    onClick={(e) => {
+                      if (e.target === e.currentTarget) {
+                        setEditingStudent(null);
+                        const formattedDate = formatDateKey(cell.year, cell.month, cell.day);
+                        setIsAddEditOpen(true);
+                        setTimeout(() => {
+                          const startInput = document.getElementsByName('internshipStartDate')[0];
+                          const endInput = document.getElementsByName('internshipEndDate')[0];
+                          if (startInput) startInput.value = formattedDate;
+                          if (endInput) endInput.value = formattedDate;
+                        }, 55);
+                      }
+                    }}
+                    className={`p-1.5 flex flex-col justify-between min-h-[110px] transition-all relative group cursor-pointer ${cell.isCurrentMonth ? (isInternshipDay ? 'bg-indigo-50/40' : 'bg-white') : 'bg-slate-50/50 text-slate-400'} ${isToday ? 'ring-2 ring-indigo-500 ring-inset bg-indigo-50/25' : ''}`}
+                  >
+                    <div className="flex items-center justify-between mb-1 select-none">
+                      <span className={`text-xs font-bold ${isToday ? 'bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center' : cell.isCurrentMonth ? (dayOfWeek === 0 ? 'text-rose-600' : dayOfWeek === 6 ? 'text-sky-600' : 'text-slate-800') : 'text-slate-400'}`}>
+                        {cell.day}
+                      </span>
+                      {isInternshipDay && cell.isCurrentMonth && (
+                        <span className="text-[8px] bg-indigo-100 text-indigo-700 font-bold px-1 rounded-sm border border-indigo-200">実習中</span>
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-1 overflow-y-auto max-h-[80px] scrollbar-thin">
+                      {dayEvents.map((ev, evIdx) => (
+                        <div
+                          key={evIdx}
+                          onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }}
+                          className={`text-[10px] px-1.5 py-0.5 rounded border font-bold truncate select-none transition-colors shadow-sm ${ev.color}`}
+                          title={ev.label}
+                        >
+                          {ev.label}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Plus className="w-3.5 h-3.5 text-slate-400 hover:text-indigo-600 bg-slate-100 rounded-full" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 animate-fadeIn">
+            <div className="bg-white p-3 border border-slate-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm">
+              <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+                <LayoutGrid className="w-4 h-4 text-indigo-600" />
+                <span>進捗変更ステップ切り替え：</span>
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(STEP_CONFIG).map(([key, cfg]) => (
+                  <button key={key} onClick={() => setKanbanStep(key)}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${kanbanStep === key ? cfg.activeColor : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'}`}>
+                    {cfg.label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-[11px] text-slate-500 font-medium">※ 生徒カードをドラッグして各列にドロップするだけで、瞬時に進捗ステータスを更新できます。</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {kanbanColumns.cols.map((col) => {
+                const groupStudents = kanbanColumns.groups[col.key] || [];
+                return (
+                  <div key={col.key}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => { if (draggingStudentId) { handleKanbanDrop(draggingStudentId, col.key); setDraggingStudentId(null); } }}
+                    className="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-4 min-h-[400px] flex flex-col space-y-3 shadow-sm">
+                    <div className={`p-2.5 rounded-xl border-l-4 font-extrabold text-xs flex items-center justify-between ${col.styles}`}>
+                      <span>{col.title}</span>
+                      <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full text-[10px]">{groupStudents.length}名</span>
+                    </div>
+                    <div className="flex-1 space-y-2.5 overflow-y-auto max-h-[550px] p-0.5">
+                      {groupStudents.length === 0 ? (
+                        <div className="text-center text-slate-400 text-[10px] py-12">該当生徒はいません</div>
+                      ) : (
+                        groupStudents.map((student) => {
+                          const isMy = myTeacherName && student.teacher === myTeacherName;
+                          return (
+                            <div key={student.id} draggable
+                              onDragStart={() => setDraggingStudentId(student.id)}
+                              className={`p-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95 cursor-grab active:cursor-grabbing group relative ${isMy ? 'ring-1 ring-indigo-400 bg-indigo-50/10' : ''}`}>
+                              <div className="flex items-center justify-between">
+                                <span className="font-extrabold text-sm text-slate-900">{student.name}</span>
+                                <span className="text-[9px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded">
+                                  {student.grade ? `${student.grade}年` : ''}{student.classVal ? `${student.classVal}組` : ''}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-700 font-bold mt-1.5 truncate">{student.location}</p>
+                              {student.internshipStartDate && student.internshipEndDate && (
+                                <p className="text-[10px] text-slate-400 mt-0.5 truncate">📅 {student.internshipStartDate} 〜 {student.internshipEndDate}</p>
+                              )}
+                              <div className="flex items-center justify-between border-t border-slate-100 mt-2.5 pt-2 text-[10px] text-slate-500">
+                                <span className="font-bold">担当教員: {student.teacher}</span>
+                                <button onClick={() => setSelectedStudentDetail(student)} className="text-indigo-600 hover:text-indigo-800 font-bold hover:underline cursor-pointer">詳細表示</button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </main>
+
+      <footer className="bg-white border-t border-slate-200 py-6 px-4 mt-12 shrink-0">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+          <div>
+            <p className="font-semibold text-slate-700">現場実習進捗マネージャー - HTML スタンドアロン版</p>
+            <p className="mt-0.5">Google Firebase Infrastructure 連携対応</p>
+          </div>
+          <div className="flex items-center gap-4 font-medium text-slate-400">
+            <span>匿名認証・合言葉部屋分割・BOM付きCSV出力・Undo/Redo・カレンダー日付入力</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* 詳細モーダル */}
+      {selectedStudentDetail && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden text-slate-800 animate-scaleIn">
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <User className="w-5 h-5 text-indigo-600" />
+                <span>実習生 詳細情報</span>
+              </h3>
+              <button onClick={() => setSelectedStudentDetail(null)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <div className="text-xs text-slate-400 font-bold">生徒情報（学年・組）</div>
+                <div className="text-base font-extrabold text-slate-950 mt-0.5">
+                  {selectedStudentDetail.name}
+                  <span className="text-xs font-normal text-slate-500 ml-2">
+                    ({selectedStudentDetail.grade ? `${selectedStudentDetail.grade}年` : ''}{selectedStudentDetail.classVal ? `${selectedStudentDetail.classVal}組` : ''})
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs text-slate-400 font-bold">担当教員</div>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5">{selectedStudentDetail.teacher || '未設定'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-400 font-bold">実習先 / 実習期間</div>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                    {selectedStudentDetail.location || '未設定'}<br />
+                    <span className="text-[10px] text-slate-500 font-normal">
+                      {selectedStudentDetail.internshipStartDate && selectedStudentDetail.internshipEndDate ? `${selectedStudentDetail.internshipStartDate} 〜 ${selectedStudentDetail.internshipEndDate}` : '期間未設定'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <hr className="border-slate-100" />
+
+              {[
+                {
+                  icon: Phone, iconColor: 'text-indigo-500', label: '事前電話連絡',
+                  text: selectedStudentDetail.phoneStatus === 'completed' ? `完了 (${selectedStudentDetail.phoneDate || ''})` : selectedStudentDetail.phoneStatus === 'none' ? '不要' : '未完了',
+                  palette: selectedStudentDetail.phoneStatus === 'completed' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : selectedStudentDetail.phoneStatus === 'none' ? 'bg-slate-100 text-slate-600' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                },
+                {
+                  icon: FileText, iconColor: 'text-emerald-500', label: '保護者お知らせ',
+                  text: selectedStudentDetail.docStatus === 'completed' ? `配付/回収済 (${selectedStudentDetail.docDate || ''})` : selectedStudentDetail.docStatus === 'none' ? '不要' : '未提出',
+                  palette: selectedStudentDetail.docStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : selectedStudentDetail.docStatus === 'none' ? 'bg-slate-100 text-slate-600' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                }
+              ].map(({ icon: Icon, iconColor, label, text, palette }) => (
+                <div key={label} className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-500 flex items-center gap-1">
+                      <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
+                      {label}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-md font-bold ${palette}`}>{text}</span>
+                  </div>
+                </div>
+              ))}
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-500 flex items-center gap-1">
+                    <Handshake className="w-3.5 h-3.5 text-teal-600" />
+                    事前挨拶訪問
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-md font-bold ${selectedStudentDetail.greetingStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : selectedStudentDetail.greetingStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-slate-100 text-slate-600'}`}>
+                    {selectedStudentDetail.greetingStatus === 'completed' ? '訪問終了' : selectedStudentDetail.greetingStatus === 'scheduled' ? '日程確定' : '未調整'}
+                  </span>
+                </div>
+                {(selectedStudentDetail.greetingDate || selectedStudentDetail.greetingTime || selectedStudentDetail.greetingVisitor) && (
+                  <div className="p-2 bg-emerald-50 border border-emerald-100 text-emerald-900 rounded-lg text-xs font-semibold">
+                    {selectedStudentDetail.greetingDate    && <div>📅 挨拶予定: {selectedStudentDetail.greetingDate}</div>}
+                    {selectedStudentDetail.greetingTime    && <div>⏰ 時間: {selectedStudentDetail.greetingTime}</div>}
+                    {selectedStudentDetail.greetingVisitor && <div>引率教員: {selectedStudentDetail.greetingVisitor}</div>}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-500 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-violet-500" />
+                    指導巡回
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-md font-bold ${selectedStudentDetail.patrolStatus === 'completed' ? 'bg-violet-50 text-violet-700 border border-violet-200' : selectedStudentDetail.patrolStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-slate-100 text-slate-600'}`}>
+                    {selectedStudentDetail.patrolStatus === 'completed' ? '巡回終了' : selectedStudentDetail.patrolStatus === 'scheduled' ? '巡回確定' : '未確定'}
+                  </span>
+                </div>
+                {(selectedStudentDetail.patrolDate || selectedStudentDetail.patrolTime) && (
+                  <div className="p-2 bg-violet-50 border border-violet-100 text-violet-900 rounded-lg text-xs font-semibold space-y-1">
+                    {selectedStudentDetail.patrolDate    && <div>📅 巡回予定日: {selectedStudentDetail.patrolDate}</div>}
+                    {selectedStudentDetail.patrolTime    && <div>⏰ 時間: {selectedStudentDetail.patrolTime}</div>}
+                    {selectedStudentDetail.patrolVisitor && <div>巡回教員: {selectedStudentDetail.patrolVisitor}</div>}
+                  </div>
+                )}
+              </div>
+
+              {selectedStudentDetail.notes && (
+                <div className="space-y-1">
+                  <div className="text-xs text-slate-400 font-bold">特記事項・配慮事項</div>
+                  <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 border border-slate-200 p-2.5 rounded-xl">{selectedStudentDetail.notes}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between">
+              <button onClick={() => { const id = selectedStudentDetail.id; setSelectedStudentDetail(null); handleDeleteStudent(id); }}
+                className="px-3 py-2 text-rose-600 hover:bg-rose-50 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1">
+                <Trash2 className="w-4 h-4" />
+                削除する
+              </button>
+              <div className="flex gap-2">
+                <button onClick={() => { setEditingStudent(selectedStudentDetail); setSelectedStudentDetail(null); setIsAddEditOpen(true); }}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer">編集する</button>
+                <button onClick={() => setSelectedStudentDetail(null)}
+                  className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">閉じる</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 追加・編集モーダル */}
+      {isAddEditOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden text-slate-800 animate-scaleIn">
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" />
+                {editingStudent ? '実習生の登録情報を変更' : '新しい実習生を登録'}
+              </h3>
+              <button onClick={() => { setIsAddEditOpen(false); setEditingStudent(null); }} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
+            </div>
+
+            <form onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                handleSaveStudent({
+                  name: fd.get('name'), grade: fd.get('grade'), classVal: fd.get('classVal'),
+                  location: fd.get('location'),
+                  internshipStartDate: fd.get('internshipStartDate'), internshipEndDate: fd.get('internshipEndDate'),
+                  teacher: fd.get('teacher'),
+                  phoneStatus: fd.get('phoneStatus'), phoneDate: fd.get('phoneDate'),
+                  docStatus: fd.get('docStatus'), docDate: fd.get('docDate'),
+                  greetingStatus: fd.get('greetingStatus'), greetingDate: fd.get('greetingDate'),
+                  greetingTime: fd.get('greetingTime'), greetingVisitor: fd.get('greetingVisitor'),
+                  patrolStatus: fd.get('patrolStatus'), patrolDate: fd.get('patrolDate'),
+                  patrolTime: fd.get('patrolTime'), patrolVisitor: fd.get('patrolVisitor'),
+                  notes: fd.get('notes')
+                });
+              }}
+              className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">生徒氏名 *</label>
+                  <input type="text" name="name" required placeholder="例: O.H. (イニシャル推奨)" defaultValue={editingStudent?.name || ''}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">学年 *</label>
+                    <select name="grade" required defaultValue={editingStudent?.grade || '3'}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800">
+                      <option value="1">1年</option><option value="2">2年</option><option value="3">3年</option><option value="other">他</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1">組 *</label>
+                    <input type="text" name="classVal" required placeholder="例: 1" defaultValue={editingStudent?.classVal || ''}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">実習先企業・事業所名 *</label>
+                  <input type="text" name="location" required placeholder="例: 第一物産 配送センター" defaultValue={editingStudent?.location || ''}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">担当教員 *</label>
+                  <input type="text" name="teacher" required placeholder="例: 鈴木 先生" defaultValue={editingStudent?.teacher || myTeacherName || ''}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 bg-indigo-50/20 p-3 rounded-xl border border-indigo-100">
+                <div>
+                  <label className="block text-[11px] font-bold text-indigo-900 mb-1">実習開始日</label>
+                  <input type="date" name="internshipStartDate" defaultValue={editingStudent?.internshipStartDate || ''}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 cursor-pointer" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-indigo-900 mb-1">実習終了日</label>
+                  <input type="date" name="internshipEndDate" defaultValue={editingStudent?.internshipEndDate || ''}
+                    className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 cursor-pointer" />
+                </div>
+              </div>
+
+              <hr className="border-slate-200" />
+
+              {[
+                { title: '事前電話連絡', icon: Phone, headerColor: 'text-indigo-700', iconClass: 'text-indigo-600',
+                  statusField: 'phoneStatus', dateField: 'phoneDate',
+                  options: [['pending', '未完了'], ['completed', '完了'], ['none', '不要']],
+                  accent: 'accent-indigo-600', defaultStatus: editingStudent?.phoneStatus || 'pending',
+                  defaultDate: editingStudent?.phoneDate || '', dateHint: '連絡日 (空欄は本日日付)' },
+                { title: '保護者お知らせ (同意書等)', icon: FileText, headerColor: 'text-emerald-800', iconClass: 'text-emerald-600',
+                  statusField: 'docStatus', dateField: 'docDate',
+                  options: [['pending', '未提出'], ['completed', '提出/回収済'], ['none', '不要']],
+                  accent: 'accent-emerald-600', defaultStatus: editingStudent?.docStatus || 'pending',
+                  defaultDate: editingStudent?.docDate || '', dateHint: '配付・回収日 (空欄は本日日付)' }
+              ].map(({ title, icon: Icon, headerColor, iconClass, statusField, dateField, options, accent, defaultStatus, defaultDate, dateHint }) => (
+                <div key={statusField} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className={`text-xs font-bold ${headerColor} flex items-center gap-1`}>
+                      <Icon className={`w-3.5 h-3.5 ${iconClass}`} />
+                      {title}
+                    </h4>
+                    <div className="flex gap-2">
+                      {options.map(([st, lbl]) => (
+                        <label key={st} className="flex items-center gap-1 text-[10px] cursor-pointer font-semibold text-slate-700">
+                          <input type="radio" name={statusField} value={st} defaultChecked={defaultStatus === st} className={accent} />
+                          <span>{lbl}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="w-full">
+                    <label className="block text-[9px] text-slate-500 mb-0.5">{dateHint}</label>
+                    <input type="date" name={dateField} defaultValue={defaultDate}
+                      className="w-44 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 cursor-pointer" />
+                  </div>
+                </div>
+              ))}
+
+              {[
+                { title: '事前挨拶訪問', icon: Handshake, headerColor: 'text-teal-800', iconClass: 'text-teal-600',
+                  statusField: 'greetingStatus', dateField: 'greetingDate', timeField: 'greetingTime', visitorField: 'greetingVisitor',
+                  options: [['pending', '未調整'], ['scheduled', '日程確定'], ['completed', '挨拶終了']], accent: 'accent-teal-600',
+                  defaultStatus: editingStudent?.greetingStatus || 'pending', defaultDate: editingStudent?.greetingDate || '',
+                  defaultTime: editingStudent?.greetingTime || '', defaultVisitor: editingStudent?.greetingVisitor || editingStudent?.teacher || myTeacherName || '',
+                  dateLabel: '挨拶予定日', timeLabel: '挨拶予定時間', visitorLabel: '引率教員', timePlaceholder: '例: 13:30' },
+                { title: '指導巡回予定', icon: Clock, headerColor: 'text-violet-800', iconClass: 'text-violet-600',
+                  statusField: 'patrolStatus', dateField: 'patrolDate', timeField: 'patrolTime', visitorField: 'patrolVisitor',
+                  options: [['pending', '未確定'], ['scheduled', '日程確定'], ['completed', '巡回終了']], accent: 'accent-violet-600',
+                  defaultStatus: editingStudent?.patrolStatus || 'pending', defaultDate: editingStudent?.patrolDate || '',
+                  defaultTime: editingStudent?.patrolTime || '', defaultVisitor: editingStudent?.patrolVisitor || editingStudent?.teacher || myTeacherName || '',
+                  dateLabel: '巡回予定日', timeLabel: '巡回予定時間', visitorLabel: '巡回訪問教員', timePlaceholder: '例: 10:00〜11:30' }
+              ].map(({ title, icon: Icon, headerColor, iconClass, statusField, dateField, timeField, visitorField, options, accent, defaultStatus, defaultDate, defaultTime, defaultVisitor, dateLabel, timeLabel, visitorLabel, timePlaceholder }) => (
+                <div key={statusField} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className={`text-xs font-bold ${headerColor} flex items-center gap-1`}>
+                      <Icon className={`w-3.5 h-3.5 ${iconClass}`} />
+                      {title}
+                    </h4>
+                    <div className="flex gap-2">
+                      {options.map(([st, lbl]) => (
+                        <label key={st} className="flex items-center gap-1 text-[10px] cursor-pointer font-semibold text-slate-700">
+                          <input type="radio" name={statusField} value={st} defaultChecked={defaultStatus === st} className={accent} />
+                          <span>{lbl}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-[9px] text-slate-500 mb-0.5">{dateLabel}</label>
+                      <input type="date" name={dateField} defaultValue={defaultDate}
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800 cursor-pointer" />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-slate-500 mb-0.5">{timeLabel}</label>
+                      <input type="text" name={timeField} placeholder={timePlaceholder} defaultValue={defaultTime}
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] text-slate-500 mb-0.5">{visitorLabel}</label>
+                      <input type="text" name={visitorField} placeholder="例: 鈴木 先生" defaultValue={defaultVisitor}
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">実習配慮事項・特記事項</label>
+                <textarea name="notes" rows={3} placeholder="健康面、服薬関係、交通アクセスでの配慮事項など..." defaultValue={editingStudent?.notes || ''}
+                  className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-slate-400 text-slate-800"></textarea>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => { setIsAddEditOpen(false); setEditingStudent(null); }}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer">キャンセル</button>
+                <button type="submit"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer">保存してダッシュボードに同期</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 設定モーダル */}
+      {isConfigOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden text-slate-800">
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-indigo-600" />
+                実習管理システム：環境連携設定
+              </h3>
+              <button onClick={() => setIsConfigOpen(false)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="space-y-3">
+                <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                  <h4 className="text-xs font-bold text-indigo-800 flex items-center gap-1.5 mb-1">
+                    <Key className="w-4 h-4 text-indigo-600" />
+                    学年・クラス部屋キーの設定 (合言葉)
+                  </h4>
+                  <p className="text-[11px] text-indigo-900 leading-relaxed">学校独自のFirebaseプロジェクトの中で、さらに「学級」「年度」ごとに部屋を細かく分けることができます。（例：3-1、3-2、2026-all など）</p>
+                </div>
+
+                <form onSubmit={handleRoomKeyChange} className="flex gap-2">
+                  <input type="text" required placeholder="例: 3-1" value={tempRoomKey} onChange={(e) => setTempRoomKey(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
+                  <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm shrink-0 cursor-pointer">合言葉を変更</button>
+                </form>
+              </div>
+
+              <hr className="border-slate-200" />
+
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                  <Database className="w-4 h-4 text-indigo-600" />
+                  学校独自の Firebase Config (接続情報)
+                </h4>
+                <p className="text-[11px] text-slate-500 leading-relaxed">安全なデータ保護とセキュリティルール適用のため、各自のFirebaseコンソールから取得した「ウェブアプリ設定」JSONオブジェクトを以下に貼り付けてください。</p>
+
+                <form onSubmit={handleConfigSubmit} className="space-y-4">
+                  <textarea rows={5} placeholder={'{\n  "apiKey": "AIzaSy...",\n  "projectId": "school-database", ...\n}'}
+                    value={firebaseConfigStr} onChange={(e) => setFirebaseConfigStr(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-700 placeholder-slate-400"></textarea>
+
+                  <div className="flex gap-2">
+                    <button type="submit" className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-sm cursor-pointer text-center">学校のクラウドに接続する</button>
+                    {firebaseConfigStr && (
+                      <button type="button" onClick={resetConfig} className="px-3 py-2.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer">接続解除</button>
+                    )}
+                  </div>
+                </form>
+
+                {connectionError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 leading-relaxed">
+                    <span className="font-bold flex items-center gap-1 mb-1 text-rose-700">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      接続エラーガイド
+                    </span>
+                    <p className="text-[10px] text-rose-900">{connectionError}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button onClick={() => setIsConfigOpen(false)} className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">閉じる</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* カスタムアラート */}
+      {alertState && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-scaleIn">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 mb-4 text-indigo-600">
+              <Info className="h-6 w-6" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 mb-2">お知らせ</h3>
+            <p className="text-xs text-slate-600 mb-6 leading-relaxed">{alertState.message}</p>
+            <button onClick={closeAlert} className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer">OK</button>
+          </div>
+        </div>
+      )}
+
+      {/* カスタム確認ダイアログ */}
+      {confirmState && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-scaleIn">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-rose-100 mb-4 text-rose-600">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 mb-2">確認</h3>
+            <p className="text-xs text-slate-600 mb-6 leading-relaxed">{confirmState.message}</p>
+            <div className="flex gap-2">
+              <button onClick={confirmState.onCancel} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer">キャンセル</button>
+              <button onClick={confirmState.onConfirm} className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer">実行</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+// =============================================================================
+// 起動 / Bootstrap
+// =============================================================================
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<App />);
+</script>
+</body>
+</html>
