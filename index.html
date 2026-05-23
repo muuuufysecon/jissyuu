@@ -117,6 +117,18 @@ const STEP_CONFIG = {
     cycle: ['pending', 'scheduled', 'completed'],
     label: '🚗 4. 指導巡回',
     activeColor: 'bg-violet-600 border-violet-600 text-white shadow-sm'
+  },
+  studentThankYou: {
+    field: 'studentThankYouStatus', dateField: 'studentThankYouDate',
+    cycle: ['pending', 'completed', 'none'],
+    label: '📮 5. 生徒お礼状',
+    activeColor: 'bg-pink-600 border-pink-600 text-white shadow-sm'
+  },
+  teacherThankYou: {
+    field: 'teacherThankYouStatus', dateField: 'teacherThankYouDate',
+    cycle: ['pending', 'completed', 'none'],
+    label: '✉️ 6. 教師お礼状',
+    activeColor: 'bg-cyan-600 border-cyan-600 text-white shadow-sm'
   }
 };
 
@@ -687,6 +699,8 @@ function App() {
   const [filterDocStatus, setFilterDocStatus] = useState('all');
   const [filterGreetingStatus, setFilterGreetingStatus] = useState('all');
   const [filterPatrolStatus, setFilterPatrolStatus] = useState('all');
+  const [filterStudentThankYouStatus, setFilterStudentThankYouStatus] = useState('all');
+  const [filterTeacherThankYouStatus, setFilterTeacherThankYouStatus] = useState('all');
 
   const persistPartial = async (studentId, partial) => {
     if (connectionStatus === 'connected' && window.firebase) {
@@ -917,11 +931,14 @@ function App() {
       if (filterDocStatus !== 'all' && (s.docStatus || 'pending') !== filterDocStatus) return false;
       if (filterGreetingStatus !== 'all' && (s.greetingStatus || 'pending') !== filterGreetingStatus) return false;
       if (filterPatrolStatus !== 'all' && (s.patrolStatus || 'pending') !== filterPatrolStatus) return false;
+      if (filterStudentThankYouStatus !== 'all' && (s.studentThankYouStatus || 'pending') !== filterStudentThankYouStatus) return false;
+      if (filterTeacherThankYouStatus !== 'all' && (s.teacherThankYouStatus || 'pending') !== filterTeacherThankYouStatus) return false;
 
       return true;
     });
   }, [students, searchQuery, myTeacherName, filterProgress, filterGrade, filterClass,
-      filterPhoneStatus, filterDocStatus, filterGreetingStatus, filterPatrolStatus]);
+      filterPhoneStatus, filterDocStatus, filterGreetingStatus, filterPatrolStatus,
+      filterStudentThankYouStatus, filterTeacherThankYouStatus]);
 
   const stats = useMemo(() => {
     const total = students.length;
@@ -1060,12 +1077,14 @@ function App() {
     setFilterGrade('all'); setFilterClass('all');
     setFilterPhoneStatus('all'); setFilterDocStatus('all');
     setFilterGreetingStatus('all'); setFilterPatrolStatus('all');
+    setFilterStudentThankYouStatus('all'); setFilterTeacherThankYouStatus('all');
   };
 
   const hasActiveFilter = filterProgress !== 'all' || searchQuery || myTeacherName ||
     filterGrade !== 'all' || filterClass !== 'all' ||
     filterPhoneStatus !== 'all' || filterDocStatus !== 'all' ||
-    filterGreetingStatus !== 'all' || filterPatrolStatus !== 'all';
+    filterGreetingStatus !== 'all' || filterPatrolStatus !== 'all' ||
+    filterStudentThankYouStatus !== 'all' || filterTeacherThankYouStatus !== 'all';
 
   const handleExportExcel = () => {
     if (filteredStudents.length === 0) {
@@ -1270,16 +1289,16 @@ function App() {
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 text-xs font-bold select-none">
                     <th className="p-4 min-w-[180px]">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                      <div className="group/info flex items-center gap-1.5 flex-wrap">
                         <span>生徒情報</span>
-                        <button title="学年で絞り込み" onClick={() => setSelectEditState({ value: filterGrade, title: '学年で絞り込み', options: [['all','すべて'],['1','1年'],['2','2年'],['3','3年']], onSave: (v) => setFilterGrade(v) })} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border ${filterGrade !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><span>学年</span><ChevronDown className="w-3 h-3" /></button>
-                        <button title="組で絞り込み" onClick={() => setSelectEditState({ value: filterClass, title: '組で絞り込み', options: [['all','すべて'],['1','1組'],['2','2組'],['3','3組'],['4','4組']], onSave: (v) => setFilterClass(v) })} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border ${filterClass !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><span>組</span><ChevronDown className="w-3 h-3" /></button>
+                        <button title="学年で絞り込み" onClick={() => setSelectEditState({ value: filterGrade, title: '学年で絞り込み', options: [['all','すべて'],['1','1年'],['2','2年'],['3','3年']], onSave: (v) => setFilterGrade(v) })} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-opacity ${filterGrade !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/info:opacity-100'}`}><span>学年</span><ChevronDown className="w-3 h-3" /></button>
+                        <button title="組で絞り込み" onClick={() => setSelectEditState({ value: filterClass, title: '組で絞り込み', options: [['all','すべて'],['1','1組'],['2','2組'],['3','3組'],['4','4組']], onSave: (v) => setFilterClass(v) })} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer border transition-opacity ${filterClass !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300 opacity-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100 opacity-0 group-hover/info:opacity-100'}`}><span>組</span><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
                     <th className="p-4 min-w-[180px]">実習先 &amp; 実習期間</th>
                     <th className="p-4 min-w-[150px]">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span>事前電話確認</span>
+                        <span>事前電話</span>
                         <button title="事前電話で絞り込み" onClick={() => setSelectEditState({ value: filterPhoneStatus, title: '事前電話で絞り込み', options: [['all','すべて'],['pending','未完了(要電話)'],['completed','電話連絡済'],['none','連絡不要']], onSave: (v) => setFilterPhoneStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterPhoneStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
@@ -1301,20 +1320,32 @@ function App() {
                         <button title="巡回で絞り込み" onClick={() => setSelectEditState({ value: filterPatrolStatus, title: '巡回で絞り込み', options: [['all','すべて'],['pending','未確定'],['scheduled','日程確定/巡回調整済'],['completed','巡回終了']], onSave: (v) => setFilterPatrolStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterPatrolStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
                       </div>
                     </th>
+                    <th className="p-4 min-w-[140px]">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span>生徒お礼状</span>
+                        <button title="生徒お礼状で絞り込み" onClick={() => setSelectEditState({ value: filterStudentThankYouStatus, title: '生徒お礼状で絞り込み', options: [['all','すべて'],['pending','未送付'],['completed','送付済'],['none','不要']], onSave: (v) => setFilterStudentThankYouStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterStudentThankYouStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                      </div>
+                    </th>
+                    <th className="p-4 min-w-[140px]">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span>教師お礼状</span>
+                        <button title="教師お礼状で絞り込み" onClick={() => setSelectEditState({ value: filterTeacherThankYouStatus, title: '教師お礼状で絞り込み', options: [['all','すべて'],['pending','未送付'],['completed','送付済'],['none','不要']], onSave: (v) => setFilterTeacherThankYouStatus(v) })} className={`inline-flex items-center px-1 py-0.5 rounded cursor-pointer border ${filterTeacherThankYouStatus !== 'all' ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'}`}><ChevronDown className="w-3 h-3" /></button>
+                      </div>
+                    </th>
                     <th className="p-4 max-w-[200px]">備考・配慮事項</th>
                     <th className="p-4 text-center">操作</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
                   {isLoading ? (
-                    <tr><td colSpan={8} className="p-12 text-center text-slate-500 font-medium">
+                    <tr><td colSpan={10} className="p-12 text-center text-slate-500 font-medium">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <span className="w-8 h-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin inline-block"></span>
                         <span className="text-slate-600">データを同期しています...</span>
                       </div>
                     </td></tr>
                   ) : filteredStudents.length === 0 ? (
-                    <tr><td colSpan={8} className="p-12 text-center text-slate-500 font-medium">条件に一致する実習対象生徒が見つかりません。</td></tr>
+                    <tr><td colSpan={10} className="p-12 text-center text-slate-500 font-medium">条件に一致する実習対象生徒が見つかりません。</td></tr>
                   ) : (
                     filteredStudents.map((s, idx) => {
                       const isMyStudent = myTeacherName && s.teacher === myTeacherName;
@@ -1323,6 +1354,8 @@ function App() {
                       const docPalette = s.docStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.docStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
                       const greetingPalette = s.greetingStatus === 'completed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100/70' : s.greetingStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
                       const patrolPalette = s.patrolStatus === 'completed' ? 'bg-violet-50 border-violet-200 text-violet-800 hover:bg-violet-100/70' : s.patrolStatus === 'scheduled' ? 'bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200';
+                      const studentThankYouPalette = s.studentThankYouStatus === 'completed' ? 'bg-pink-50 border-pink-200 text-pink-800 hover:bg-pink-100/70' : s.studentThankYouStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
+                      const teacherThankYouPalette = s.teacherThankYouStatus === 'completed' ? 'bg-cyan-50 border-cyan-200 text-cyan-800 hover:bg-cyan-100/70' : s.teacherThankYouStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
 
                       return (
                         <tr key={s.id} className={`hover:bg-slate-50/80 transition-colors group ${isMyStudent ? 'bg-indigo-50/30' : zebraBg}`}>
@@ -1406,6 +1439,30 @@ function App() {
                                 className="text-[10px] font-semibold pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">📅 巡回: <span className={s.patrolDate ? 'text-slate-700' : 'text-slate-400 italic'}>{s.patrolDate ? formatShortDate(s.patrolDate) : '未設定（タップ）'}</span></button>
                               {s.patrolTime    && <div className="text-[9px] text-indigo-700 font-mono bg-indigo-50 px-1 rounded border border-indigo-100 w-fit pl-1">{s.patrolTime}</div>}
                               {s.patrolVisitor && <div className="text-[9px] text-slate-500 pl-1">巡回者: {s.patrolVisitor}</div>}
+                            </div>
+                          </td>
+                          <td className="p-4 align-top">
+                            <div className="space-y-1.5">
+                              <ProgressToggleButton icon={FileText} label={s.studentThankYouStatus === 'completed' ? '送付済' : s.studentThankYouStatus === 'none' ? '不要' : '未送付'}
+                                status={s.studentThankYouStatus} palette={studentThankYouPalette}
+                                onClick={() => handleInstantToggle(s, 'studentThankYouStatus', s.studentThankYouStatus)}
+                                suffix={s.studentThankYouStatus === 'completed' ? '✔' : s.studentThankYouStatus === 'none' ? 'ー' : '📮'} />
+                              {s.studentThankYouStatus === 'completed' && (
+                                <button onClick={() => setDatePickerState({ value: s.studentThankYouDate || '', title: `${s.name} の生徒お礼状送付日`, onSelect: (v) => persistPartial(s.id, { studentThankYouDate: v }) })}
+                                  className="text-[9px] text-slate-600 font-mono pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">送付日: {s.studentThankYouDate ? formatShortDate(s.studentThankYouDate) : '未設定（タップ）'}</button>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-4 align-top">
+                            <div className="space-y-1.5">
+                              <ProgressToggleButton icon={FileText} label={s.teacherThankYouStatus === 'completed' ? '送付済' : s.teacherThankYouStatus === 'none' ? '不要' : '未送付'}
+                                status={s.teacherThankYouStatus} palette={teacherThankYouPalette}
+                                onClick={() => handleInstantToggle(s, 'teacherThankYouStatus', s.teacherThankYouStatus)}
+                                suffix={s.teacherThankYouStatus === 'completed' ? '✔' : s.teacherThankYouStatus === 'none' ? 'ー' : '✉'} />
+                              {s.teacherThankYouStatus === 'completed' && (
+                                <button onClick={() => setDatePickerState({ value: s.teacherThankYouDate || '', title: `${s.name} の教師お礼状送付日`, onSelect: (v) => persistPartial(s.id, { teacherThankYouDate: v }) })}
+                                  className="text-[9px] text-slate-600 font-mono pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">送付日: {s.teacherThankYouDate ? formatShortDate(s.teacherThankYouDate) : '未設定（タップ）'}</button>
+                              )}
                             </div>
                           </td>
                           <td className="p-4 align-top max-w-[200px]">
