@@ -402,7 +402,7 @@ const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, b
         {label}
         {pendingCount > 0 && (
           <span className="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
-            {label.includes('電話') ? `未連絡 ${pendingCount}` : `未完了 ${pendingCount}`}
+            {label.includes('電話') ? `未連絡 ${pendingCount}` : label.includes('実習') ? `実施中 ${pendingCount}` : label.includes('お礼状') ? `未送付 ${pendingCount}` : `未完了 ${pendingCount}`}
           </span>
         )}
       </p>
@@ -1122,6 +1122,9 @@ function App() {
         case 'doc_pending':      if (s.docStatus && s.docStatus !== 'pending') return false; break;
         case 'greeting_pending': if (s.greetingStatus === 'completed') return false; break;
         case 'patrol_pending':   if ((s.patrols || []).length > 0 && (s.patrols || []).every((p) => p.done)) return false; break;
+        case 'internship_in_progress': if (!(s.internshipDates || []).includes(getTodayString())) return false; break;
+        case 'student_thankyou_pending': if ((s.studentThankYouStatus || 'pending') !== 'pending') return false; break;
+        case 'teacher_thankyou_pending': if ((s.teacherThankYouStatus || 'pending') !== 'pending') return false; break;
         default: break;
       }
 
@@ -1144,12 +1147,20 @@ function App() {
     const total = students.length;
     if (total === 0) return {
       total: 0, phonePercent: 0, docPercent: 0, greetingPercent: 0, patrolPercent: 0,
-      phonePendingCount: 0, docPendingCount: 0, greetingPendingCount: 0, patrolPendingCount: 0
+      phonePendingCount: 0, docPendingCount: 0, greetingPendingCount: 0, patrolPendingCount: 0,
+      internshipImplPercent: 0, internshipInProgressCount: 0,
+      studentThankYouPercent: 0, studentThankYouPendingCount: 0,
+      teacherThankYouPercent: 0, teacherThankYouPendingCount: 0
     };
+    const todayKey = getTodayString();
     const phoneDone    = students.filter((s) => s.phoneStatus === 'completed' || s.phoneStatus === 'none').length;
     const docDone      = students.filter((s) => s.docStatus   === 'completed' || s.docStatus   === 'none').length;
     const greetingDone = students.filter((s) => s.greetingStatus === 'completed').length;
     const patrolDone   = students.filter((s) => { const ps = s.patrols || []; return ps.length > 0 && ps.every((p) => p.done); }).length;
+    const internshipImplDone = students.filter((s) => { const dates = s.internshipDates || []; if (dates.length === 0) return false; const last = [...dates].sort().pop(); return last < todayKey; }).length;
+    const internshipInProgressCount = students.filter((s) => (s.internshipDates || []).includes(todayKey)).length;
+    const studentTYDone = students.filter((s) => s.studentThankYouStatus === 'completed' || s.studentThankYouStatus === 'none').length;
+    const teacherTYDone = students.filter((s) => s.teacherThankYouStatus === 'completed' || s.teacherThankYouStatus === 'none').length;
     return {
       total,
       phonePercent:    Math.round((phoneDone    / total) * 100),
@@ -1159,7 +1170,13 @@ function App() {
       phonePendingCount:    students.filter((s) => s.phoneStatus === 'pending').length,
       docPendingCount:      students.filter((s) => s.docStatus   === 'pending').length,
       greetingPendingCount: students.filter((s) => s.greetingStatus === 'pending' || s.greetingStatus === 'scheduled').length,
-      patrolPendingCount:   students.filter((s) => (s.patrols || []).some((p) => !p.done)).length
+      patrolPendingCount:   students.filter((s) => (s.patrols || []).some((p) => !p.done)).length,
+      internshipImplPercent: Math.round((internshipImplDone / total) * 100),
+      internshipInProgressCount,
+      studentThankYouPercent: Math.round((studentTYDone / total) * 100),
+      studentThankYouPendingCount: students.filter((s) => (s.studentThankYouStatus || 'pending') === 'pending').length,
+      teacherThankYouPercent: Math.round((teacherTYDone / total) * 100),
+      teacherThankYouPendingCount: students.filter((s) => (s.teacherThankYouStatus || 'pending') === 'pending').length
     };
   }, [students]);
 
@@ -1450,7 +1467,7 @@ function App() {
       )}
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7 gap-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
             <div>
               <p className="text-xs text-slate-500 font-bold">全登録生徒数</p>
@@ -1473,6 +1490,18 @@ function App() {
             active={filterProgress === 'greeting_pending'}
             onClick={() => setFilterProgress(filterProgress === 'greeting_pending' ? 'all' : 'greeting_pending')}
             barColor="bg-emerald-600" iconColor="text-teal-600" />
+          <StatCard icon={Calendar} label="実習・見学 実施状況" percent={stats.internshipImplPercent} pendingCount={stats.internshipInProgressCount}
+            active={filterProgress === 'internship_in_progress'}
+            onClick={() => setFilterProgress(filterProgress === 'internship_in_progress' ? 'all' : 'internship_in_progress')}
+            barColor="bg-yellow-500" iconColor="text-yellow-600" />
+          <StatCard icon={FileText} label="生徒お礼状 送付状況" percent={stats.studentThankYouPercent} pendingCount={stats.studentThankYouPendingCount}
+            active={filterProgress === 'student_thankyou_pending'}
+            onClick={() => setFilterProgress(filterProgress === 'student_thankyou_pending' ? 'all' : 'student_thankyou_pending')}
+            barColor="bg-pink-500" iconColor="text-pink-600" />
+          <StatCard icon={FileText} label="教師お礼状 送付状況" percent={stats.teacherThankYouPercent} pendingCount={stats.teacherThankYouPendingCount}
+            active={filterProgress === 'teacher_thankyou_pending'}
+            onClick={() => setFilterProgress(filterProgress === 'teacher_thankyou_pending' ? 'all' : 'teacher_thankyou_pending')}
+            barColor="bg-cyan-500" iconColor="text-cyan-600" />
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-4 shadow-sm">
