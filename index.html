@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.4</title>
+<title>現場実習進捗マネージャー v3.5</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -51,6 +51,11 @@
   }
 }
 </script>
+
+<!-- Firebase config を外部ファイルから読み込み（v3.5〜） -->
+<!-- 同じフォルダに config.js を置く。中身は window.FIREBASE_CONFIG = {...} 形式 -->
+<!-- 無い場合は環境設定画面からの手動入力にフォールバック -->
+<script src="./config.js" onerror="console.warn('config.js が見つかりません。環境設定画面から手動入力してください。')"></script>
 
 <!-- Babel Standalone: ブラウザで JSX をトランスパイル -->
 <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
@@ -771,7 +776,15 @@ const BulkImportModal = ({ onClose, onCommit, onAlert, defaultTeacher }) => {
 // =============================================================================
 
 function App() {
-  const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => localStorage.getItem('school_firebase_config') || '');
+  // v3.5: 外部 config.js が読み込まれていれば window.FIREBASE_CONFIG を優先利用。
+  // 無ければ従来通り localStorage の手動入力値にフォールバック。
+  const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => {
+    if (typeof window !== 'undefined' && window.FIREBASE_CONFIG && typeof window.FIREBASE_CONFIG === 'object') {
+      try { return JSON.stringify(window.FIREBASE_CONFIG); } catch (e) {}
+    }
+    return localStorage.getItem('school_firebase_config') || '';
+  });
+  const [isConfigFromFile] = useState(() => !!(typeof window !== 'undefined' && window.FIREBASE_CONFIG && typeof window.FIREBASE_CONFIG === 'object'));
   const [roomKey, setRoomKey] = useState(() => localStorage.getItem('school_room_key') || '3-1');
   const [tempRoomKey, setTempRoomKey] = useState(roomKey);
   const [myTeacherName, setMyTeacherName] = useState(() => localStorage.getItem('my_teacher_name') || '');
@@ -1461,7 +1474,8 @@ function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.4 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.5 HTML</span>
+                {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
             </div>
