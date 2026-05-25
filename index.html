@@ -16,6 +16,8 @@
   .animate-fadeIn { animation: fadeIn 0.25s ease-out }
   .animate-scaleIn { animation: scaleIn 0.2s ease-out }
   .animate-slideDown { animation: slideDown 0.2s ease-out }
+  @keyframes slowBlink { 0%, 100% { opacity: 1 } 50% { opacity: 0.35 } }
+  .animate-slowBlink { animation: slowBlink 1.8s ease-in-out infinite }
   .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent }
@@ -1626,6 +1628,12 @@ function App() {
                                 <div className="text-[10px] text-slate-500 font-bold mt-0.5">
                                   {s.grade ? `${s.grade}年` : 'ー'}{s.classVal ? `${s.classVal}組` : 'ー'}
                                 </div>
+                                {(s.internshipDates || []).includes(getTodayString()) && (
+                                  <div className={`mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] font-extrabold animate-slowBlink shadow-sm ${s.internshipType === 'observation' ? 'bg-pink-100 border-pink-400 text-pink-800' : 'bg-yellow-100 border-yellow-500 text-yellow-800'}`} title="本日は実習当日です">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${s.internshipType === 'observation' ? 'bg-pink-500' : 'bg-yellow-500'}`}></span>
+                                    <span>{s.internshipType === 'observation' ? '見学中' : '実習中'}</span>
+                                  </div>
+                                )}
                                 {s.notes && (
                                   <div className="pointer-events-none absolute z-50 left-0 top-full mt-1 hidden group-hover/name:block bg-white border border-slate-300 rounded-xl shadow-xl p-3 text-xs text-slate-700 w-64 whitespace-normal leading-relaxed">
                                     <div className="text-[10px] font-bold text-slate-400 mb-1">備考・配慮事項</div>
