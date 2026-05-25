@@ -17,7 +17,7 @@
   .animate-scaleIn { animation: scaleIn 0.2s ease-out }
   .animate-slideDown { animation: slideDown 0.2s ease-out }
   @keyframes slowBlink { 0%, 100% { opacity: 1 } 50% { opacity: 0.35 } }
-  .animate-slowBlink { animation: slowBlink 1.8s ease-in-out infinite }
+  .animate-slowBlink { animation: slowBlink 4s ease-in-out infinite }
   .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent }
@@ -1843,19 +1843,14 @@ function App() {
                         const isObservation = (ev) => ev.type === 'period' && ev.student && ev.student.internshipType === 'observation';
                         const topEvents = dayEvents.filter((ev) => !isObservation(ev));
                         const bottomEvents = dayEvents.filter((ev) => isObservation(ev));
-                        const showDivider = topEvents.length > 0 && bottomEvents.length > 0;
                         return (
                           <>
-                            {topEvents.length > 0 && (
-                              <div className={`space-y-1 ${showDivider ? 'pb-1 border-b border-dashed border-slate-200' : ''}`}>
-                                {topEvents.map((ev, evIdx) => renderEvent(ev, evIdx))}
-                              </div>
-                            )}
-                            {bottomEvents.length > 0 && (
-                              <div className={`space-y-1 ${showDivider ? 'pt-1' : ''}`}>
-                                {bottomEvents.map((ev, evIdx) => renderEvent(ev, evIdx))}
-                              </div>
-                            )}
+                            <div className="space-y-1 min-h-[18px] pb-1 border-b border-dashed border-slate-200">
+                              {topEvents.map((ev, evIdx) => renderEvent(ev, evIdx))}
+                            </div>
+                            <div className="space-y-1 min-h-[18px] pt-1">
+                              {bottomEvents.map((ev, evIdx) => renderEvent(ev, evIdx))}
+                            </div>
                           </>
                         );
                       })()}
