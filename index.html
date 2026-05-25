@@ -430,13 +430,13 @@ const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, b
 const ProgressToggleButton = ({ icon: Icon, label, status, palette, onClick, suffix }) => {
   if (status === 'none') {
     return (
-      <button onClick={onClick} title={label} className="w-full py-1.5 px-2.5 text-[11px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95 cursor-pointer">ー</button>
+      <button onClick={onClick} title={label} className="w-full py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95 cursor-pointer">ー</button>
     );
   }
   return (
     <button
       onClick={onClick}
-      className={`w-full py-1.5 px-2.5 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${palette}`}
+      className={`w-full py-1.5 px-2.5 rounded-lg border text-[10px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${palette}`}
     >
       <span className="flex items-center gap-1">
         <Icon className="w-3.5 h-3.5" />
