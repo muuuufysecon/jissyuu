@@ -66,7 +66,7 @@ import {
   Plus, Search, Settings, Database, AlertTriangle, Check, CheckCircle2,
   Clock, Phone, FileText, Calendar, User, Filter, RotateCcw, RotateCw, HelpCircle,
   Info, Copy, Trash2, Edit, AlertCircle, Share2, BookOpen, Key, ChevronDown, CheckCircle, Download,
-  ChevronLeft, ChevronRight, List, LayoutGrid, SlidersHorizontal, Handshake, Paperclip, Upload
+  ChevronLeft, ChevronRight, List, LayoutGrid, SlidersHorizontal, Handshake, Paperclip, Upload, GripVertical
 } from 'lucide-react';
 
 // =============================================================================
@@ -791,6 +791,9 @@ function App() {
   const [editingStudent, setEditingStudent] = useState(null);
   const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
   const [draggingStudentId, setDraggingStudentId] = useState(null);
+  const [dragOverId, setDragOverId] = useState(null);
+  const [dragHandleArmed, setDragHandleArmed] = useState(null);
+  const [customOrder, setCustomOrder] = useState(() => { try { return JSON.parse(localStorage.getItem('list_custom_order_' + (localStorage.getItem('school_room_key') || '3-1')) || '{}'); } catch (e) { return {}; } });
 
   const [datePickerState, setDatePickerState] = useState(null);
   const [formDates, setFormDates] = useState({
@@ -1109,6 +1112,30 @@ function App() {
     if (myTeacherName) localStorage.setItem('my_teacher_name', myTeacherName);
     else localStorage.removeItem('my_teacher_name');
   }, [myTeacherName]);
+
+  useEffect(() => {
+    try { setCustomOrder(JSON.parse(localStorage.getItem('list_custom_order_' + roomKey) || '{}')); }
+    catch (e) { setCustomOrder({}); }
+  }, [roomKey]);
+
+  const sortByCustomOrder = (list, gradeKey) => {
+    const arr = customOrder[gradeKey] || [];
+    return [...list].sort((a, b) => { const ia = arr.indexOf(a.id); const ib = arr.indexOf(b.id); if (ia === -1 && ib === -1) return 0; if (ia === -1) return 1; if (ib === -1) return -1; return ia - ib; });
+  };
+
+  const reorderListRow = (gradeKey, draggedId, targetId) => {
+    if (!draggedId || draggedId === targetId) return;
+    const sectionAll = students.filter((s) => gradeKey === 'other' ? !['1','2','3'].includes(s.grade) : s.grade === gradeKey);
+    const currentArr = customOrder[gradeKey] || [];
+    let ordered = sectionAll.map((s) => s.id).sort((a, b) => { const ia = currentArr.indexOf(a); const ib = currentArr.indexOf(b); if (ia === -1 && ib === -1) return 0; if (ia === -1) return 1; if (ib === -1) return -1; return ia - ib; });
+    if (!ordered.includes(draggedId)) return;
+    ordered = ordered.filter((id) => id !== draggedId);
+    const ti = ordered.indexOf(targetId);
+    if (ti === -1) ordered.push(draggedId); else ordered.splice(ti, 0, draggedId);
+    const next = { ...customOrder, [gradeKey]: ordered };
+    setCustomOrder(next);
+    try { localStorage.setItem('list_custom_order_' + roomKey, JSON.stringify(next)); } catch (e) {}
+  };
 
   const filteredStudents = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -1638,8 +1665,8 @@ function App() {
                     const grades = ['1', '2', '3'];
                     const ungraded = filteredStudents.filter((s) => !grades.includes(s.grade));
                     const sections = [];
-                    grades.forEach((g) => { const list = filteredStudents.filter((s) => s.grade === g); sections.push({ key: g, label: `${g}年`, list, accent: g === '3' ? 'bg-rose-100 border-rose-100 text-rose-900' : g === '2' ? 'bg-emerald-100 border-emerald-100 text-emerald-900' : 'bg-sky-100 border-sky-100 text-sky-900' }); });
-                    if (ungraded.length > 0) sections.push({ key: 'other', label: '学年未設定', list: ungraded, accent: 'bg-slate-100 border-slate-100 text-slate-700' });
+                    grades.forEach((g) => { const list = sortByCustomOrder(filteredStudents.filter((s) => s.grade === g), g); sections.push({ key: g, label: `${g}年`, list, accent: g === '3' ? 'bg-rose-100 border-rose-100 text-rose-900' : g === '2' ? 'bg-emerald-100 border-emerald-100 text-emerald-900' : 'bg-sky-100 border-sky-100 text-sky-900' }); });
+                    if (ungraded.length > 0) sections.push({ key: 'other', label: '学年未設定', list: sortByCustomOrder(ungraded, 'other'), accent: 'bg-slate-100 border-slate-100 text-slate-700' });
                     return sections.flatMap(({ key, label, list, accent }) => [
                       <tr key={`grade-header-${key}`} className={accent + ' border-y-4'}>
                         <td colSpan={10} className="px-4 py-3 text-sm font-extrabold">{label}<span className="ml-2 text-[10px] font-mono bg-white border border-slate-300 text-slate-700 rounded px-1.5 py-0.5 font-bold">{list.length}名</span></td>
@@ -1656,8 +1683,22 @@ function App() {
                       const teacherThankYouPalette = s.teacherThankYouStatus === 'completed' ? 'bg-cyan-50 border-cyan-200 text-cyan-800 hover:bg-cyan-100/70' : s.teacherThankYouStatus === 'none' ? 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200' : 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100';
 
                       return (
-                        <tr key={s.id} className={`hover:bg-slate-50/80 transition-colors group ${selectedIds.has(s.id) ? 'bg-indigo-50/60' : isMyStudent ? 'bg-indigo-50/30' : zebraBg}`}>
-                          <td className="p-3 align-top text-center"><input type="checkbox" checked={selectedIds.has(s.id)} onChange={() => toggleSelectOne(s.id)} className="cursor-pointer accent-indigo-600 w-4 h-4" /></td>
+                        <tr key={s.id}
+                          draggable={dragHandleArmed === s.id}
+                          onDragStart={(e) => { setDraggingStudentId(s.id); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', s.id); } catch (err) {} }}
+                          onDragOver={(e) => { if (draggingStudentId && draggingStudentId !== s.id) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverId(s.id); } }}
+                          onDragLeave={() => setDragOverId((cur) => cur === s.id ? null : cur)}
+                          onDrop={(e) => { e.preventDefault(); if (draggingStudentId && draggingStudentId !== s.id) reorderListRow(key, draggingStudentId, s.id); setDraggingStudentId(null); setDragOverId(null); setDragHandleArmed(null); }}
+                          onDragEnd={() => { setDraggingStudentId(null); setDragOverId(null); setDragHandleArmed(null); }}
+                          className={`hover:bg-slate-50/80 transition-colors group ${draggingStudentId === s.id ? 'opacity-40' : ''} ${dragOverId === s.id ? 'outline outline-2 outline-indigo-500 -outline-offset-2' : ''} ${selectedIds.has(s.id) ? 'bg-indigo-50/60' : isMyStudent ? 'bg-indigo-50/30' : zebraBg}`}>
+                          <td className="p-3 align-top text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <span onMouseEnter={() => setDragHandleArmed(s.id)} onMouseLeave={() => setDragHandleArmed(null)} className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-indigo-600 select-none" title="ドラッグして並べ替え">
+                                <GripVertical className="w-3.5 h-3.5" />
+                              </span>
+                              <input type="checkbox" checked={selectedIds.has(s.id)} onChange={() => toggleSelectOne(s.id)} className="cursor-pointer accent-indigo-600 w-4 h-4" />
+                            </div>
+                          </td>
                           <td className="p-4 align-top">
                             <div className="flex items-start gap-2">
                               {isMyStudent && <span className="w-1.5 h-6 rounded bg-indigo-600 shrink-0"></span>}
