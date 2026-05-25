@@ -217,6 +217,36 @@ const computeInternshipDayInfo = (student, target) => {
   return { dayNumber: sorted.indexOf(target) + 1, totalDays: sorted.length };
 };
 
+// 貼り付け / ドロップされたテキストから Firebase config オブジェクトを抽出する。
+// JSON / JS のオブジェクトリテラル / "window.FIREBASE_CONFIG = {...}" / "const firebaseConfig = {...}" 形式に対応。
+const parseFirebaseConfigText = (text) => {
+  if (!text) return null;
+  const trimmed = String(text).trim();
+  if (!trimmed) return null;
+  const isLikelyConfig = (o) => o && typeof o === 'object' && !Array.isArray(o) && (o.apiKey || o.projectId || o.appId);
+  // 1) そのまま JSON として
+  try {
+    const obj = JSON.parse(trimmed);
+    if (isLikelyConfig(obj)) return obj;
+  } catch (e) {}
+  // 2) 最初の { から最後の } までを切り出して評価
+  const start = trimmed.indexOf('{');
+  const end = trimmed.lastIndexOf('}');
+  if (start !== -1 && end > start) {
+    const body = trimmed.slice(start, end + 1);
+    try {
+      const obj = JSON.parse(body);
+      if (isLikelyConfig(obj)) return obj;
+    } catch (e) {}
+    try {
+      // JS オブジェクトリテラル（クォート無しキー / シングルクォート等）にも対応
+      const obj = new Function('"use strict"; return (' + body + ');')();
+      if (isLikelyConfig(obj)) return obj;
+    } catch (e) {}
+  }
+  return null;
+};
+
 // =============================================================================
 // カスタムフック / Hooks
 // =============================================================================
@@ -785,6 +815,10 @@ function App() {
     return localStorage.getItem('school_firebase_config') || '';
   });
   const [isConfigFromFile] = useState(() => !!(typeof window !== 'undefined' && window.FIREBASE_CONFIG && typeof window.FIREBASE_CONFIG === 'object'));
+  // v3.5: 画面へのドラッグ＆ドロップ / 貼り付けで config を読み込むためのオーバーレイ表示状態
+  const [configDropOverlay, setConfigDropOverlay] = useState(null); // null | 'dragging' | 'success' | 'error'
+  const [configDropMessage, setConfigDropMessage] = useState('');
+  const configFileInputRef = useRef(null);
   const [roomKey, setRoomKey] = useState(() => localStorage.getItem('school_room_key') || '3-1');
   const [tempRoomKey, setTempRoomKey] = useState(roomKey);
   const [myTeacherName, setMyTeacherName] = useState(() => localStorage.getItem('my_teacher_name') || '');
@@ -1125,6 +1159,105 @@ function App() {
     if (myTeacherName) localStorage.setItem('my_teacher_name', myTeacherName);
     else localStorage.removeItem('my_teacher_name');
   }, [myTeacherName]);
+
+  // ========== ドラッグ＆ドロップ / 貼り付けで config.js を取り込む（v3.5〜） ==========
+  useEffect(() => {
+    const applyConfigObject = (obj, sourceLabel) => {
+      try {
+        const json = JSON.stringify(obj);
+        setFirebaseConfigStr(json);
+        localStorage.setItem('school_firebase_config', json);
+        setConfigDropOverlay('success');
+        setConfigDropMessage(`${sourceLabel} から Firebase 接続情報を読み込みました。クラウド接続を開始します。`);
+        setIsConfigOpen(false);
+        setTimeout(() => setConfigDropOverlay(null), 3500);
+      } catch (e) {
+        setConfigDropOverlay('error');
+        setConfigDropMessage('接続情報の適用に失敗しました: ' + e.message);
+        setTimeout(() => setConfigDropOverlay(null), 4500);
+      }
+    };
+    const readFile = (file) => {
+      if (!file) return;
+      const name = file.name || 'ファイル';
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = String(reader.result || '');
+        const obj = parseFirebaseConfigText(text);
+        if (obj) applyConfigObject(obj, `「${name}」`);
+        else {
+          setConfigDropOverlay('error');
+          setConfigDropMessage(`「${name}」から Firebase 接続情報を読み取れませんでした。Firebase Console でコピーした config を含む .js / .json / .txt ファイルを指定してください。`);
+          setTimeout(() => setConfigDropOverlay(null), 5500);
+        }
+      };
+      reader.onerror = () => {
+        setConfigDropOverlay('error');
+        setConfigDropMessage('ファイルの読み込みに失敗しました。');
+        setTimeout(() => setConfigDropOverlay(null), 4000);
+      };
+      reader.readAsText(file, 'UTF-8');
+    };
+    // 「config.js を読み込む」ボタンからも呼べるよう window に公開
+    window.__loadConfigFromFile = readFile;
+
+    let dragCounter = 0;
+    const hasFiles = (e) => !!e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
+    const onDragEnter = (e) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      dragCounter++;
+      setConfigDropOverlay((cur) => cur === 'success' || cur === 'error' ? cur : 'dragging');
+    };
+    const onDragOver = (e) => { if (hasFiles(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } };
+    const onDragLeave = (e) => {
+      if (!hasFiles(e)) return;
+      dragCounter--;
+      if (dragCounter <= 0) {
+        dragCounter = 0;
+        setConfigDropOverlay((cur) => cur === 'dragging' ? null : cur);
+      }
+    };
+    const onDrop = (e) => {
+      if (!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+      e.preventDefault();
+      dragCounter = 0;
+      const file = e.dataTransfer.files[0];
+      const lname = (file.name || '').toLowerCase();
+      // 画像/PDF等を関連資料モーダル等へドロップした意図では受け取らないよう拡張子を限定
+      if (!(lname.endsWith('.js') || lname.endsWith('.json') || lname.endsWith('.txt'))) {
+        setConfigDropOverlay((cur) => cur === 'dragging' ? null : cur);
+        return;
+      }
+      readFile(file);
+    };
+    const onPaste = (e) => {
+      const t = e.target;
+      // テキストフィールドへの通常の貼り付けには介入しない
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      const text = e.clipboardData?.getData('text/plain') || '';
+      if (!text || !/apiKey|projectId|appId/.test(text)) return;
+      const obj = parseFirebaseConfigText(text);
+      if (obj) {
+        e.preventDefault();
+        applyConfigObject(obj, 'クリップボード');
+      }
+    };
+
+    window.addEventListener('dragenter', onDragEnter);
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('dragleave', onDragLeave);
+    window.addEventListener('drop', onDrop);
+    window.addEventListener('paste', onPaste);
+    return () => {
+      window.removeEventListener('dragenter', onDragEnter);
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('dragleave', onDragLeave);
+      window.removeEventListener('drop', onDrop);
+      window.removeEventListener('paste', onPaste);
+      delete window.__loadConfigFromFile;
+    };
+  }, []);
 
   useEffect(() => {
     try { setCustomOrder(JSON.parse(localStorage.getItem('list_custom_order_' + roomKey) || '{}')); }
@@ -1468,6 +1601,44 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
 
+      {/* 隠しファイル入力: 「config.js を読み込む」ボタンから呼ばれる */}
+      <input
+        ref={configFileInputRef}
+        type="file"
+        accept=".js,.json,.txt,application/json,text/javascript,text/plain"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file && typeof window.__loadConfigFromFile === 'function') {
+            window.__loadConfigFromFile(file);
+          }
+          e.target.value = '';
+        }}
+      />
+
+      {/* ドラッグ＆ドロップ中のオーバーレイ */}
+      {configDropOverlay === 'dragging' && (
+        <div className="fixed inset-0 z-[200] bg-indigo-900/40 backdrop-blur-sm flex items-center justify-center pointer-events-none animate-fadeIn">
+          <div className="bg-white border-4 border-dashed border-indigo-400 rounded-3xl px-12 py-10 shadow-2xl text-center max-w-md">
+            <div className="text-5xl mb-3">📥</div>
+            <div className="text-lg font-extrabold text-indigo-900 mb-1">config.js をここにドロップ</div>
+            <div className="text-xs text-slate-600 leading-relaxed">
+              Firebase Console からコピーした config が書かれた<br />
+              <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">config.js</code> / <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">.json</code> / <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono">.txt</code> を読み込みます
+            </div>
+          </div>
+        </div>
+      )}
+      {/* 読み込み結果トースト */}
+      {(configDropOverlay === 'success' || configDropOverlay === 'error') && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl shadow-2xl border max-w-md text-xs font-bold animate-slideDown ${configDropOverlay === 'success' ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-900'}`}>
+          <div className="flex items-start gap-2">
+            <span className="text-base shrink-0">{configDropOverlay === 'success' ? '✅' : '⚠️'}</span>
+            <span className="leading-relaxed">{configDropMessage}</span>
+          </div>
+        </div>
+      )}
+
       <header className="bg-white border-b border-slate-200 shrink-0 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -1500,14 +1671,23 @@ function App() {
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
             <span className="flex items-center gap-2 text-amber-800">
               <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
-              現在はPC1台のみの「体験デモ」で稼働しています。他の先生と今すぐリアルタイム同期するには共有設定が必要です。
+              現在はPC1台のみの「体験デモ」で稼働しています。<strong className="font-bold">config.js をこの画面にドラッグ＆ドロップ</strong>、または <strong className="font-bold">Ctrl+V で貼り付け</strong> すれば、すぐにクラウド接続できます。
             </span>
-            <button
-              onClick={() => setIsConfigOpen(true)}
-              className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-[11px] transition-colors shadow-sm shrink-0"
-            >
-              オンライン接続
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => configFileInputRef.current?.click()}
+                className="px-3 py-1 bg-white border border-amber-300 hover:bg-amber-100 text-amber-800 rounded-lg font-bold text-[11px] transition-colors shadow-sm"
+                title="config.js / firebase-config.json などのファイルを選択して読み込みます"
+              >
+                config.js を読み込む
+              </button>
+              <button
+                onClick={() => setIsConfigOpen(true)}
+                className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-[11px] transition-colors shadow-sm"
+              >
+                手動入力
+              </button>
+            </div>
           </div>
         </div>
       )}
