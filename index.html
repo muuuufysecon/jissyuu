@@ -392,9 +392,10 @@ const ConnectionBadge = ({ status, roomKey }) => {
   );
 };
 
-const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, barColor, iconColor }) => (
+const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, barColor, iconColor, title }) => (
   <button
     onClick={onClick}
+    title={title}
     className={`text-left bg-white border rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm ${active ? 'border-amber-500 bg-amber-50/50 ring-2 ring-amber-400' : 'border-slate-200 hover:border-slate-300'}`}
   >
     <div>
@@ -1440,6 +1441,7 @@ function App() {
             <ConnectionBadge status={connectionStatus} roomKey={roomKey} />
             <button
               onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
+              title="Firebase接続設定・合言葉(ルームキー)の切替・担当教員名の保存を行います"
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-sm"
             >
               <Settings className="w-4 h-4 text-slate-500" />
@@ -1481,26 +1483,32 @@ function App() {
           <StatCard icon={Phone} label="事前電話連絡状況" percent={stats.phonePercent} pendingCount={stats.phonePendingCount}
             active={filterProgress === 'phone_pending'}
             onClick={() => setFilterProgress(filterProgress === 'phone_pending' ? 'all' : 'phone_pending')}
+            title="クリックで「未連絡」の生徒だけを絞り込みします"
             barColor="bg-indigo-600" iconColor="text-indigo-600" />
           <StatCard icon={FileText} label="保護者お知らせ状況" percent={stats.docPercent} pendingCount={stats.docPendingCount}
             active={filterProgress === 'doc_pending'}
             onClick={() => setFilterProgress(filterProgress === 'doc_pending' ? 'all' : 'doc_pending')}
+            title="クリックで「未配付」の生徒だけを絞り込みます"
             barColor="bg-emerald-600" iconColor="text-emerald-600" />
           <StatCard icon={Handshake} label="事前挨拶 完了状況" percent={stats.greetingPercent} pendingCount={stats.greetingPendingCount}
             active={filterProgress === 'greeting_pending'}
             onClick={() => setFilterProgress(filterProgress === 'greeting_pending' ? 'all' : 'greeting_pending')}
+            title="クリックで「挨拶未完了」の生徒だけを絞り込みます"
             barColor="bg-emerald-600" iconColor="text-teal-600" />
           <StatCard icon={Calendar} label="実習・見学 実施状況" percent={stats.internshipImplPercent} pendingCount={stats.internshipInProgressCount}
             active={filterProgress === 'internship_in_progress'}
             onClick={() => setFilterProgress(filterProgress === 'internship_in_progress' ? 'all' : 'internship_in_progress')}
+            title="完了率＝最終実習日が過去になった生徒の割合。クリックで「本日実習中」の生徒だけを絞り込みます"
             barColor="bg-yellow-500" iconColor="text-yellow-600" />
           <StatCard icon={FileText} label="生徒お礼状 送付状況" percent={stats.studentThankYouPercent} pendingCount={stats.studentThankYouPendingCount}
             active={filterProgress === 'student_thankyou_pending'}
             onClick={() => setFilterProgress(filterProgress === 'student_thankyou_pending' ? 'all' : 'student_thankyou_pending')}
+            title="クリックで「生徒お礼状未送付」の生徒だけを絞り込みます"
             barColor="bg-pink-500" iconColor="text-pink-600" />
           <StatCard icon={FileText} label="教師お礼状 送付状況" percent={stats.teacherThankYouPercent} pendingCount={stats.teacherThankYouPendingCount}
             active={filterProgress === 'teacher_thankyou_pending'}
             onClick={() => setFilterProgress(filterProgress === 'teacher_thankyou_pending' ? 'all' : 'teacher_thankyou_pending')}
+            title="クリックで「教師お礼状未送付」の生徒だけを絞り込みます"
             barColor="bg-cyan-500" iconColor="text-cyan-600" />
         </div>
 
@@ -1513,9 +1521,9 @@ function App() {
                   className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all" />
               </div>
 
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を学年で絞り込みます">
                 <Filter className="w-3.5 h-3.5 text-slate-500" />
-                <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)}
+                <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)} title="表示する学年を選んでください"
                   className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
                   <option value="all">学年: すべて</option>
                   <option value="1">1年</option>
@@ -1526,11 +1534,11 @@ function App() {
 
               <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
                 {[
-                  { key: 'list',     icon: List,       label: 'リスト一覧' },
-                  { key: 'calendar', icon: Calendar,   label: 'カレンダー' },
-                  { key: 'kanban',   icon: LayoutGrid, label: '進捗かんばん' }
-                ].map(({ key, icon: Icon, label }) => (
-                  <button key={key} onClick={() => setCurrentView(key)}
+                  { key: 'list',     icon: List,       label: 'リスト一覧',     title: '全生徒の進捗を一覧表で表示します' },
+                  { key: 'calendar', icon: Calendar,   label: 'カレンダー',   title: '月別カレンダーで実習日・事前挨拶・巪回を可視化します' },
+                  { key: 'kanban',   icon: LayoutGrid, label: '進捗かんばん', title: '進捗ステータスごとに生徒をかんばん形式で並べて表示します' }
+                ].map(({ key, icon: Icon, label, title }) => (
+                  <button key={key} onClick={() => setCurrentView(key)} title={title}
                     className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentView === key ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
                     <Icon className="w-3.5 h-3.5" />
                     <span>{label}</span>
@@ -1576,6 +1584,7 @@ function App() {
               </button>
 
               <button onClick={() => openAddModal()}
+                title="新しい生徒の進捗データを登録します"
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all transform active:scale-95 cursor-pointer">
                 <Plus className="w-4 h-4" />
                 <span>登録</span>
@@ -1651,7 +1660,7 @@ function App() {
                               {isMyStudent && <span className="w-1.5 h-6 rounded bg-indigo-600 shrink-0"></span>}
                               <div className="relative group/name">
                                 <div className={`font-extrabold text-slate-900 text-sm inline-flex items-center gap-1 ${s.notes ? 'cursor-help' : ''}`}>
-                                  <span>{s.name}</span>
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); setTextEditState({ title: '生徒名を編集', label: '氏名', value: s.name || '', onSave: (v) => { const trimmed = (v || '').trim(); if (!trimmed || trimmed === s.name) return; const before = { name: s.name }; const after = { name: trimmed }; recordUpdate(s.id, before, after); persistPartial(s.id, after); } }); }} className="hover:bg-amber-50 hover:text-amber-700 rounded px-1 -mx-1 cursor-pointer transition-colors text-left" title="クリックして名前を編集">{s.name || '（未記入）'}</button>
                                   {s.notes && <span className="text-[9px] text-amber-600" title="備考あり">📝</span>}
                                 </div>
                                 <div className="text-[10px] text-slate-500 font-bold mt-0.5">
