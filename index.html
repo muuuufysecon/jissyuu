@@ -492,7 +492,7 @@ const ConnectionBadge = ({ status, roomKey }) => {
       <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">
         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
         <span>クラウド接続中</span>
-        <span className="bg-emerald-100/80 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-mono">合言葉: {roomKey}</span>
+        <span className="bg-emerald-100/80 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-mono">ルーム名: {roomKey}</span>
       </div>
     );
   }
@@ -516,7 +516,7 @@ const ConnectionBadge = ({ status, roomKey }) => {
     <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">
       <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
       <span>お試しデモ(端末保存)</span>
-      <span className="bg-amber-100/80 text-amber-800 px-2 py-0.5 rounded text-[10px] font-mono">合言葉: {roomKey}</span>
+      <span className="bg-amber-100/80 text-amber-800 px-2 py-0.5 rounded text-[10px] font-mono">ルーム名: {roomKey}</span>
     </div>
   );
 };
@@ -1777,7 +1777,7 @@ function App() {
                         </div>
                       )}
                       <div className="text-[10px] text-slate-400 px-2 pt-2 pb-1 border-t border-slate-100 mt-1 leading-snug">
-                        ※ 同じ合言葉({roomKey})の部屋を開いている端末を表示します。<br />25秒ごとに更新、最終更新から60秒以上経ったセッションは離脱として扱います。
+                        ※ 同じルーム名({roomKey})の部屋を開いている端末を表示します。<br />25秒ごとに更新、最終更新から60秒以上経ったセッションは離脱として扱います。
                       </div>
                     </div>
                   </>
@@ -1786,7 +1786,7 @@ function App() {
             )}
             <button
               onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
-              title="Firebase接続設定・合言葉(ルームキー)の切替・担当教員名の保存を行います"
+              title="Firebase接続設定・ルーム名の切替・担当教員名の保存を行います"
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-sm"
             >
               <Settings className="w-4 h-4 text-slate-500" />
