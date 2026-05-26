@@ -908,6 +908,8 @@ function App() {
   const [isConfigFromFile] = useState(() => !!(typeof window !== 'undefined' && window.FIREBASE_CONFIG && typeof window.FIREBASE_CONFIG === 'object'));
   // v3.5: 画面へのドラッグ＆ドロップ / 貼り付けで config を読み込むためのオーバーレイ表示状態
   const [configDropOverlay, setConfigDropOverlay] = useState(null); // null | 'dragging' | 'success' | 'error'
+  // v3.7: 環境設定モーダル内のドロップゾーンに config ファイルがホバー中かどうか
+  const [isConfigModalDragOver, setIsConfigModalDragOver] = useState(false);
   const [configDropMessage, setConfigDropMessage] = useState('');
   const configFileInputRef = useRef(null);
   const [roomKey, setRoomKey] = useState(() => localStorage.getItem('school_room_key') || '3-1');
@@ -1299,6 +1301,11 @@ function App() {
         const k = localStorage.key(i);
         if (k && k.startsWith('local_students_')) rooms.add(k.replace('local_students_', ''));
       }
+      // v3.7: 過去に開いたルームの履歴も一覧に含める
+      try {
+        const visited = JSON.parse(localStorage.getItem('visited_rooms') || '[]');
+        if (Array.isArray(visited)) visited.forEach((r) => { if (r) rooms.add(r); });
+      } catch (e) {}
       if (connectionStatus === 'connected' && window.firebase) {
         try {
           const db = window.firebase.app().firestore();
@@ -1331,6 +1338,19 @@ function App() {
     setRoomKey(target);
     setIsConfigOpen(false);
   };
+
+  // v3.7: 訪問したルーム名を localStorage に履歴として記録する。これにより、別のルームに切り替えても以前いたルームを一覧に表示できる。
+  useEffect(() => {
+    if (!roomKey) return;
+    try {
+      const arr = JSON.parse(localStorage.getItem('visited_rooms') || '[]');
+      const set = new Set(Array.isArray(arr) ? arr : []);
+      set.add(roomKey);
+      localStorage.setItem('visited_rooms', JSON.stringify(Array.from(set)));
+    } catch (e) {
+      try { localStorage.setItem('visited_rooms', JSON.stringify([roomKey])); } catch (e2) {}
+    }
+  }, [roomKey]);
 
   // v3.7: クラウド接続したらマーカードキュメントを書き込み、後でルーム一覧から見つけられるようにする。
   useEffect(() => {
@@ -2952,6 +2972,19 @@ function App() {
                 <p className="text-[11px] text-slate-500 leading-relaxed">安全なデータ保護とセキュリティルール適用のため、各自のFirebaseコンソールから取得した「ウェブアプリ設定」JSONオブジェクトを以下に貼り付けてください。</p>
 
                 <form onSubmit={handleConfigSubmit} className="space-y-4">
+              {/* v3.7: config.js / config.json をドラッグ＆ドロップ または クリックで選択してインポートできるゾーン */}
+              <div
+                onDragEnter={(e) => { const types = Array.from(e.dataTransfer.types || []); if (types.includes('Files')) { e.preventDefault(); e.stopPropagation(); setIsConfigModalDragOver(true); } }}
+                onDragOver={(e) => { const types = Array.from(e.dataTransfer.types || []); if (types.includes('Files')) { e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'copy'; setIsConfigModalDragOver(true); } }}
+                onDragLeave={(e) => { e.stopPropagation(); setIsConfigModalDragOver(false); }}
+                onDrop={(e) => { e.preventDefault(); e.stopPropagation(); setIsConfigModalDragOver(false); const file = e.dataTransfer?.files?.[0]; if (file && typeof window.__loadConfigFromFile === 'function') window.__loadConfigFromFile(file); }}
+                onClick={() => { if (configFileInputRef.current) configFileInputRef.current.click(); }}
+                title="config.js / config.json ファイルをここにドラッグ＆ドロップするか、クリックして選択するとインポートできます"
+                className={'flex items-center justify-center gap-2 px-3 py-4 border-2 border-dashed rounded-xl text-xs font-bold cursor-pointer transition-all ' + (isConfigModalDragOver ? 'bg-indigo-100 border-indigo-500 text-indigo-800 ring-2 ring-indigo-300 scale-[1.01]' : 'bg-indigo-50/40 border-indigo-300 hover:border-indigo-500 hover:bg-indigo-50 text-indigo-700')}
+              >
+                <Upload className="w-4 h-4" />
+                <span>{isConfigModalDragOver ? 'ここにドロップしてインポート' : 'config.js / config.json をドロップ、またはクリックして選択'}</span>
+              </div>
                   <textarea rows={5} placeholder={'{\n  "apiKey": "AIzaSy...",\n  "projectId": "school-database", ...\n}'}
                     value={firebaseConfigStr} onChange={(e) => setFirebaseConfigStr(e.target.value)}
                     className={"w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-700 placeholder-slate-400 " + (showConfigText ? '' : 'config-mask')}></textarea>
