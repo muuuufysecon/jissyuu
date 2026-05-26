@@ -524,7 +524,7 @@ const ConnectionBadge = ({ status, roomKey }) => {
 
 const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, barColor, iconColor, title }) => (
   <button
-    onClick={onClick}
+    onClick={(e) => { if (clickGate && !clickGate()) return; if (onClick) onClick(e); }} {...(cellHandlers || {})}
     title={title}
     className={`text-left bg-white border rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm ${active ? 'border-amber-500 bg-amber-50/50 ring-2 ring-amber-400' : 'border-slate-200 hover:border-slate-300'}`}
   >
@@ -551,15 +551,15 @@ const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, b
   </button>
 );
 
-const ProgressToggleButton = ({ icon: Icon, label, status, palette, onClick, suffix }) => {
+const ProgressToggleButton = ({ icon: Icon, label, status, palette, onClick, suffix, cellHandlers, clickGate }) => {
   if (status === 'none') {
     return (
-      <button onClick={onClick} title={label} className="w-full py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95 cursor-pointer">ー</button>
+      <button onClick={(e) => { if (clickGate && !clickGate()) return; if (onClick) onClick(e); }} {...(cellHandlers || {})} title={label} className="w-full py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95 cursor-pointer">ー</button>
     );
   }
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => { if (clickGate && !clickGate()) return; if (onClick) onClick(e); }} {...(cellHandlers || {})}
       className={`w-full py-1.5 px-2.5 rounded-lg border text-[10px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${palette}`}
     >
       <span className="flex items-center gap-1">
@@ -965,6 +965,12 @@ function App() {
   const [materialDropTargetId, setMaterialDropTargetId] = useState(null);
   const [textEditState, setTextEditState] = useState(null);
   const [selectEditState, setSelectEditState] = useState(null);
+  const [statusEditState, setStatusEditState] = useState(null);
+  const longPressTimerRef = useRef(null);
+  const longPressFiredRef = useRef(false);
+  const lastClickSnapshotRef = useRef({ studentId: null, field: null, before: null, time: 0 });
+  const statusCellHandlers = (studentId, field) => ({ onPointerDown: () => { longPressFiredRef.current = false; if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current); longPressTimerRef.current = setTimeout(() => { longPressFiredRef.current = true; setStatusEditState({ studentId, field }); }, 500); }, onPointerUp: () => { if (longPressTimerRef.current) { clearTimeout(longPressTimerRef.current); longPressTimerRef.current = null; } }, onPointerLeave: () => { if (longPressTimerRef.current) { clearTimeout(longPressTimerRef.current); longPressTimerRef.current = null; } }, onPointerCancel: () => { if (longPressTimerRef.current) { clearTimeout(longPressTimerRef.current); longPressTimerRef.current = null; } }, onDoubleClick: (e) => { e.preventDefault(); const snap = lastClickSnapshotRef.current; if (snap && snap.studentId === studentId && snap.field === field && snap.before) { persistPartial(studentId, snap.before); lastClickSnapshotRef.current = { studentId: null, field: null, before: null, time: 0 }; } setStatusEditState({ studentId, field }); } });
+  const statusClickGate = (studentId, field) => () => { if (longPressFiredRef.current) { longPressFiredRef.current = false; return false; } const student = students.find((s) => s.id === studentId); if (student) { const stepCfg = field === 'phone' ? STEP_CONFIG.phone : field === 'doc' ? STEP_CONFIG.doc : STEP_CONFIG.greeting; const snap = lastClickSnapshotRef.current; const now = Date.now(); const sameTarget = snap.studentId === studentId && snap.field === field && now - snap.time < 400; if (!sameTarget) { const before = { [stepCfg.field]: student[stepCfg.field] != null ? student[stepCfg.field] : '' }; if (stepCfg.dateField) before[stepCfg.dateField] = student[stepCfg.dateField] != null ? student[stepCfg.dateField] : ''; lastClickSnapshotRef.current = { studentId, field, before, time: now }; } else { lastClickSnapshotRef.current.time = now; } } return true; };
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
 
@@ -2314,7 +2320,7 @@ function App() {
                             <div className="space-y-1.5">
                               <ProgressToggleButton icon={Phone} label={s.phoneStatus === 'completed' ? '連絡済み' : s.phoneStatus === 'none' ? '必要なし' : '未連絡'}
                                 status={s.phoneStatus} palette={phonePalette}
-                                onClick={() => handleInstantToggle(s, 'phoneStatus', s.phoneStatus)}
+                                onClick={() => handleInstantToggle(s, 'phoneStatus', s.phoneStatus)} cellHandlers={statusCellHandlers(s.id, 'phone')} clickGate={statusClickGate(s.id, 'phone')}
                                 suffix={''} />
                               {s.phoneStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.phoneDate || '', title: `${s.name} の電話連絡日`, onSelect: (v) => persistPartial(s.id, { phoneDate: v }) })}
@@ -2326,7 +2332,7 @@ function App() {
                             <div className="space-y-1.5">
                               <ProgressToggleButton icon={FileText} label={s.docStatus === 'completed' ? '配付済み' : s.docStatus === 'none' ? '配付の必要なし' : '未配付'}
                                 status={s.docStatus} palette={docPalette}
-                                onClick={() => handleInstantToggle(s, 'docStatus', s.docStatus)}
+                                onClick={() => handleInstantToggle(s, 'docStatus', s.docStatus)} cellHandlers={statusCellHandlers(s.id, 'doc')} clickGate={statusClickGate(s.id, 'doc')}
                                 suffix={''} />
                               {s.docStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.docDate || '', title: `${s.name} の保護者お知らせ配付日`, onSelect: (v) => persistPartial(s.id, { docDate: v }) })}
@@ -2336,7 +2342,7 @@ function App() {
                           </td>
                           <td className="p-4 align-top">
                             <div className="space-y-1.5">
-                              <button onClick={() => handleInstantToggle(s, 'greetingStatus', s.greetingStatus)}
+                              <button onClick={(e) => { if (!statusClickGate(s.id, 'greeting')()) return; handleInstantToggle(s, 'greetingStatus', s.greetingStatus); }} {...statusCellHandlers(s.id, 'greeting')}
                                 className={s.greetingStatus === 'pending' ? 'w-full py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95 cursor-pointer' : `w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${greetingPalette}`}>
                                 <span className="flex items-center gap-1">
                                   {s.greetingStatus !== 'pending' && <Handshake className="w-3.5 h-3.5 text-slate-500" />}
@@ -2729,6 +2735,7 @@ function App() {
 
       <TextEditModal state={textEditState} onClose={() => setTextEditState(null)} />
       <SelectEditModal state={selectEditState} onClose={() => setSelectEditState(null)} />
+      {statusEditState && (() => { const sd = students.find((s) => s.id === statusEditState.studentId); if (!sd) return null; const field = statusEditState.field; const title = field === 'phone' ? '事前電話の編集' : field === 'doc' ? '保護者お知らせの編集' : '事前挨拶の編集'; const statusKey = field + 'Status'; const dateKey = field + 'Date'; const currentStatus = sd[statusKey] || 'pending'; const phoneOpts = [['pending', '未連絡'], ['completed', '連絡済み'], ['none', '必要なし']]; const docOpts = [['pending', '未配付'], ['completed', '配付済み'], ['none', '配付の必要なし']]; const greetingOpts = [['pending', 'ー'], ['unadjusted', '未調整'], ['scheduled', '挨拶日決定'], ['completed', '挨拶終了']]; const opts = field === 'phone' ? phoneOpts : field === 'doc' ? docOpts : greetingOpts; const close = () => setStatusEditState(null); const saveStatus = (v) => { const update = { [statusKey]: v }; if (field !== 'greeting') { if (v === 'completed' && !sd[dateKey]) update[dateKey] = getTodayString(); if (v !== 'completed') update[dateKey] = ''; } const before = Object.fromEntries(Object.keys(update).map((k) => [k, sd[k] != null ? sd[k] : ''])); recordUpdate(sd.id, before, update); persistPartial(sd.id, update); }; return (<div className="fixed inset-0 z-[105] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={close}><div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-scaleIn"><div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between"><h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Edit className="w-4 h-4 text-indigo-600" /><span>{sd.name} - {title}</span></h3><button type="button" onClick={close} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button></div><div className="p-4 space-y-3"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">ステータス</div><div className="space-y-1">{opts.map(([val, lbl]) => (<button key={val} type="button" onClick={() => saveStatus(val)} className={'w-full text-left px-3 py-2 rounded-lg text-xs font-bold cursor-pointer transition-colors ' + (currentStatus === val ? 'bg-indigo-600 text-white' : 'bg-slate-50 hover:bg-indigo-50 text-slate-700 border border-slate-200')}>{currentStatus === val ? '● ' : '○ '}{lbl}</button>))}</div></div>{field !== 'greeting' && currentStatus === 'completed' && (<div><div className="text-[11px] font-bold text-slate-600 mb-1.5">{field === 'phone' ? '連絡日' : '配付日'}</div><button type="button" onClick={() => setDatePickerState({ value: sd[dateKey] || '', title: title, onSelect: (v) => persistPartial(sd.id, { [dateKey]: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd[dateKey] ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd[dateKey] ? formatShortDate(sd[dateKey]) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div>)}{field === 'greeting' && currentStatus !== 'pending' && (<div className="space-y-2"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">挨拶日</div><button type="button" onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: '事前挨拶日', onSelect: (v) => persistPartial(sd.id, { greetingDate: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd.greetingDate ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">時間</div><input type="text" placeholder="例: 13:30" defaultValue={sd.greetingTime || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingTime || '')) persistPartial(sd.id, { greetingTime: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">引率教員</div><input type="text" placeholder="例: 鈴木 先生" defaultValue={sd.greetingVisitor || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingVisitor || '')) persistPartial(sd.id, { greetingVisitor: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div></div>)}<div className="text-[10px] text-slate-500 leading-relaxed pt-1 border-t border-slate-100">※ クリック（タップ）で従来通りステータスを切替、長押し（0.5秒）またはダブルクリックでこの編集モーダルを開きます。</div></div><div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2"><button type="button" onClick={close} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer">閉じる</button></div></div></div>); })()}
 
       {/* 追加・編集モーダル */}
       {isAddEditOpen && (
