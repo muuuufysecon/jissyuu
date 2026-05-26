@@ -2137,7 +2137,7 @@ function App() {
                                   {s.notes && <span className="text-[9px] text-amber-600" title="備考あり">📝</span>}
                                 </div>
                                 <div className="text-[10px] text-slate-500 font-bold mt-0.5">
-                                  {s.grade ? `${s.grade}年` : 'ー'}<button type="button" onClick={(e) => { e.stopPropagation(); setTextEditState({ title: `${s.name} の組を編集`, label: '組（数字のみ）', value: s.classVal || '', onSave: async (v) => { const next = String(v || '').trim().replace(/組$/, ''); const before = { classVal: s.classVal || '' }; const after = { classVal: next }; recordUpdate(s.id, before, after); await persistPartial(s.id, after); } }); }} className="hover:bg-indigo-100 hover:text-indigo-800 rounded px-1 -mx-0.5 cursor-pointer transition-colors inline-flex items-center gap-0.5" title="クリックして組を編集">{s.classVal ? `${s.classVal}組` : 'ー組'}<Edit className="w-2.5 h-2.5 opacity-40" /></button>
+                                  {s.grade ? `${s.grade}年` : 'ー'}<button type="button" onClick={(e) => { e.stopPropagation(); setSelectEditState({ title: `${s.name} の組を変更`, value: s.classVal || '', options: [['', '未設定'], ['1', '1組'], ['2', '2組'], ['3', '3組']], onSave: async (v) => { const before = { classVal: s.classVal || '' }; const after = { classVal: v }; recordUpdate(s.id, before, after); await persistPartial(s.id, after); } }); }} className="hover:bg-indigo-100 hover:text-indigo-800 rounded px-1 -mx-0.5 cursor-pointer transition-colors inline-flex items-center gap-0.5" title="クリックして組を編集">{s.classVal ? `${s.classVal}組` : 'ー組'}<Edit className="w-2.5 h-2.5 opacity-40" /></button>
                                 </div>
                                 {(s.internshipDates || []).includes(getTodayString()) && (
                                   <div className={`mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] font-extrabold animate-slowBlink shadow-sm ${s.internshipType === 'observation' ? 'bg-pink-100 border-pink-300 text-pink-800' : 'bg-yellow-100 border-yellow-500 text-yellow-800'}`} title="本日は実習当日です">
@@ -2564,12 +2564,7 @@ function App() {
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between shrink-0">
-              <button onClick={() => { const id = sd.id; setSelectedStudentDetail(null); handleDeleteStudent(id); }}
-                className="px-3 py-2 text-rose-600 hover:bg-rose-50 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1">
-                <Trash2 className="w-4 h-4" />
-                削除する
-              </button>
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end shrink-0">
               <button onClick={() => setSelectedStudentDetail(null)}
                 className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">閉じる</button>
             </div>
