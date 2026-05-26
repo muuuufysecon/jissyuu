@@ -1396,7 +1396,8 @@ function App() {
         (s.classVal && `${s.classVal}組`.includes(q));
 
       if (!matchSearch) return false;
-      if (myTeacherName && s.teacher !== myTeacherName) return false;
+      // v3.6: myTeacherName は「編集者名（あなたの名前）」として使うため、担当教員フィルターとしては使わない。
+      // 「自分の担当生徒だけ表示」したい場合は上部の検索欄や今後追加のフィルターを使う。
 
       switch (filterProgress) {
         case 'phone_pending':    if (s.phoneStatus && s.phoneStatus !== 'pending') return false; break;
@@ -1420,7 +1421,7 @@ function App() {
 
       return true;
     });
-  }, [students, searchQuery, myTeacherName, filterProgress, filterGrade, filterClass,
+  }, [students, searchQuery, filterProgress, filterGrade, filterClass,
       filterPhoneStatus, filterDocStatus, filterGreetingStatus, filterPatrolStatus,
       filterStudentThankYouStatus, filterTeacherThankYouStatus]);
 
@@ -1574,14 +1575,14 @@ function App() {
   }, [filteredStudents, kanbanStep]);
 
   const clearFilters = () => {
-    setSearchQuery(''); setFilterProgress('all'); setMyTeacherName('');
+    setSearchQuery(''); setFilterProgress('all');
     setFilterGrade('all'); setFilterClass('all');
     setFilterPhoneStatus('all'); setFilterDocStatus('all');
     setFilterGreetingStatus('all'); setFilterPatrolStatus('all');
     setFilterStudentThankYouStatus('all'); setFilterTeacherThankYouStatus('all');
   };
 
-  const hasActiveFilter = filterProgress !== 'all' || searchQuery || myTeacherName ||
+  const hasActiveFilter = filterProgress !== 'all' || searchQuery ||
     filterGrade !== 'all' || filterClass !== 'all' ||
     filterPhoneStatus !== 'all' || filterDocStatus !== 'all' ||
     filterGreetingStatus !== 'all' || filterPatrolStatus !== 'all' ||
