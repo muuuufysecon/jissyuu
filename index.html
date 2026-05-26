@@ -2243,22 +2243,31 @@ function App() {
                             </div>
                           </td>
                           <td className="p-4 align-top">
-                            <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => setMaterialModalStudentId(s.id)} title="関連資料"
-                                className="relative p-1.5 text-slate-600 hover:text-amber-600 bg-white border border-slate-200 hover:border-amber-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
-                                <Paperclip className="w-4 h-4" />
-                                {(s.materials?.length || 0) > 0 && (
-                                  <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{s.materials.length}</span>
-                                )}
-                              </button>
-                              <button onClick={() => setSelectedStudentDetail(s)} title="詳細・編集"
-                                className="p-1.5 text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 hover:border-indigo-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button onClick={() => handleDeleteStudent(s.id)} title="削除"
-                                className="p-1.5 text-slate-400 hover:text-rose-600 bg-white border border-slate-200 hover:border-rose-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                            <div className="flex items-start gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                              <div className="flex-1 min-w-0 space-y-1">
+                                {(s.materials || []).map((m) => (
+                                  <button key={m.id} onClick={() => setMaterialPreview(m)} title={m.name}
+                                    className="w-full flex items-center gap-1 px-1.5 py-1 bg-amber-50/60 hover:bg-amber-100 border border-amber-200 text-slate-700 hover:text-amber-800 rounded-md text-[10px] font-bold cursor-pointer transition-all">
+                                    <span className="shrink-0 text-[11px] leading-none">{m.kind === 'url' ? '🔗' : m.mimeType?.startsWith('image/') ? '🖼️' : m.mimeType === 'application/pdf' ? '📄' : '📎'}</span>
+                                    <span className="truncate flex-1 text-left">{m.name}</span>
+                                  </button>
+                                ))}
+                                <button onClick={() => setMaterialModalStudentId(s.id)} title={(s.materials?.length || 0) > 0 ? '関連資料を追加・管理' : '関連資料を追加'}
+                                  className="w-full flex items-center justify-center gap-1 px-1.5 py-1 bg-white hover:bg-amber-50 border border-dashed border-slate-300 hover:border-amber-300 text-slate-500 hover:text-amber-700 rounded-md text-[10px] font-bold cursor-pointer transition-all">
+                                  <Paperclip className="w-3 h-3" />
+                                  <span>{(s.materials?.length || 0) > 0 ? '管理' : '追加'}</span>
+                                </button>
+                              </div>
+                              <div className="flex flex-col items-center gap-1 shrink-0">
+                                <button onClick={() => setSelectedStudentDetail(s)} title="詳細・編集"
+                                  className="p-1.5 text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 hover:border-indigo-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
+                                  <Edit className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => handleDeleteStudent(s.id)} title="削除"
+                                  className="p-1.5 text-slate-400 hover:text-rose-600 bg-white border border-slate-200 hover:border-rose-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
                           </td>
                         </tr>
