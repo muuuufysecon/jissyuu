@@ -585,7 +585,7 @@ const ConnectionBadge = ({ status, roomKey }) => {
 
 const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, barColor, iconColor, title }) => (
   <button
-    onClick={(e) => { if (clickGate && !clickGate()) return; if (onClick) onClick(e); }} {...(cellHandlers || {})}
+    onClick={onClick}
     title={title}
     className={`text-left bg-white border rounded-2xl p-4 flex items-center justify-between transition-all shadow-sm ${active ? 'border-amber-500 bg-amber-50/50 ring-2 ring-amber-400' : 'border-slate-200 hover:border-slate-300'}`}
   >
