@@ -2502,12 +2502,12 @@ function App() {
                           </td>
                           <td className="p-4 align-top">
                             <div className="flex items-start gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                              <div className="flex-1 min-w-0 space-y-1">
+                              <div className="flex-1 min-w-0 w-[150px] max-w-[150px] space-y-1">
                                 {(s.materials || []).map((m) => (
                                   <button key={m.id} onClick={() => { if (m.kind === 'file' && typeof window.__requestFileUnlock === 'function') window.__requestFileUnlock(() => setMaterialPreview(m)); else setMaterialPreview(m); }} title={m.name}
-                                    className="w-full flex items-center gap-1 px-1.5 py-1 bg-amber-50/60 hover:bg-amber-100 border border-amber-200 text-slate-700 hover:text-amber-800 rounded-md text-[10px] font-bold cursor-pointer transition-all">
+                                    className="w-full max-w-full flex items-center gap-1 px-1.5 py-1 bg-amber-50/60 hover:bg-amber-100 border border-amber-200 text-slate-700 hover:text-amber-800 rounded-md text-[10px] font-bold cursor-pointer transition-all overflow-hidden">
                                     <span className="shrink-0 text-[11px] leading-none">{m.kind === 'url' ? '🔗' : m.mimeType?.startsWith('image/') ? '🖼️' : m.mimeType === 'application/pdf' ? '📄' : '📎'}</span>
-                                    <span className="truncate flex-1 text-left">{m.name}</span>
+                                    <span className="truncate flex-1 min-w-0 text-left whitespace-nowrap overflow-hidden">{m.name}</span>
                                   </button>
                                 ))}
                                 <button onClick={() => setMaterialModalStudentId(s.id)}
