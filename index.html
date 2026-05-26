@@ -632,7 +632,7 @@ const ProgressToggleButton = ({ icon: Icon, label, status, palette, onClick, suf
   );
 };
 
-const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert }) => {
+const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, onRename }) => {
   // v3.6: 保存ファイル(kind:'file')のプレビュー/DLはパスワードゲートを介して動作させる。URL登録はゲート不要。
   const gateFile = (action) => { if (typeof window.__requestFileUnlock === 'function') window.__requestFileUnlock(action); else action(); };
   const [urlInput, setUrlInput] = useState('');
@@ -681,7 +681,7 @@ const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert }
                 <div key={m.id} className="flex items-center gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
                   <span className="text-lg shrink-0">{iconFor(m)}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-slate-800 truncate">{m.name}</div>
+                    <button type="button" onClick={() => onRename && onRename(m)} title="クリックしてファイル名を編集" className="text-xs font-bold text-slate-800 truncate text-left hover:text-indigo-700 hover:bg-indigo-50 rounded px-1 -mx-1 cursor-pointer block w-full">{m.name}</button>
                     {m.kind === 'url' && <div className="text-[10px] text-slate-500 truncate">{m.url}</div>}
                     {m.kind === 'file' && m.size && <div className="text-[10px] text-slate-500">{Math.round(m.size / 1024)} KB · {m.mimeType || 'file'}</div>}
                   </div>
@@ -1091,6 +1091,7 @@ function App() {
   const [filterProgress, setFilterProgress] = useState('all');
   const [filterGrade, setFilterGrade] = useState('all');
   const [filterClass, setFilterClass] = useState('all');
+  const [filterInternshipType, setFilterInternshipType] = useState('all');
   const [filterPhoneStatus, setFilterPhoneStatus] = useState('all');
   const [filterDocStatus, setFilterDocStatus] = useState('all');
   const [filterGreetingStatus, setFilterGreetingStatus] = useState('all');
@@ -1278,6 +1279,17 @@ function App() {
     if (!target) return;
     const current = target.materials || [];
     const next = current.filter((m) => m.id !== materialId);
+    recordUpdate(target.id, { materials: current }, { materials: next });
+    await persistPartial(target.id, { materials: next });
+  };
+
+  const handleRenameMaterial = async (materialId, newName) => {
+    const target = students.find((s) => s.id === materialModalStudentId);
+    if (!target) return;
+    const trimmed = String(newName || '').trim();
+    if (!trimmed) return;
+    const current = target.materials || [];
+    const next = current.map((m) => m.id === materialId ? { ...m, name: trimmed } : m);
     recordUpdate(target.id, { materials: current }, { materials: next });
     await persistPartial(target.id, { materials: next });
   };
@@ -1611,6 +1623,7 @@ function App() {
 
       if (filterGrade !== 'all' && s.grade !== filterGrade) return false;
       if (filterClass !== 'all' && s.classVal !== filterClass) return false;
+      if (filterInternshipType !== 'all' && (s.internshipType || 'internship') !== filterInternshipType) return false;
       if (filterPhoneStatus !== 'all' && (s.phoneStatus || 'pending') !== filterPhoneStatus) return false;
       if (filterDocStatus !== 'all' && (s.docStatus || 'pending') !== filterDocStatus) return false;
       if (filterGreetingStatus !== 'all' && (s.greetingStatus || 'pending') !== filterGreetingStatus) return false;
@@ -1622,7 +1635,7 @@ function App() {
     });
   }, [students, searchQuery, filterProgress, filterGrade, filterClass,
       filterPhoneStatus, filterDocStatus, filterGreetingStatus, filterPatrolStatus,
-      filterStudentThankYouStatus, filterTeacherThankYouStatus]);
+      filterStudentThankYouStatus, filterTeacherThankYouStatus, filterInternshipType]);
 
   const stats = useMemo(() => {
     const total = students.length;
@@ -1784,14 +1797,14 @@ function App() {
     setFilterGrade('all'); setFilterClass('all');
     setFilterPhoneStatus('all'); setFilterDocStatus('all');
     setFilterGreetingStatus('all'); setFilterPatrolStatus('all');
-    setFilterStudentThankYouStatus('all'); setFilterTeacherThankYouStatus('all');
+    setFilterStudentThankYouStatus('all'); setFilterTeacherThankYouStatus('all'); setFilterInternshipType('all');
   };
 
   const hasActiveFilter = filterProgress !== 'all' || searchQuery ||
     filterGrade !== 'all' || filterClass !== 'all' ||
     filterPhoneStatus !== 'all' || filterDocStatus !== 'all' ||
     filterGreetingStatus !== 'all' || filterPatrolStatus !== 'all' ||
-    filterStudentThankYouStatus !== 'all' || filterTeacherThankYouStatus !== 'all';
+    filterStudentThankYouStatus !== 'all' || filterTeacherThankYouStatus !== 'all' || filterInternshipType !== 'all';
 
   const handleExportExcel = () => {
     if (filteredStudents.length === 0) {
@@ -2252,6 +2265,7 @@ function App() {
                 ))}
               </div>
 
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を活動種別（実習/見学）で絞り込みます"><Filter className="w-3.5 h-3.5 text-slate-500" /><select value={filterInternshipType} onChange={(e) => setFilterInternshipType(e.target.value)} title="活動種別を選んでください" className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold"><option value="all">種別: すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></div>
               {hasActiveFilter && (
                 <button onClick={clearFilters} className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
                   <RotateCcw className="w-3 h-3" />
@@ -3198,6 +3212,7 @@ function App() {
             onClose={() => setMaterialModalStudentId(null)}
             onAdd={handleAddMaterial}
             onDelete={handleDeleteMaterial}
+              onRename={(m) => setTextEditState({ title: 'ファイル名を編集', label: '表示名', value: m.name || '', onSave: (v) => handleRenameMaterial(m.id, v) })}
             onPreview={setMaterialPreview}
             onAlert={showAlert}
           />
