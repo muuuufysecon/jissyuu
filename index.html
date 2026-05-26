@@ -2149,7 +2149,7 @@ function App() {
                               <div className="relative group/name">
                                 <div className={`font-extrabold text-slate-900 text-sm inline-flex items-center gap-1 ${s.notes ? 'cursor-help' : ''}`}>
                                   <button type="button" onClick={(e) => { e.stopPropagation(); setTextEditState({ title: '生徒名を編集', label: '氏名', value: s.name || '', onSave: (v) => { const trimmed = (v || '').trim(); if (!trimmed || trimmed === s.name) return; const before = { name: s.name }; const after = { name: trimmed }; recordUpdate(s.id, before, after); persistPartial(s.id, after); } }); }} className="hover:bg-amber-50 hover:text-amber-700 rounded px-1 -mx-1 cursor-pointer transition-colors text-left" title="クリックして名前を編集">{s.name || '（未記入）'}</button>
-                                  {s.notes && <span className="text-[9px] text-amber-600" title="備考あり">📝</span>}
+                                  
                                 </div>
                                 <div className="text-[10px] text-slate-500 font-bold mt-0.5">
                                   {s.grade ? `${s.grade}年` : 'ー'}<button type="button" onClick={(e) => { e.stopPropagation(); setSelectEditState({ title: `${s.name} の組を変更`, value: s.classVal || '', options: [['', '未設定'], ['1', '1組'], ['2', '2組'], ['3', '3組']], onSave: async (v) => { const before = { classVal: s.classVal || '' }; const after = { classVal: v }; recordUpdate(s.id, before, after); await persistPartial(s.id, after); } }); }} className="hover:bg-indigo-100 hover:text-indigo-800 rounded px-1 -mx-0.5 cursor-pointer transition-colors inline-flex items-center gap-0.5" title="クリックして組を編集">{s.classVal ? `${s.classVal}組` : 'ー組'}<Edit className="w-2.5 h-2.5 opacity-40" /></button>
@@ -2189,7 +2189,7 @@ function App() {
                               <ProgressToggleButton icon={Phone} label={s.phoneStatus === 'completed' ? '連絡済み' : s.phoneStatus === 'none' ? '必要なし' : '未連絡'}
                                 status={s.phoneStatus} palette={phonePalette}
                                 onClick={() => handleInstantToggle(s, 'phoneStatus', s.phoneStatus)}
-                                suffix={s.phoneStatus === 'completed' ? '✔' : s.phoneStatus === 'none' ? 'ー' : '☎'} />
+                                suffix={''} />
                               {s.phoneStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.phoneDate || '', title: `${s.name} の電話連絡日`, onSelect: (v) => persistPartial(s.id, { phoneDate: v }) })}
                                   className="text-[9px] text-slate-600 font-mono pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">連絡日: {s.phoneDate ? formatShortDate(s.phoneDate) : '未設定（タップ）'}</button>
@@ -2201,7 +2201,7 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.docStatus === 'completed' ? '配付済み' : s.docStatus === 'none' ? '配付の必要なし' : '未配付'}
                                 status={s.docStatus} palette={docPalette}
                                 onClick={() => handleInstantToggle(s, 'docStatus', s.docStatus)}
-                                suffix={s.docStatus === 'completed' ? '✔' : s.docStatus === 'none' ? 'ー' : '⚠'} />
+                                suffix={''} />
                               {s.docStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.docDate || '', title: `${s.name} の保護者お知らせ配付日`, onSelect: (v) => persistPartial(s.id, { docDate: v }) })}
                                   className="text-[9px] text-slate-600 font-mono pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">配付日: {s.docDate ? formatShortDate(s.docDate) : '未設定（タップ）'}</button>
@@ -2214,13 +2214,13 @@ function App() {
                                 className={`w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${greetingPalette}`}>
                                 <span className="flex items-center gap-1">
                                   <Handshake className="w-3.5 h-3.5 text-slate-500" />
-                                  {s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '挨拶日決定' : s.greetingStatus === 'unadjusted' ? '未調整' : '必要なし'}
+                                  {s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '挨拶日決定' : s.greetingStatus === 'unadjusted' ? '未調整' : 'ー'}
                                 </span>
-                                <span>{s.greetingStatus === 'completed' ? '✔' : s.greetingStatus === 'scheduled' ? '📅' : s.greetingStatus === 'unadjusted' ? '🕐' : 'ー'}</span>
+                                <span></span>
                               </button>
                               {s.greetingStatus !== 'pending' && (<>
                               <button onClick={() => setDatePickerState({ value: s.greetingDate || '', title: `${s.name} の事前挨拶日`, onSelect: (v) => { const upd = { greetingDate: v }; if (v && (!s.greetingStatus || s.greetingStatus === 'pending')) upd.greetingStatus = 'scheduled'; persistPartial(s.id, upd); } })}
-                                className="text-[10px] font-semibold pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">📅 日時: <span className={s.greetingDate ? 'text-slate-700' : 'text-slate-400 italic'}>{s.greetingDate ? formatShortDate(s.greetingDate) : '未設定（タップ）'}</span></button>
+                                className="text-[10px] font-semibold pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">日時: <span className={s.greetingDate ? 'text-slate-700' : 'text-slate-400 italic'}>{s.greetingDate ? formatShortDate(s.greetingDate) : '未設定（タップ）'}</span></button>
                               {s.greetingTime    && <div className="text-[9px] text-slate-500 pl-1">時間: {s.greetingTime}</div>}
                               {s.greetingVisitor && <div className="text-[9px] text-slate-500 pl-1">引率: {s.greetingVisitor}</div>}
                               </>)}
@@ -2238,7 +2238,7 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.studentThankYouStatus === 'completed' ? '送付済' : s.studentThankYouStatus === 'none' ? '不要' : '未送付'}
                                 status={s.studentThankYouStatus} palette={studentThankYouPalette}
                                 onClick={() => handleInstantToggle(s, 'studentThankYouStatus', s.studentThankYouStatus)}
-                                suffix={s.studentThankYouStatus === 'completed' ? '✔' : s.studentThankYouStatus === 'none' ? 'ー' : ''} />
+                                suffix={''} />
                               {s.studentThankYouStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.studentThankYouDate || '', title: `${s.name} の生徒お礼状送付日`, onSelect: (v) => persistPartial(s.id, { studentThankYouDate: v }) })}
                                   className="text-[9px] text-slate-600 font-mono pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">送付日: {s.studentThankYouDate ? formatShortDate(s.studentThankYouDate) : '未設定（タップ）'}</button>
@@ -2250,7 +2250,7 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.teacherThankYouStatus === 'completed' ? '送付済' : s.teacherThankYouStatus === 'none' ? '不要' : '未送付'}
                                 status={s.teacherThankYouStatus} palette={teacherThankYouPalette}
                                 onClick={() => handleInstantToggle(s, 'teacherThankYouStatus', s.teacherThankYouStatus)}
-                                suffix={s.teacherThankYouStatus === 'completed' ? '✔' : s.teacherThankYouStatus === 'none' ? 'ー' : ''} />
+                                suffix={''} />
                               {s.teacherThankYouStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.teacherThankYouDate || '', title: `${s.name} の教師お礼状送付日`, onSelect: (v) => persistPartial(s.id, { teacherThankYouDate: v }) })}
                                   className="text-[9px] text-slate-600 font-mono pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">送付日: {s.teacherThankYouDate ? formatShortDate(s.teacherThankYouDate) : '未設定（タップ）'}</button>
@@ -2556,7 +2556,7 @@ function App() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-slate-500 flex items-center gap-1"><Handshake className="w-3.5 h-3.5 text-teal-600" />事前挨拶訪問</span>
-                  <button onClick={() => handleInstantToggle(sd, 'greetingStatus', sd.greetingStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.greetingStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : sd.greetingStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100' : sd.greetingStatus === 'unadjusted' ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>{sd.greetingStatus === 'completed' ? '挨拶終了' : sd.greetingStatus === 'scheduled' ? '挨拶日決定' : sd.greetingStatus === 'unadjusted' ? '未調整' : '必要なし'}</button>
+                  <button onClick={() => handleInstantToggle(sd, 'greetingStatus', sd.greetingStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.greetingStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : sd.greetingStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100' : sd.greetingStatus === 'unadjusted' ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>{sd.greetingStatus === 'completed' ? '挨拶終了' : sd.greetingStatus === 'scheduled' ? '挨拶日決定' : sd.greetingStatus === 'unadjusted' ? '未調整' : 'ー'}</button>
                 </div>
                 {sd.greetingStatus !== 'pending' && (<div className="p-2 bg-emerald-50/40 border border-emerald-100 text-emerald-900 rounded-lg text-xs font-semibold space-y-1">
                   <button onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: `${sd.name} の挨拶予定日`, onSelect: (v) => { const upd = { greetingDate: v }; if (v && (!sd.greetingStatus || sd.greetingStatus === 'pending')) upd.greetingStatus = 'scheduled'; persistPartial(sd.id, upd); } })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">📅 挨拶予定: <span className={sd.greetingDate ? '' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : '未設定(タップ)'}</span></button>
