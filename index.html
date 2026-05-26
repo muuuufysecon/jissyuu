@@ -1370,16 +1370,25 @@ function App() {
     return [...list].sort((a, b) => { const ia = arr.indexOf(a.id); const ib = arr.indexOf(b.id); if (ia === -1 && ib === -1) return 0; if (ia === -1) return 1; if (ib === -1) return -1; return ia - ib; });
   };
 
-  const reorderListRow = (gradeKey, draggedId, targetId) => {
+  const reorderListRow = (sectionKey, draggedId, targetId) => {
     if (!draggedId || draggedId === targetId) return;
-    const sectionAll = students.filter((s) => gradeKey === 'other' ? !['1','2','3'].includes(s.grade) : s.grade === gradeKey);
-    const currentArr = customOrder[gradeKey] || [];
+    let sectionAll;
+    if (sectionKey === 'other') {
+      sectionAll = students.filter((s) => !['1','2','3'].includes(s.grade));
+    } else if (sectionKey.endsWith('-_nocls')) {
+      const g = sectionKey.split('-')[0];
+      sectionAll = students.filter((s) => s.grade === g && !s.classVal);
+    } else {
+      const [g, c] = sectionKey.split('-');
+      sectionAll = students.filter((s) => s.grade === g && s.classVal === c);
+    }
+    const currentArr = customOrder[sectionKey] || [];
     let ordered = sectionAll.map((s) => s.id).sort((a, b) => { const ia = currentArr.indexOf(a); const ib = currentArr.indexOf(b); if (ia === -1 && ib === -1) return 0; if (ia === -1) return 1; if (ib === -1) return -1; return ia - ib; });
     if (!ordered.includes(draggedId)) return;
     ordered = ordered.filter((id) => id !== draggedId);
     const ti = ordered.indexOf(targetId);
     if (ti === -1) ordered.push(draggedId); else ordered.splice(ti, 0, draggedId);
-    const next = { ...customOrder, [gradeKey]: ordered };
+    const next = { ...customOrder, [sectionKey]: ordered };
     setCustomOrder(next);
     try { localStorage.setItem('list_custom_order_' + roomKey, JSON.stringify(next)); } catch (e) {}
   };
@@ -2089,11 +2098,11 @@ function App() {
                       if (gradeStudents.length === 0) return;
                       const classes = Array.from(new Set(gradeStudents.map((s) => s.classVal).filter(Boolean))).sort();
                       classes.forEach((c) => {
-                        const list = sortByCustomOrder(gradeStudents.filter((s) => s.classVal === c), g);
+                        const list = sortByCustomOrder(gradeStudents.filter((s) => s.classVal === c), g + '-' + c);
                         sections.push({ key: g + '-' + c, label: `${g}年${c}組`, list, accent: accentOf(g) });
                       });
                       const nocls = gradeStudents.filter((s) => !s.classVal);
-                      if (nocls.length > 0) sections.push({ key: g + '-_nocls', label: `${g}年（組未設定）`, list: sortByCustomOrder(nocls, g), accent: accentOf(g) });
+                      if (nocls.length > 0) sections.push({ key: g + '-_nocls', label: `${g}年（組未設定）`, list: sortByCustomOrder(nocls, g + '-_nocls'), accent: accentOf(g) });
                     });
                     if (ungraded.length > 0) sections.push({ key: 'other', label: '学年未設定', list: sortByCustomOrder(ungraded, 'other'), accent: 'bg-slate-100 border-slate-100 text-slate-700' });
                     return sections.flatMap(({ key, label, list, accent }) => [
@@ -2284,8 +2293,8 @@ function App() {
             </div>
           </div>
         ) : currentView === 'calendar' ? (
-          <div key="view-calendar" className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col animate-fadeIn">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div key="view-calendar" className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col animate-fadeIn">
+            <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 rounded-t-2xl sticky top-[60px] z-30 shadow-sm">
               <div className="flex items-center gap-2">
                 <button onClick={handlePrevMonth} className="p-1.5 hover:bg-slate-200 bg-white border border-slate-200 rounded-lg text-slate-700 transition-all cursor-pointer">
                   <ChevronLeft className="w-4 h-4" />
