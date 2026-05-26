@@ -412,7 +412,7 @@ function usePresence(connectionStatus, roomKey, teacherName) {
       return;
     }
     if (!sessionIdRef.current) {
-      sessionIdRef.current = 'sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+      sessionIdRef.current = (typeof localStorage !== 'undefined' && localStorage.getItem('presence_session_id')) || ('sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10)); try { localStorage.setItem('presence_session_id', sessionIdRef.current); } catch (e) {}
     }
     const sessionId = sessionIdRef.current;
     const db = window.firebase.app().firestore();
@@ -457,7 +457,7 @@ function usePresence(connectionStatus, roomKey, teacherName) {
           });
         }
       });
-      members.sort((a, b) => (Number(b.isSelf) - Number(a.isSelf)) || String(a.teacherName).localeCompare(String(b.teacherName), 'ja'));
+      members.sort((a, b) => b.lastSeen - a.lastSeen); const dedupMap = new Map(); for (const m of members) { const key = String(m.teacherName || '').trim() || ('__id__' + m.id); if (m.isSelf) dedupMap.set(key, m); else if (!dedupMap.has(key)) dedupMap.set(key, m); } members.length = 0; for (const m of dedupMap.values()) members.push(m); members.sort((a, b) => (Number(b.isSelf) - Number(a.isSelf)) || String(a.teacherName).localeCompare(String(b.teacherName), 'ja'));
       setOnlineMembers(members);
     }, (err) => {
       console.warn('presence snapshot error:', err.message);
