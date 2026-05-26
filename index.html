@@ -1272,6 +1272,43 @@ function App() {
     setIsConfigOpen(false);
   };
 
+  // v3.6: 環境設定モーダルから「過去データを一括削除」する。パスワード「@kirari」必須。
+  //        クラウド接続中なら Firestore のドキュメントをバッチ削除、ローカルなら localStorage を消去。
+  const handleWipeAllData = (password) => {
+    if (String(password || '').trim() !== '@kirari') {
+      showAlert('パスワードが違います。削除を実行するには「@kirari」と入力してください。');
+      return;
+    }
+    showConfirm(`本当にこのルーム「${roomKey}」の過去データをすべて削除しますか？この操作は取り消せません（Undo不可）。`, async () => {
+      setIsLoading(true);
+      try {
+        if (connectionStatus === 'connected' && window.firebase) {
+          const db = window.firebase.app().firestore();
+          const snap = await db.collection('rooms').doc(roomKey).collection('students').get();
+          const docs = snap.docs;
+          const batchSize = 400;
+          for (let i = 0; i < docs.length; i += batchSize) {
+            const batch = db.batch();
+            docs.slice(i, i + batchSize).forEach((d) => batch.delete(d.ref));
+            await batch.commit();
+          }
+          showAlert(`クラウド上の${docs.length}件の生徒データを削除しました。`);
+        } else {
+          const count = students.length;
+          localStorage.removeItem(`local_students_${roomKey}`);
+          setStudents([]);
+          showAlert(`ローカル保存の${count}件の生徒データを削除しました。`);
+        }
+        setSelectedIds(new Set());
+        setIsConfigOpen(false);
+      } catch (e) {
+        showAlert(`一括削除に失敗しました: ${e.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    });
+  };
+
   const resetConfig = () => {
     showConfirm('接続情報を削除してローカルのお試しデモモードに戻しますか？', () => {
       localStorage.removeItem('school_firebase_config');
@@ -2824,7 +2861,21 @@ function App() {
                   </div>
                 </form>
 
-                {connectionError && (
+                {/* v3.6: 危険ゾーン：過去データ一括削除（パスワード「@kirari」必須） */}
+              <hr className="border-slate-200" />
+              <div className="space-y-3 p-4 bg-rose-50/40 border border-rose-200 rounded-xl">
+                <h4 className="text-xs font-bold text-rose-800 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
+                  <span>危険ゾーン：過去データの一括削除</span>
+                </h4>
+                <p className="text-[11px] text-rose-900 leading-relaxed">現在のルーム「<span className="font-mono font-bold">{roomKey}</span>」に保存されている<strong>すべての生徒データ</strong>を削除します。この操作は<strong>取り消せません（Undo不可）</strong>。続行するにはパスワード「<span className="font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-rose-200">@kirari</span>」を入力してください。</p>
+                <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); handleWipeAllData(fd.get('wipePassword')); e.currentTarget.reset(); }} className="flex gap-2">
+                  <input type="password" name="wipePassword" required placeholder="パスワードを入力" autoComplete="off" className="flex-1 px-3 py-2 border border-rose-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-slate-800" />
+                  <button type="submit" className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm shrink-0 cursor-pointer flex items-center gap-1.5"><Trash2 className="w-3.5 h-3.5" /><span>過去データを一括削除</span></button>
+                </form>
+              </div>
+
+              {connectionError && (
                   <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 leading-relaxed">
                     <span className="font-bold flex items-center gap-1 mb-1 text-rose-700">
                       <AlertTriangle className="w-4 h-4 shrink-0" />
