@@ -1519,7 +1519,7 @@ function App() {
             : 'bg-green-200 border-green-400 text-green-900 hover:bg-green-300'
         });
       }
-      if (calendarFilter !== 'student') {
+      if (calendarFilter === 'teacher') {
         (student.patrols || []).forEach((p) => {
           if (p.date !== target) return;
           events.push({
@@ -1538,9 +1538,15 @@ function App() {
         const color = isObs
           ? 'bg-pink-100 border-pink-300 text-pink-900 hover:bg-pink-200'
           : 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200';
+        const patrolsOnDay = (student.patrols || []).filter((p) => p.date === target);
+        const patrolNames = patrolsOnDay.map((p) => p.teacher).filter(Boolean);
+        const tipLines = [`${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`];
+        if (student.teacher) tipLines.push(`同行: ${student.teacher}`);
+        if (patrolNames.length > 0) tipLines.push(`巡回: ${patrolNames.join('、')}`);
         events.push({
           type: 'period',
           label: `${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`,
+          title: tipLines.join('\n'),
           student,
           color,
           dateKey: target
@@ -2354,7 +2360,7 @@ function App() {
                         const renderEvent = (ev, evIdx) => {
                           if (ev.type === 'period') {
                             return (
-                              <div key={evIdx} className={`text-[10px] px-1.5 py-0.5 rounded border font-bold select-none transition-colors shadow-sm flex items-center justify-between gap-1 ${ev.color}`} title={ev.label}>
+                              <div key={evIdx} className={`text-[10px] px-1.5 py-0.5 rounded border font-bold select-none transition-colors shadow-sm flex items-center justify-between gap-1 ${ev.color}`} title={ev.title || ev.label}>
                                 <button onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }} className="truncate text-left flex-1 cursor-pointer">{ev.label}</button>
                                 <button onClick={(e) => { e.stopPropagation(); handleRemoveInternshipDate(ev.student, ev.dateKey); }}
                                   title="この日を実習日から外す"
