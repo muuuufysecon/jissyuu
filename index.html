@@ -1647,29 +1647,36 @@ function App() {
       teacherThankYouPercent: 0, teacherThankYouPendingCount: 0
     };
     const todayKey = getTodayString();
-    const phoneDone    = students.filter((s) => s.phoneStatus === 'completed' || s.phoneStatus === 'none').length;
-    const docDone      = students.filter((s) => s.docStatus   === 'completed' || s.docStatus   === 'none').length;
+    const phoneNeeded = students.filter((s) => (s.phoneStatus || 'pending') !== 'none').length;
+    const phoneDone = students.filter((s) => s.phoneStatus === 'completed').length;
+    const docNeeded = students.filter((s) => (s.docStatus || 'pending') !== 'none').length;
+    const docDone = students.filter((s) => s.docStatus === 'completed').length;
+    const greetingNeeded = students.filter((s) => (s.greetingStatus || 'pending') !== 'none').length;
     const greetingDone = students.filter((s) => s.greetingStatus === 'completed').length;
-    const patrolDone   = students.filter((s) => { const ps = s.patrols || []; return ps.length > 0 && ps.every((p) => p.done); }).length;
+    const patrolNeeded = students.filter((s) => (s.patrols || []).length > 0).length;
+    const patrolDone = students.filter((s) => { const ps = s.patrols || []; return ps.length > 0 && ps.every((p) => p.done); }).length;
+    const internshipNeeded = students.filter((s) => (s.internshipDates || []).length > 0).length;
     const internshipImplDone = students.filter((s) => { const dates = s.internshipDates || []; if (dates.length === 0) return false; const last = [...dates].sort().pop(); return last < todayKey; }).length;
     const internshipInProgressCount = students.filter((s) => (s.internshipDates || []).includes(todayKey)).length;
-    const studentTYDone = students.filter((s) => s.studentThankYouStatus === 'completed' || s.studentThankYouStatus === 'none').length;
-    const teacherTYDone = students.filter((s) => s.teacherThankYouStatus === 'completed' || s.teacherThankYouStatus === 'none').length;
+    const studentTYNeeded = students.filter((s) => (s.studentThankYouStatus || 'pending') !== 'none').length;
+    const studentTYDone = students.filter((s) => s.studentThankYouStatus === 'completed').length;
+    const teacherTYNeeded = students.filter((s) => (s.teacherThankYouStatus || 'pending') !== 'none').length;
+    const teacherTYDone = students.filter((s) => s.teacherThankYouStatus === 'completed').length;
     return {
       total,
-      phonePercent:    Math.round((phoneDone    / total) * 100),
-      docPercent:      Math.round((docDone      / total) * 100),
-      greetingPercent: Math.round((greetingDone / total) * 100),
-      patrolPercent:   Math.round((patrolDone   / total) * 100),
+      phonePercent:    phoneNeeded > 0 ? Math.round((phoneDone / phoneNeeded) * 100) : 0,
+      docPercent:      docNeeded > 0 ? Math.round((docDone / docNeeded) * 100) : 0,
+      greetingPercent: greetingNeeded > 0 ? Math.round((greetingDone / greetingNeeded) * 100) : 0,
+      patrolPercent:   patrolNeeded > 0 ? Math.round((patrolDone / patrolNeeded) * 100) : 0,
       phonePendingCount:    students.filter((s) => s.phoneStatus === 'pending').length,
       docPendingCount:      students.filter((s) => s.docStatus   === 'pending').length,
       greetingPendingCount: students.filter((s) => s.greetingStatus === 'pending' || s.greetingStatus === 'scheduled').length,
       patrolPendingCount:   students.filter((s) => (s.patrols || []).some((p) => !p.done)).length,
-      internshipImplPercent: Math.round((internshipImplDone / total) * 100),
+      internshipImplPercent: internshipNeeded > 0 ? Math.round((internshipImplDone / internshipNeeded) * 100) : 0,
       internshipInProgressCount,
-      studentThankYouPercent: Math.round((studentTYDone / total) * 100),
+      studentThankYouPercent: studentTYNeeded > 0 ? Math.round((studentTYDone / studentTYNeeded) * 100) : 0,
       studentThankYouPendingCount: students.filter((s) => (s.studentThankYouStatus || 'pending') === 'pending').length,
-      teacherThankYouPercent: Math.round((teacherTYDone / total) * 100),
+      teacherThankYouPercent: teacherTYNeeded > 0 ? Math.round((teacherTYDone / teacherTYNeeded) * 100) : 0,
       teacherThankYouPendingCount: students.filter((s) => (s.teacherThankYouStatus || 'pending') === 'pending').length
     };
   }, [students]);
