@@ -2177,9 +2177,9 @@ function App() {
                           <td className="p-4 align-top">
                             <div className="space-y-1.5">
                               <button onClick={() => handleInstantToggle(s, 'greetingStatus', s.greetingStatus)}
-                                className={`w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${greetingPalette}`}>
+                                className={s.greetingStatus === 'pending' ? 'w-full py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95 cursor-pointer' : `w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${greetingPalette}`}>
                                 <span className="flex items-center gap-1">
-                                  <Handshake className="w-3.5 h-3.5 text-slate-500" />
+                                  {s.greetingStatus !== 'pending' && <Handshake className="w-3.5 h-3.5 text-slate-500" />}
                                   {s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '挨拶日決定' : s.greetingStatus === 'unadjusted' ? '未調整' : 'ー'}
                                 </span>
                                 <span></span>
