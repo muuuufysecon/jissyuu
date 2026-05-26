@@ -925,7 +925,11 @@ function App() {
   const [kanbanStep, setKanbanStep] = useState('phone');
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
-  const [calendarFilter, setCalendarFilter] = useState('all'); // 'all' | 'teacher' | 'student'
+  const [calendarFilter, setCalendarFilter] = useState('student'); // 'all' | 'teacher' | 'student'
+  // v3.6: ファイル起動時のパスワードロック。`@kirari` を入力するまで操作不可。
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -1532,7 +1536,7 @@ function App() {
     const target = formatDateKey(year, month, day);
     const events = [];
     filteredStudents.forEach((student) => {
-      if (student.greetingDate === target) {
+      if ((calendarFilter === 'all' || calendarFilter === 'student') && student.greetingDate === target) {
         events.push({
           type: 'greeting',
           label: `挨拶: ${student.name} (${student.greetingTime || '時間未定'})`,
@@ -1542,7 +1546,7 @@ function App() {
             : 'bg-green-200 border-green-400 text-green-900 hover:bg-green-300'
         });
       }
-      if (calendarFilter === 'teacher') {
+      if (calendarFilter === 'teacher' || calendarFilter === 'all') {
         (student.patrols || []).forEach((p) => {
           if (p.date !== target) return;
           events.push({
@@ -1556,7 +1560,7 @@ function App() {
         });
       }
       const info = computeInternshipDayInfo(student, target);
-      if (info && calendarFilter !== 'teacher') {
+      if (info && (calendarFilter === 'student' || calendarFilter === 'all')) {
         const isObs = student.internshipType === 'observation';
         const color = isObs
           ? 'bg-pink-100 border-pink-300 text-pink-900 hover:bg-pink-200'
@@ -1740,6 +1744,32 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+
+      {/* v3.6: 起動パスワードロック画面。@kirari を入力するまでアプリ操作をブロック */}
+      {!isUnlocked && (
+        <div className="fixed inset-0 z-[300] bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-scaleIn">
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-5 text-white">
+              <div className="flex items-center gap-3">
+                <Key className="w-7 h-7" />
+                <div>
+                  <div className="text-lg font-extrabold">パスワードを入力</div>
+                  <div className="text-xs text-indigo-100">このファイルを開くにはパスワードが必要です</div>
+                </div>
+              </div>
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); if (passwordInput.trim() === '@kirari') { setIsUnlocked(true); setPasswordError(''); setPasswordInput(''); } else { setPasswordError('パスワードが違います。'); } }} className="p-6 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-700 mb-1.5 block">パスワード</label>
+                <input type="password" autoFocus value={passwordInput} onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }} className="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-indigo-400 rounded-xl text-sm font-bold outline-none transition-colors" placeholder="パスワードを入力" />
+                {passwordError && <div className="mt-2 text-xs text-rose-700 font-bold">⚠ {passwordError}</div>}
+              </div>
+              <button type="submit" className="w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-extrabold transition-colors shadow-sm">ロックを解除</button>
+              <p className="text-[10px] text-slate-500 leading-relaxed">※ ブラウザのタブを閉じる、またはページを再読み込みすると再度パスワード入力が必要になります。</p>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* 隠しファイル入力: 「config.js を読み込む」ボタンから呼ばれる */}
       <input
