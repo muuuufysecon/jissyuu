@@ -21,6 +21,7 @@
   .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent }
+  .config-mask { -webkit-text-security: disc; text-security: disc; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; }
   /* 文字色を黒で統一（実習/見学/挨拶/巡回チップの文字色は除外） */
   body, body * { color: #000 !important; }
@@ -911,6 +912,7 @@ function App() {
   const configFileInputRef = useRef(null);
   const [roomKey, setRoomKey] = useState(() => localStorage.getItem('school_room_key') || '3-1');
   const [tempRoomKey, setTempRoomKey] = useState(roomKey);
+  const [showConfigText, setShowConfigText] = useState(false);
   const [myTeacherName, setMyTeacherName] = useState(() => localStorage.getItem('my_teacher_name') || '');
 
   const { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError } =
@@ -1286,7 +1288,7 @@ function App() {
   //        クラウド接続中なら Firestore のドキュメントをバッチ削除、ローカルなら localStorage を消去。
   const handleWipeAllData = (password) => {
     if (String(password || '').trim() !== '@kirari') {
-      showAlert('パスワードが違います。削除を実行するには「@kirari」と入力してください。');
+      showAlert('パスワードが違います。正しいパスワードを入力してください。');
       return;
     }
     showConfirm(`本当にこのルーム「${roomKey}」の過去データをすべて削除しますか？この操作は取り消せません（Undo不可）。`, async () => {
@@ -2887,7 +2889,8 @@ function App() {
                 <form onSubmit={handleConfigSubmit} className="space-y-4">
                   <textarea rows={5} placeholder={'{\n  "apiKey": "AIzaSy...",\n  "projectId": "school-database", ...\n}'}
                     value={firebaseConfigStr} onChange={(e) => setFirebaseConfigStr(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-700 placeholder-slate-400"></textarea>
+                    className={"w-full px-3 py-2 border border-slate-300 rounded-xl text-xs font-mono bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-700 placeholder-slate-400 " + (showConfigText ? '' : 'config-mask')}></textarea>
+                  <div className="flex justify-end -mt-2"><button type="button" onClick={() => setShowConfigText(v => !v)} className="text-[10px] font-bold px-2.5 py-1 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-md cursor-pointer flex items-center gap-1">{showConfigText ? '🙈 隠す' : '👁 表示する'}</button></div>
 
                   <div className="flex gap-2">
                     <button type="submit" className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-sm cursor-pointer text-center">学校のクラウドに接続する</button>
@@ -2904,7 +2907,7 @@ function App() {
                   <AlertTriangle className="w-4 h-4 text-rose-600" />
                   <span>危険ゾーン：過去データの一括削除</span>
                 </h4>
-                <p className="text-[11px] text-rose-900 leading-relaxed">現在のルーム「<span className="font-mono font-bold">{roomKey}</span>」に保存されている<strong>すべての生徒データ</strong>を削除します。この操作は<strong>取り消せません（Undo不可）</strong>。続行するにはパスワード「<span className="font-mono font-bold bg-white px-1.5 py-0.5 rounded border border-rose-200">@kirari</span>」を入力してください。</p>
+                <p className="text-[11px] text-rose-900 leading-relaxed">現在のルーム「<span className="font-mono font-bold">{roomKey}</span>」に保存されている<strong>すべての生徒データ</strong>を削除します。この操作は<strong>取り消せません（Undo不可）</strong>。続行するにはパスワードを入力してください。</p>
                 <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); handleWipeAllData(fd.get('wipePassword')); e.currentTarget.reset(); }} className="flex gap-2">
                   <input type="password" name="wipePassword" required placeholder="パスワードを入力" autoComplete="off" className="flex-1 px-3 py-2 border border-rose-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-slate-800" />
                   <button type="submit" className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm shrink-0 cursor-pointer flex items-center gap-1.5"><Trash2 className="w-3.5 h-3.5" /><span>過去データを一括削除</span></button>
