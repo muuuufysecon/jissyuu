@@ -541,7 +541,12 @@ function useBoardSync(connectionStatus, roomKey) {
     });
   };
 
-  return { posts, addPost, deletePost };
+  const [hiddenIds, setHiddenIds] = useState(() => { try { const v = localStorage.getItem('board_hidden_' + roomKey); return new Set(v ? JSON.parse(v) : []); } catch (e) { return new Set(); } });
+  useEffect(() => { try { const v = localStorage.getItem('board_hidden_' + roomKey); setHiddenIds(new Set(v ? JSON.parse(v) : [])); } catch (e) { setHiddenIds(new Set()); } }, [roomKey]);
+  const hidePost = (postId) => { setHiddenIds((prev) => { const next = new Set(prev); next.add(postId); try { localStorage.setItem('board_hidden_' + roomKey, JSON.stringify(Array.from(next))); } catch (e) {} return next; }); };
+  const visiblePosts = posts.filter((p) => !hiddenIds.has(p.id));
+
+  return { posts: visiblePosts, addPost, deletePost, hidePost };
 }
 
 // =============================================================================
@@ -988,7 +993,7 @@ function App() {
   const { history, redo, push: pushHistory, popUndo, popRedo } = useHistory(10);
   const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
   const { onlineCount, onlineMembers } = usePresence(connectionStatus, roomKey, myTeacherName);
-  const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost } = useBoardSync(connectionStatus, roomKey);
+  const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost, hidePost: hideBoardPost } = useBoardSync(connectionStatus, roomKey);
   const [boardInput, setBoardInput] = useState('');
   const [isBoardOpen, setIsBoardOpen] = useState(true);
   const [isOnlineListOpen, setIsOnlineListOpen] = useState(false);
@@ -1964,7 +1969,7 @@ function App() {
                         <div className="text-[9px] text-slate-500 font-mono">{timeStr}</div>
                       </div>
                       <div className="flex-1 text-slate-800 whitespace-pre-wrap break-words leading-relaxed">{p.message}</div>
-                      <button type="button" onClick={() => showConfirm('この投稿を削除しますか？', () => deleteBoardPost(p.id))} title={canDelete ? 'この投稿を削除' : '他の人の投稿も削除できます'} className="shrink-0 px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer">削除</button>
+                      <div className="shrink-0 flex flex-col gap-1">{myTeacherName && p.author === myTeacherName ? (<><button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button><button type="button" onClick={() => showConfirm('この投稿を全員の画面から削除しますか？この操作は取り消せません。', () => deleteBoardPost(p.id))} title="自分の投稿を全員の画面から削除します" className="px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">全員削除</button></>) : (<button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button>)}</div>
                     </div>
                   ); })}
                 </div>
