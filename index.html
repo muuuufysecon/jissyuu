@@ -484,6 +484,67 @@ function usePresence(connectionStatus, roomKey, teacherName) {
 }
 
 // =============================================================================
+// useBoardSync: 画面上部の掲示板。rooms/{roomKey}/board コレクションを
+// 購読、接続中はリアルタイム同期、ローカル時は localStorage を使う。
+// =============================================================================
+function useBoardSync(connectionStatus, roomKey) {
+  const [posts, setPosts] = useState([]);
+  const unsubRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('local_board_' + roomKey);
+      setPosts(stored ? JSON.parse(stored) : []);
+    } catch (e) { setPosts([]); }
+
+    if (connectionStatus === 'connected' && window.firebase) {
+      const db = window.firebase.app().firestore();
+      const ref = db.collection('rooms').doc(roomKey).collection('board').orderBy('createdAt', 'desc').limit(50);
+      if (unsubRef.current) unsubRef.current();
+      unsubRef.current = ref.onSnapshot((snap) => {
+        const list = [];
+        snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
+        setPosts(list);
+      }, (err) => { console.warn('board snapshot:', err.message); });
+    }
+
+    return () => { if (unsubRef.current) { unsubRef.current(); unsubRef.current = null; } };
+  }, [connectionStatus, roomKey]);
+
+  const addPost = async (author, message) => {
+    if (connectionStatus === 'connected' && window.firebase) {
+      try {
+        const db = window.firebase.app().firestore();
+        await db.collection('rooms').doc(roomKey).collection('board').add({ author: author || '匿名', message, createdAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+        return;
+      } catch (e) { console.warn('board add failed:', e.message); }
+    }
+    setPosts((prev) => {
+      const next = [{ id: 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6), author: author || '匿名', message, createdAt: Date.now() }, ...prev];
+      try { localStorage.setItem('local_board_' + roomKey, JSON.stringify(next.slice(0, 50))); } catch (e) {}
+      return next.slice(0, 50);
+    });
+  };
+
+  const deletePost = async (postId) => {
+    if (connectionStatus === 'connected' && window.firebase && !String(postId).startsWith('local-')) {
+      try {
+        const db = window.firebase.app().firestore();
+        await db.collection('rooms').doc(roomKey).collection('board').doc(postId).delete();
+        return;
+      } catch (e) { console.warn('board delete failed:', e.message); }
+    }
+    setPosts((prev) => {
+      const next = prev.filter((p) => p.id !== postId);
+      try { localStorage.setItem('local_board_' + roomKey, JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
+  };
+
+  return { posts, addPost, deletePost };
+}
+
+// =============================================================================
 // 共通サブコンポーネント
 // =============================================================================
 
@@ -927,6 +988,9 @@ function App() {
   const { history, redo, push: pushHistory, popUndo, popRedo } = useHistory(10);
   const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
   const { onlineCount, onlineMembers } = usePresence(connectionStatus, roomKey, myTeacherName);
+  const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost } = useBoardSync(connectionStatus, roomKey);
+  const [boardInput, setBoardInput] = useState('');
+  const [isBoardOpen, setIsBoardOpen] = useState(true);
   const [isOnlineListOpen, setIsOnlineListOpen] = useState(false);
   // v3.6: 接続した各端末で「編集者名」を個別に入力してもらうためのモーダル状態
   const [isNamePromptOpen, setIsNamePromptOpen] = useState(false);
@@ -1843,6 +1907,53 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+
+      {/* v3.7: 画面上部の掲示板。ルーム単位で共有され、投稿者名と削除ボタン付き。 */}
+      <div className="sticky top-0 z-40 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-300 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setIsBoardOpen((v) => !v)} className="flex items-center gap-2 text-xs font-bold text-amber-900 hover:text-amber-700 cursor-pointer">
+              <span className="text-base">📣</span>
+              <span>掲示板</span>
+              <span className="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full text-[10px] font-mono">{boardPosts.length}件</span>
+              <ChevronDown className={"w-3.5 h-3.5 transition-transform " + (isBoardOpen ? "rotate-180" : "")} />
+            </button>
+            {!isBoardOpen && boardPosts[0] && (
+              <div className="text-[11px] text-amber-900 truncate flex-1 min-w-0">
+                <span className="font-bold">{boardPosts[0].author || '匿名'}:</span> {boardPosts[0].message}
+              </div>
+            )}
+          </div>
+          {isBoardOpen && (
+            <div className="mt-2 space-y-2">
+              <form onSubmit={(e) => { e.preventDefault(); if (!boardInput.trim()) return; addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); }} className="flex items-start gap-2">
+                <div className="flex-shrink-0 bg-amber-100 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-amber-900 whitespace-nowrap" title="投稿者名。「編集者名」と同じ。">
+                  {myTeacherName || '匿名'}
+                </div>
+                <textarea value={boardInput} onChange={(e) => setBoardInput(e.target.value)} placeholder="連絡事項やお知らせを入力（CtrlまたはCmd + Enter で投稿）" rows={1} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (boardInput.trim()) { addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); } } }} className="flex-1 bg-white border border-amber-300 focus:border-amber-500 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300 text-slate-800 resize-y min-h-[34px]" />
+                <button type="submit" disabled={!boardInput.trim()} className={"px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 " + (boardInput.trim() ? "bg-amber-600 hover:bg-amber-700 text-white cursor-pointer shadow-sm" : "bg-slate-200 text-slate-400 cursor-not-allowed")}>投稿</button>
+              </form>
+              {boardPosts.length === 0 ? (
+                <p className="text-[11px] text-amber-700/70 italic text-center py-2">まだ投稿はありません。</p>
+              ) : (
+                <div className="space-y-1 max-h-56 overflow-y-auto scrollbar-thin pr-1">
+                  {boardPosts.map((p) => { const ts = p.createdAt; const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0); const timeStr = ms ? new Date(ms).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; const canDelete = !myTeacherName || !p.author || p.author === '匿名' || p.author === myTeacherName; return (
+                    <div key={p.id} className="flex items-start gap-2 bg-white/80 border border-amber-200 rounded-lg px-3 py-2 text-xs">
+                      <div className="shrink-0 min-w-[80px]">
+                        <div className="font-bold text-amber-900 text-[11px] truncate">{p.author || '匿名'}</div>
+                        <div className="text-[9px] text-slate-500 font-mono">{timeStr}</div>
+                      </div>
+                      <div className="flex-1 text-slate-800 whitespace-pre-wrap break-words leading-relaxed">{p.message}</div>
+                      <button type="button" onClick={() => showConfirm('この投稿を削除しますか？', () => deleteBoardPost(p.id))} title={canDelete ? 'この投稿を削除' : '他の人の投稿も削除できます'} className="shrink-0 px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer">削除</button>
+                    </div>
+                  ); })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
 
       {/* v3.6: 起動パスワードロック画面。@kirari を入力するまでアプリ操作をブロック */}
       {pendingFileAction && (
