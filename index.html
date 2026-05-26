@@ -2490,7 +2490,7 @@ function App() {
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <button onClick={() => setTextEditState({ value: sd.name || '', title: '生徒氏名を編集', label: '氏名(イニシャル推奨)', onSave: (v) => persistPartial(sd.id, { name: v }) })} className="text-base font-extrabold text-slate-950 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-transparent hover:border-indigo-200">{sd.name || '(未設定)'}</button>
                   <button onClick={() => setSelectEditState({ value: sd.grade || '3', title: '学年を選択', options: [['1','1年'],['2','2年'],['3','3年'],['other','他']], onSave: (v) => persistPartial(sd.id, { grade: v }) })} className="text-xs font-bold text-slate-700 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-slate-200 hover:border-indigo-200">{sd.grade ? `${sd.grade}年` : '学年'}</button>
-                  <button onClick={() => setTextEditState({ value: sd.classVal || '', title: '組を編集', label: '組(数字)', onSave: (v) => persistPartial(sd.id, { classVal: v }) })} className="text-xs font-bold text-slate-700 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-slate-200 hover:border-indigo-200">{sd.classVal ? `${sd.classVal}組` : '組'}</button>
+                  <button onClick={() => setSelectEditState({ value: sd.classVal || '', title: '組を変更', options: [['', '未設定'], ['1', '1組'], ['2', '2組'], ['3', '3組']], onSave: (v) => persistPartial(sd.id, { classVal: v }) })} className="text-xs font-bold text-slate-700 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-slate-200 hover:border-indigo-200">{sd.classVal ? `${sd.classVal}組` : '組'}</button>
                 </div>
               </div>
 
