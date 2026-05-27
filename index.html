@@ -1107,6 +1107,75 @@ function App() {
   const [adminSetupNewPw, setAdminSetupNewPw] = useState('');
   const [adminSetupNewPw2, setAdminSetupNewPw2] = useState('');
 
+  // v3.9: 今日の訪問者履歴（編集者名を設定して開いた人だけを記録）
+  const [todayVisitors, setTodayVisitors] = useState({});
+  const [isTodayVisitorsOpen, setIsTodayVisitorsOpen] = useState(false);
+
+  // v3.9: 訪問者ハートビート + 購読。名前 + 最終接続時刻 + 編集件数を rooms/{rk}/visitors に保存。ローカルモードは localStorage。
+  useEffect(() => {
+    const todayKey = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+    const rk = roomKey || '3-1';
+    const lsKey = `local_visitors_${rk}_${todayKey}`;
+    const fbConnected = connectionStatus === 'connected' && window.firebase;
+
+    // 編集件数を +n するグローバルヘルパー。recordUpdate / recordCreate / recordDelete から呼ぶ。
+    window.__bumpVisitorEditCount = async (n = 1) => {
+      if (!myTeacherName) return;
+      try {
+        if (fbConnected) {
+          const db = window.firebase.firestore();
+          await db.collection('rooms').doc(rk).collection('visitors').doc(`${todayKey}_${myTeacherName}`).set({ teacherName: myTeacherName, dateKey: todayKey, editCount: window.firebase.firestore.FieldValue.increment(n), lastSeenAt: Date.now() }, { merge: true });
+        } else {
+          const cur = JSON.parse(localStorage.getItem(lsKey) || '{}');
+          if (!cur[myTeacherName]) cur[myTeacherName] = { firstSeenAt: Date.now(), lastSeenAt: Date.now(), editCount: 0 };
+          cur[myTeacherName].editCount = (cur[myTeacherName].editCount || 0) + n;
+          cur[myTeacherName].lastSeenAt = Date.now();
+          localStorage.setItem(lsKey, JSON.stringify(cur));
+          setTodayVisitors({ ...cur });
+        }
+      } catch (e) { /* ignore */ }
+    };
+
+    let unsubscribe = null;
+    let hbTimer = null;
+    if (fbConnected) {
+      const visitorsRef = window.firebase.firestore().collection('rooms').doc(rk).collection('visitors');
+      unsubscribe = visitorsRef.where('dateKey', '==', todayKey).onSnapshot((snap) => {
+        const next = {};
+        snap.forEach((d) => { const v = d.data(); if (v && v.teacherName) next[v.teacherName] = { firstSeenAt: v.firstSeenAt || 0, lastSeenAt: v.lastSeenAt || 0, editCount: v.editCount || 0 }; });
+        setTodayVisitors(next);
+      }, () => {});
+      if (myTeacherName) {
+        const beat = async () => {
+          try {
+            const ref = visitorsRef.doc(`${todayKey}_${myTeacherName}`);
+            const snap = await ref.get();
+            if (!snap.exists) await ref.set({ teacherName: myTeacherName, dateKey: todayKey, firstSeenAt: Date.now(), lastSeenAt: Date.now(), editCount: 0 });
+            else await ref.update({ lastSeenAt: Date.now() });
+          } catch (e) { /* ignore */ }
+        };
+        beat();
+        hbTimer = setInterval(beat, 25000);
+      }
+    } else {
+      try { setTodayVisitors(JSON.parse(localStorage.getItem(lsKey) || '{}')); } catch (e) { setTodayVisitors({}); }
+      if (myTeacherName) {
+        const beat = () => {
+          try {
+            const cur = JSON.parse(localStorage.getItem(lsKey) || '{}');
+            if (!cur[myTeacherName]) cur[myTeacherName] = { firstSeenAt: Date.now(), lastSeenAt: Date.now(), editCount: 0 };
+            else cur[myTeacherName].lastSeenAt = Date.now();
+            localStorage.setItem(lsKey, JSON.stringify(cur));
+            setTodayVisitors({ ...cur });
+          } catch (e) { /* ignore */ }
+        };
+        beat();
+        hbTimer = setInterval(beat, 25000);
+      }
+    }
+    return () => { if (unsubscribe) { try { unsubscribe(); } catch (e) {} } if (hbTimer) clearInterval(hbTimer); window.__bumpVisitorEditCount = null; };
+  }, [connectionStatus, roomKey, myTeacherName]);
+
   // v3.9: 「登録」ボタンを押すまで実データを作成しない方式に変更。
   // 以前は ＋ ボタンや FAB を押した時点で Firestore / localStorage に
   // 空レコードを追加していたため、誤クリックで予定が増えてしまっていた。
@@ -1218,9 +1287,10 @@ function App() {
     if (entry) await applyHistoryEntry(entry, 'redo');
   };
 
-  const recordUpdate = (studentId, before, after) => pushHistory({ kind: 'update', studentId, before, after });
-  const recordCreate = (student) => pushHistory({ kind: 'create', student });
-  const recordDelete = (student) => pushHistory({ kind: 'delete', student });
+  // v3.9: 編集アクションと同時に「今日の訪問者」の編集件数を +1 する。undo/redo からは呼ばれないので重複カウントしない。
+  const recordUpdate = (studentId, before, after) => { pushHistory({ kind: 'update', studentId, before, after }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
+  const recordCreate = (student) => { pushHistory({ kind: 'create', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
+  const recordDelete = (student) => { pushHistory({ kind: 'delete', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
 
   const handleSaveStudent = async (studentData) => {
     setIsLoading(true);
@@ -2306,6 +2376,51 @@ function App() {
                 )}
               </div>
             )}
+            {/* v3.9: 今日の訪問者ボタン。編集者名を設定して開いた人だけが記録される。 */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsTodayVisitorsOpen((v) => !v)}
+                title="今日このルームを開いた編集者の一覧（名前を設定した人だけ記録されます）"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 hover:bg-violet-100 active:bg-violet-200 border border-violet-200 text-violet-800 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer"
+              >
+                <span className="text-sm leading-none">📜</span>
+                <span>今日の訪問者 {Object.keys(todayVisitors).length}名</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${isTodayVisitorsOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isTodayVisitorsOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsTodayVisitorsOpen(false)} />
+                  <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl p-2 min-w-[280px] z-50 animate-slideDown">
+                    <div className="text-[10px] font-bold text-slate-500 px-2 py-1 border-b border-slate-100 mb-1 flex items-center justify-between gap-2">
+                      <span>今日の訪問者 ({Object.keys(todayVisitors).length}名)</span>
+                      <span className="font-mono text-slate-400">{(() => { const d = new Date(); return `${d.getMonth()+1}/${d.getDate()}`; })()}</span>
+                    </div>
+                    {Object.keys(todayVisitors).length === 0 ? (
+                      <div className="text-xs text-slate-400 italic px-2 py-3 text-center leading-relaxed">今日はまだ訪問者がいません。<br />※ 編集者名を設定した端末のみ記録されます。</div>
+                    ) : (
+                      <div className="max-h-72 overflow-y-auto scrollbar-thin">
+                        {Object.entries(todayVisitors).sort((a, b) => (b[1].lastSeenAt || 0) - (a[1].lastSeenAt || 0)).map(([name, v]) => {
+                          const lastDate = v.lastSeenAt ? new Date(v.lastSeenAt) : null;
+                          const lastStr = lastDate ? `${String(lastDate.getHours()).padStart(2,'0')}:${String(lastDate.getMinutes()).padStart(2,'0')}` : '?';
+                          const isSelf = name === myTeacherName;
+                          return (
+                            <div key={name} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 ${isSelf ? 'bg-indigo-50/50' : ''}`}>
+                              <span className="text-sm leading-none">{isSelf ? '🙋' : '👤'}</span>
+                              <span className="text-xs text-slate-800 font-bold flex-1 truncate" title={name}>{name}</span>
+                              <span className="text-[10px] font-mono text-slate-500 shrink-0" title="最終接続時刻">{lastStr}</span>
+                              <span className="text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-200 px-1.5 py-0.5 rounded shrink-0" title="今日の編集件数">{v.editCount || 0}件</span>
+                              {isSelf && <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1 py-0.5 rounded font-mono">あなた</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <div className="text-[10px] text-slate-400 px-2 pt-2 pb-1 border-t border-slate-100 mt-1 leading-snug">※ 今日（{(() => { const d = new Date(); return `${d.getMonth()+1}月${d.getDate()}日`; })()}）に編集者名を設定してこのルームを開いた人だけが記録されます。<br />※ 名前未設定の端末は履歴に残りません。</div>
+                  </div>
+                </>
+              )}
+            </div>
             <button
               onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
               title="Firebase接続設定・ルーム名の切替・担当教員名の保存を行います"
