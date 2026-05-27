@@ -2988,8 +2988,8 @@ function App() {
 
       {/* 設定モーダル */}
       {isConfigOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-xl w-full overflow-hidden text-slate-800">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden text-slate-800 flex flex-col">
             <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Settings className="w-5 h-5 text-indigo-600" />
@@ -2998,7 +2998,9 @@ function App() {
               <button onClick={() => setIsConfigOpen(false)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-6">
               <div className="space-y-3">
                 <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                   <h4 className="text-xs font-bold text-indigo-800 flex items-center gap-1.5 mb-1">
@@ -3050,9 +3052,10 @@ function App() {
                     )}
                   </div>
                 </form>
+              </div>
+              </div>
 
-                {/* v3.6: 危険ゾーン：過去データ一括削除（パスワード「@kirari」必須） */}
-              <hr className="border-slate-200" />
+              <div className="space-y-6">
               <div className="space-y-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
               <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
                 <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
@@ -3076,7 +3079,7 @@ function App() {
               )}
               <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">※ 別のルームを開くにはパスワードの入力が必要です。<br />※ 切り替えると、Firebase / ローカル両方の保存先がそのルームに切り替わります。</p>
             </div>
-            <hr className="border-slate-200" />
+            {/* v3.6: 危険ゾーン：過去データ一括削除（パスワード「@kirari」必須） */}
             <div className="space-y-3 p-4 bg-rose-50/40 border border-rose-200 rounded-xl">
                 <h4 className="text-xs font-bold text-rose-800 flex items-center gap-1.5">
                   <AlertTriangle className="w-4 h-4 text-rose-600" />
@@ -3098,6 +3101,7 @@ function App() {
                     <p className="text-[10px] text-rose-900">{connectionError}</p>
                   </div>
                 )}
+              </div>
               </div>
             </div>
 
