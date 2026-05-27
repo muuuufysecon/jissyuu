@@ -1337,6 +1337,11 @@ function App() {
   const handleInstantToggle = async (student, field, currentStatus) => {
     const stepKey = FIELD_TO_STEP[field];
     if (!stepKey) return;
+    // v3.9: ロックされたフィールドは管理者以外の変更を拒否（リスト画面の🔒マークで設定）
+    if (!isAdmin && (student.lockedFields || []).includes(field)) {
+      showAlert('この項目は管理者によりロックされています。');
+      return;
+    }
     const next = nextStatus(stepKey, currentStatus || 'pending');
     const update = buildStepUpdate(stepKey, next);
     const before = Object.fromEntries(Object.keys(update).map((k) => [k, student[k] ?? '']));
@@ -2740,7 +2745,7 @@ function App() {
                               <ProgressToggleButton icon={Phone} label={s.phoneStatus === 'completed' ? '連絡済み' : s.phoneStatus === 'none' ? '必要なし' : '未連絡'}
                                 status={s.phoneStatus} palette={phonePalette}
                                 onClick={() => handleInstantToggle(s, 'phoneStatus', s.phoneStatus)} cellHandlers={statusCellHandlers(s.id, 'phone')} clickGate={statusClickGate(s.id, 'phone')}
-                                locked={isFieldLocked(s, 'phoneStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'phoneStatus') : null} isAdmin={isAdmin}
+                                locked={(s.lockedFields || []).includes('phoneStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'phoneStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                               {s.phoneStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.phoneDate || '', title: `${s.name} の電話連絡日`, onSelect: (v) => persistPartial(s.id, { phoneDate: v }) })}
@@ -2753,7 +2758,6 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.docStatus === 'completed' ? '配付済み' : s.docStatus === 'none' ? '配付の必要なし' : '未配付'}
                                 status={s.docStatus} palette={docPalette}
                                 onClick={() => handleInstantToggle(s, 'docStatus', s.docStatus)} cellHandlers={statusCellHandlers(s.id, 'doc')} clickGate={statusClickGate(s.id, 'doc')}
-                                locked={isFieldLocked(s, 'docStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'docStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                               {s.docStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.docDate || '', title: `${s.name} の保護者お知らせ配付日`, onSelect: (v) => persistPartial(s.id, { docDate: v }) })}
@@ -2763,14 +2767,22 @@ function App() {
                           </td>
                           <td className="p-4 align-top">
                             <div className="space-y-1.5">
-                              <button onClick={(e) => { if (!statusClickGate(s.id, 'greeting')()) return; handleInstantToggle(s, 'greetingStatus', s.greetingStatus); }} {...statusCellHandlers(s.id, 'greeting')}
-                                className={s.greetingStatus === 'pending' ? 'w-full py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95 cursor-pointer' : `w-full py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${greetingPalette}`}>
-                                <span className="flex items-center gap-1">
-                                  {s.greetingStatus !== 'pending' && <Handshake className="w-3.5 h-3.5 text-slate-500" />}
-                                  {s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '挨拶日決定' : s.greetingStatus === 'unadjusted' ? '未調整' : 'ー'}
-                                </span>
-                                <span></span>
-                              </button>
+                              <span className="w-full flex items-center gap-0.5">
+                                <button onClick={(e) => { if (isFieldLocked(s, 'greetingStatus')) { e.preventDefault(); return; } if (!statusClickGate(s.id, 'greeting')()) return; handleInstantToggle(s, 'greetingStatus', s.greetingStatus); }} {...statusCellHandlers(s.id, 'greeting')}
+                                  title={isFieldLocked(s, 'greetingStatus') ? '管理者によりロックされています' : ''}
+                                  className={(s.greetingStatus === 'pending' ? 'flex-1 py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95' : `flex-1 py-1.5 px-2 rounded-lg border text-[11px] font-bold flex items-center justify-between transition-all active:scale-95 shadow-sm ${greetingPalette}`) + (isFieldLocked(s, 'greetingStatus') ? ' opacity-40 grayscale cursor-not-allowed' : ' cursor-pointer')}>
+                                  <span className="flex items-center gap-1">
+                                    {s.greetingStatus !== 'pending' && <Handshake className="w-3.5 h-3.5 text-slate-500" />}
+                                    {s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '挨拶日決定' : s.greetingStatus === 'unadjusted' ? '未調整' : 'ー'}
+                                  </span>
+                                  <span></span>
+                                </button>
+                                {isAdmin && (
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); toggleLockField(s, 'greetingStatus'); }} title={(s.lockedFields || []).includes('greetingStatus') ? '管理者ロックを解除' : '一般利用者のクリックを禁止する'} className={`ml-1 shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full border text-[9px] cursor-pointer transition-all ${(s.lockedFields || []).includes('greetingStatus') ? 'bg-amber-100 border-amber-400' : 'bg-white border-slate-300 hover:border-amber-300'}`}>
+                                    <span>{(s.lockedFields || []).includes('greetingStatus') ? '🔒' : '🔓'}</span>
+                                  </button>
+                                )}
+                              </span>
                               {s.greetingStatus !== 'pending' && (<>
                               <button onClick={() => setDatePickerState({ value: s.greetingDate || '', title: `${s.name} の事前挨拶日`, onSelect: (v) => { const upd = { greetingDate: v }; if (v && (!s.greetingStatus || s.greetingStatus === 'pending')) upd.greetingStatus = 'scheduled'; persistPartial(s.id, upd); } })}
                                 className="text-[10px] font-semibold pl-1 hover:text-indigo-700 hover:underline cursor-pointer block text-left w-full">日時: <span className={s.greetingDate ? 'text-slate-700' : 'text-slate-400 italic'}>{s.greetingDate ? formatShortDate(s.greetingDate) : '未設定（タップ）'}</span></button>
@@ -2791,7 +2803,7 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.studentThankYouStatus === 'completed' ? '送付済' : s.studentThankYouStatus === 'none' ? '不要' : '未送付'}
                                 status={s.studentThankYouStatus} palette={studentThankYouPalette}
                                 onClick={() => handleInstantToggle(s, 'studentThankYouStatus', s.studentThankYouStatus)}
-                                locked={isFieldLocked(s, 'studentThankYouStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'studentThankYouStatus') : null} isAdmin={isAdmin}
+                                locked={(s.lockedFields || []).includes('studentThankYouStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'studentThankYouStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                               {s.studentThankYouStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.studentThankYouDate || '', title: `${s.name} の生徒お礼状送付日`, onSelect: (v) => persistPartial(s.id, { studentThankYouDate: v }) })}
@@ -2804,7 +2816,6 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.teacherThankYouStatus === 'completed' ? '送付済' : s.teacherThankYouStatus === 'none' ? '不要' : '未送付'}
                                 status={s.teacherThankYouStatus} palette={teacherThankYouPalette}
                                 onClick={() => handleInstantToggle(s, 'teacherThankYouStatus', s.teacherThankYouStatus)}
-                                locked={isFieldLocked(s, 'teacherThankYouStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'teacherThankYouStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                               {s.teacherThankYouStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.teacherThankYouDate || '', title: `${s.name} の教師お礼状送付日`, onSelect: (v) => persistPartial(s.id, { teacherThankYouDate: v }) })}
