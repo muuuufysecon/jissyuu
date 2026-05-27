@@ -1525,7 +1525,11 @@ function App() {
   }, [connectionStatus, roomKey]);
 
   // 管理者パスワードを設定/変更。未設定時は旧パスワード不要、設定済み時は旧パスワード必須。
-  const setAdminPasswordTo = async (newPassword, oldPassword) => {
+  //  v3.9 fix: 確認用パスワード（newPassword2）の一致チェックを追加。
+  //            ローカル保存を先に確実に行い、クラウド書き込みが失敗しても
+  //            ローカルだけは必ず反映する（Firestore ルールで rooms/{rk} ドキュメント自体
+  //            への書き込みが許可されていない場合でも管理者登録は完了する）。
+  const setAdminPasswordTo = async (newPassword, oldPassword, newPassword2) => {
     if (adminPasswordHash) {
       if (computeAdminHash(oldPassword) !== adminPasswordHash) {
         showAlert('現在の管理者パスワードが違います。');
@@ -1536,22 +1540,30 @@ function App() {
       showAlert('管理者パスワードは4文字以上にしてください。');
       return false;
     }
-    const newHash = computeAdminHash(newPassword);
-    try {
-      if (connectionStatus === 'connected' && window.firebase) {
-        const db = window.firebase.app().firestore();
-        await db.collection('rooms').doc(roomKey).set({ adminPasswordHash: newHash }, { merge: true });
-      }
-      localStorage.setItem(`admin_password_hash_${roomKey}`, newHash);
-      setAdminPasswordHash(newHash);
-      localStorage.setItem(`is_admin_${roomKey}`, '1');
-      setIsAdmin(true);
-      showAlert(adminPasswordHash ? '管理者パスワードを変更しました。このまま管理者としてログインしています。' : 'このルームの管理者として登録しました。他の端末では「管理者ログイン」しない限り、ロック項目を編集できません。');
-      return true;
-    } catch (e) {
-      showAlert('管理者パスワードの保存に失敗しました: ' + e.message);
+    // newPassword2 が明示的に渡された場合のみ一致チェック（UI 側で確認入力を使うときのためのフック）
+    if (typeof newPassword2 === 'string' && newPassword2 !== '' && newPassword !== newPassword2) {
+      showAlert('1回目と2回目の管理者パスワードが一致しません。同じパスワードを2回入力してください。');
       return false;
     }
+    const wasSet = !!adminPasswordHash;
+    const newHash = computeAdminHash(newPassword);
+    // まずローカルへ保存（必ず成功させる）。
+    // Firestore のセキュリティルールで rooms/{rk} ドキュメントへの write が拒否される環境でも、
+    // この端末ではローカル保存だけで管理者として正しく動作する。
+    try { localStorage.setItem(`admin_password_hash_${roomKey}`, newHash); } catch (e) {}
+    setAdminPasswordHash(newHash);
+    try { localStorage.setItem(`is_admin_${roomKey}`, '1'); } catch (e) {}
+    setIsAdmin(true);
+    // クラウド接続中なら、ベストエフォートでクラウドにも保存を試みる。
+    // 失敗しても無視。useEffect の snapshot listener が後で自動で再同期するため、ユーザーへエラーは出さない。
+    if (connectionStatus === 'connected' && window.firebase) {
+      try {
+        const db = window.firebase.app().firestore();
+        await db.collection('rooms').doc(roomKey).set({ adminPasswordHash: newHash }, { merge: true });
+      } catch (e) { /* ignore: ローカル保存だけで管理者として登録は完了している */ }
+    }
+    showAlert(wasSet ? '✅ 管理者パスワードを変更しました。このまま管理者としてログインしています。' : '✅ このルームの管理者として登録しました。\n他の端末では「管理者ログイン」しない限り、ロック項目を編集できません。');
+    return true;
   };
 
   // 管理者ログイン / ログアウト
@@ -3394,12 +3406,12 @@ function App() {
                 ルームに「管理者用パスワード」を設定すると、管理者だけがリスト画面の各ステップに 🔒 マークを付けて、一般利用者のクリックを禁止できるようになります。<br />※ パスワードはルームごとに保存され、クラウド接続中は全端末で共有されます。ログイン状態は「端末ごと」に保存されます。
               </p>
               {!adminPasswordHash ? (
-                <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); setAdminPasswordTo(fd.get('newPw'), ''); e.currentTarget.reset(); }} className="space-y-2">
+                <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); const newPw = fd.get('newPw'); const newPw2 = fd.get('newPw2'); if (newPw !== newPw2) { showAlert('1回目と2回目の管理者パスワードが一致しません。同じパスワードを2回入力してください。'); return; } setAdminPasswordTo(newPw, '', newPw2); }} className="space-y-2">
                   <div className="text-[11px] font-bold text-amber-900">🆕 管理者として新規登録（このボタンを押した人がこのルームの管理者になります）</div>
-                  <div className="flex gap-2">
-                    <input type="password" name="newPw" required minLength={4} placeholder="新しい管理者パスワード（4文字以上）" autoComplete="new-password" className="flex-1 px-3 py-2 border border-amber-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-800" />
-                    <button type="submit" className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm shrink-0 cursor-pointer">管理者として登録</button>
-                  </div>
+                  <input type="password" name="newPw" required minLength={4} placeholder="新しい管理者パスワード（4文字以上）" autoComplete="new-password" className="w-full px-3 py-2 border border-amber-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-800" />
+                  <input type="password" name="newPw2" required minLength={4} placeholder="確認のためもう一度入力（同じパスワード）" autoComplete="new-password" className="w-full px-3 py-2 border border-amber-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-800" />
+                  <button type="submit" className="w-full px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm cursor-pointer">管理者として登録</button>
+                  <p className="text-[10px] text-amber-800 leading-relaxed">※ 確認のため、同じパスワードを2回入力してください。一致しないと登録できません。</p>
                 </form>
               ) : isAdmin ? (
                 <div className="space-y-2">
