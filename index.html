@@ -1064,41 +1064,18 @@ function App() {
   const [printOptions, setPrintOptions] = useState({ onlySelected: false, breakByClass: false, compactColumns: false });
   const [selectedIds, setSelectedIds] = useState(() => new Set());
 
-  const openAddModal = async (initialInternshipDates = []) => {
-    setIsLoading(true);
-    const defaults = {
-      name: '', grade: '', classVal: '', teacher: myTeacherName || '',
-      location: '', internshipType: 'internship',
+  // v3.9: 「登録」ボタンを押すまで実データを作成しない方式に変更。
+  // 以前は ＋ ボタンや FAB を押した時点で Firestore / localStorage に
+  // 空レコードを追加していたため、誤クリックで予定が増えてしまっていた。
+  // 今後は AddEditModal を開くだけにして、モーダル内の保存ボタンを
+  // 押した時にだけ handleSaveStudent 経由で実際の登録が行われる。
+  const openAddModal = (initialInternshipDates = []) => {
+    setEditingStudent(null);
+    setFormDates({
       internshipDates: [...initialInternshipDates],
-      phoneStatus: 'pending', phoneDate: '',
-      docStatus: 'pending', docDate: '',
-      greetingStatus: 'pending', greetingDate: '', greetingTime: '', greetingVisitor: '',
-      patrols: [],
-      studentThankYouStatus: 'pending', studentThankYouDate: '',
-      teacherThankYouStatus: 'pending', teacherThankYouDate: '',
-      notes: '', materials: []
-    };
-    let newStudent;
-    if (connectionStatus === 'connected' && window.firebase) {
-      try {
-        const db = window.firebase.app().firestore();
-        const ref = db.collection('rooms').doc(roomKey).collection('students');
-        const docRef = await ref.add(defaults);
-        newStudent = { id: docRef.id, ...defaults };
-      } catch (e) {
-        showAlert(`新規登録に失敗しました: ${e.message}`);
-        setIsLoading(false);
-        return;
-      }
-    } else {
-      newStudent = { id: 'local-' + Date.now(), ...defaults };
-      const updated = [...students, newStudent];
-      setStudents(updated);
-      localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
-    }
-    setIsLoading(false);
-    recordCreate(newStudent);
-    setSelectedStudentDetail(newStudent);
+      phoneDate: '', docDate: '', greetingDate: '', patrolDate: ''
+    });
+    setIsAddEditOpen(true);
   };
 
   const openEditModal = (student) => {
