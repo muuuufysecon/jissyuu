@@ -442,6 +442,7 @@ function usePresence(connectionStatus, roomKey, teacherName) {
       try {
         await presenceRef.set({
           lastSeen: window.firebase.firestore.FieldValue.serverTimestamp(),
+          lastSeenClient: Date.now(),
           teacherName: teacherNameRef.current || '匿名',
           ua: (navigator.userAgent || '').slice(0, 80)
         }, { merge: true });
@@ -451,23 +452,40 @@ function usePresence(connectionStatus, roomKey, teacherName) {
     };
 
     writeHeartbeat();
-    const heartbeatInterval = setInterval(writeHeartbeat, 25000);
+    // v3.10 fix: ハートビート間隔を 25s → 15s に短縮。切断検知のしきい値（35s）と
+    // 合わせて、最大 1〜2 回ハートビートを取りこぼせば「接続中」表示から消える。
+    const heartbeatInterval = setInterval(writeHeartbeat, 15000);
 
     // 接続を見離したセッションを期限切れとして表示から隠すための定期再検証
+    // v3.10 fix: しきい値を 60s → 35s、再検証周期を 15s → 5s に短縮して、
+    // 端末クラッシュ／ネットワーク遮断などで delete が走らなかった場合でも、
+    // 「接続中」表示が長く残り続けないようにする。
     const recountInterval = setInterval(() => {
       setOnlineMembers((prev) => {
         const now = Date.now();
-        return prev.filter((m) => now - m.lastSeen < 60000);
+        return prev.filter((m) => now - m.lastSeen < 35000);
       });
-    }, 15000);
+    }, 5000);
 
     const unsubscribe = collectionRef.onSnapshot((snap) => {
+      // v3.10 fix: snapshot がローカルキャッシュのみから来ている
+      //   （＝自分の端末が Firestore と切断中）ときは、古いオンライン情報を
+      //   そのまま表示し続けないよう、表示用リストを空にする。
+      if (snap.metadata && snap.metadata.fromCache) {
+        setOnlineMembers([]);
+        return;
+      }
       const now = Date.now();
       const members = [];
       snap.forEach((doc) => {
         const data = doc.data();
-        const lastSeen = data.lastSeen?.toMillis ? data.lastSeen.toMillis() : 0;
-        if (lastSeen && now - lastSeen < 60000) {
+        // v3.10 fix: serverTimestamp が遅延して null になることがあるため、
+        //   クライアント側の Date.now() を保存した lastSeenClient もフォールバックに使う。
+        //   しきい値も 60s → 35s に短縮し、切断後に「接続中」表示が長く残らないようにする。
+        const serverMs = data.lastSeen?.toMillis ? data.lastSeen.toMillis() : 0;
+        const clientMs = typeof data.lastSeenClient === 'number' ? data.lastSeenClient : 0;
+        const lastSeen = Math.max(serverMs, clientMs);
+        if (lastSeen && now - lastSeen < 35000) {
           members.push({
             id: doc.id,
             teacherName: data.teacherName || '匿名',
