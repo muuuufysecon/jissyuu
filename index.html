@@ -72,7 +72,7 @@ import {
   Plus, Search, Settings, Database, AlertTriangle, Check, CheckCircle2,
   Clock, Phone, FileText, Calendar, User, Filter, RotateCcw, RotateCw, HelpCircle,
   Info, Copy, Trash2, Edit, AlertCircle, Share2, BookOpen, Key, ChevronDown, CheckCircle, Download,
-  ChevronLeft, ChevronRight, List, LayoutGrid, SlidersHorizontal, Handshake, Paperclip, Upload, GripVertical
+  ChevronLeft, ChevronRight, List, SlidersHorizontal, Handshake, Paperclip, Upload, GripVertical
 } from 'lucide-react';
 
 // =============================================================================
@@ -152,13 +152,6 @@ const STEP_CONFIG = {
 const FIELD_TO_STEP = Object.fromEntries(
   Object.entries(STEP_CONFIG).map(([k, c]) => [c.field, k])
 );
-
-const KANBAN_COL_TEMPLATE = {
-  pending:   { title: '未完了 / 要対応',    styles: 'border-rose-200 bg-rose-50/20 text-rose-800' },
-  none:      { title: '対象外 / 不要',      styles: 'border-slate-200 bg-slate-50 text-slate-700' },
-  completed: { title: '完了',                styles: 'border-emerald-200 bg-emerald-50/20 text-emerald-800' },
-  scheduled: { title: '日程決定 / 調整済',   styles: 'border-sky-200 bg-sky-50/20 text-sky-800' }
-};
 
 // =============================================================================
 // ユーティリティ / Utilities
@@ -1002,7 +995,6 @@ function App() {
   const [tempTeacherName, setTempTeacherName] = useState('');
 
   const [currentView, setCurrentView] = useState('list');
-  const [kanbanStep, setKanbanStep] = useState('phone');
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
   const [calendarFilter, setCalendarFilter] = useState('student'); // 'all' | 'teacher' | 'student'
@@ -1327,18 +1319,6 @@ function App() {
     const next = [...current, ...items];
     recordUpdate(latest.id, { materials: current }, { materials: next });
     await persistPartial(latest.id, { materials: next });
-  };
-
-  const handleKanbanDrop = async (studentId, targetStatus) => {
-    const student = students.find((s) => s.id === studentId);
-    if (!student) return;
-    const cfg = STEP_CONFIG[kanbanStep];
-    const currentStatus = student[cfg.field] || 'pending';
-    if (currentStatus === targetStatus) return;
-    const update = buildStepUpdate(kanbanStep, targetStatus);
-    const before = Object.fromEntries(Object.keys(update).map((k) => [k, student[k] ?? '']));
-    recordUpdate(studentId, before, update);
-    await persistPartial(studentId, update);
   };
 
   const handleDeleteStudent = (studentId) => {
@@ -1790,20 +1770,6 @@ function App() {
     setCalendarMonth(t.getMonth());
   };
 
-  const kanbanColumns = useMemo(() => {
-    const keys = STEP_CONFIG[kanbanStep].cycle.includes('scheduled')
-      ? ['pending', 'scheduled', 'completed']
-      : ['pending', 'none', 'completed'];
-    const cols = keys.map((k) => ({ key: k, ...KANBAN_COL_TEMPLATE[k] }));
-    const groups = Object.fromEntries(keys.map((k) => [k, []]));
-    const field = STEP_CONFIG[kanbanStep].field;
-    filteredStudents.forEach((student) => {
-      const status = student[field] || 'pending';
-      (groups[status] || groups.pending).push(student);
-    });
-    return { cols, groups };
-  }, [filteredStudents, kanbanStep]);
-
   const clearFilters = () => {
     setSearchQuery(''); setFilterProgress('all');
     setFilterGrade('all'); setFilterClass('all');
@@ -2234,56 +2200,10 @@ function App() {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-4 shadow-sm">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-2.5 flex-1">
-              <div className="relative flex-1 min-w-[180px]">
-                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                <input type="text" placeholder="生徒名、実習先、期間等で検索..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all" />
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を学年で絞り込みます">
-                <Filter className="w-3.5 h-3.5 text-slate-500" />
-                <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)} title="表示する学年を選んでください"
-                  className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
-                  <option value="all">学年: すべて</option>
-                  <option value="1">1年</option>
-                  <option value="2">2年</option>
-                  <option value="3">3年</option>
-                </select>
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を組で絞り込みます">
-                <Filter className="w-3.5 h-3.5 text-slate-500" />
-                <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} title="表示する組を選んでください"
-                  className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
-                  <option value="all">組: すべて</option>
-                  {Array.from(new Set(students.map((st) => st.classVal).filter(Boolean))).sort().map((c) => (
-                    <option key={c} value={c}>{c}組</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-                {[
-                  { key: 'list',     icon: List,       label: 'リスト一覧',     title: '全生徒の進捗を一覧表で表示します' },
-                  { key: 'calendar', icon: Calendar,   label: 'カレンダー',   title: '月別カレンダーで実習日・事前挨拶・巪回を可視化します' },
-                  { key: 'kanban',   icon: LayoutGrid, label: '進捗かんばん', title: '進捗ステータスごとに生徒をかんばん形式で並べて表示します' }
-                ].map(({ key, icon: Icon, label, title }) => (
-                  <button key={key} onClick={() => setCurrentView(key)} title={title}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentView === key ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{label}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を活動種別（実習/見学）で絞り込みます"><Filter className="w-3.5 h-3.5 text-slate-500" /><select value={filterInternshipType} onChange={(e) => setFilterInternshipType(e.target.value)} title="活動種別を選んでください" className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold"><option value="all">種別: すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></div>
-              {hasActiveFilter && (
-                <button onClick={clearFilters} className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
-                  <RotateCcw className="w-3 h-3" />
-                  <span>解除</span>
-                </button>
-              )}
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+              <input type="text" placeholder="生徒名、実習先、期間等で検索..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all" />
             </div>
 
             <div className="flex flex-wrap items-center gap-2 self-end lg:self-auto">
@@ -2322,6 +2242,52 @@ function App() {
                 <span>登録</span>
               </button>
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を学年で絞り込みます">
+              <Filter className="w-3.5 h-3.5 text-slate-500" />
+              <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)} title="表示する学年を選んでください"
+                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
+                <option value="all">学年: すべて</option>
+                <option value="1">1年</option>
+                <option value="2">2年</option>
+                <option value="3">3年</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を組で絞り込みます">
+              <Filter className="w-3.5 h-3.5 text-slate-500" />
+              <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} title="表示する組を選んでください"
+                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
+                <option value="all">組: すべて</option>
+                {Array.from(new Set(students.map((st) => st.classVal).filter(Boolean))).sort().map((c) => (
+                  <option key={c} value={c}>{c}組</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を活動種別（実習/見学）で絞り込みます"><Filter className="w-3.5 h-3.5 text-slate-500" /><select value={filterInternshipType} onChange={(e) => setFilterInternshipType(e.target.value)} title="活動種別を選んでください" className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold"><option value="all">種別: すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></div>
+
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+              {[
+                { key: 'list',     icon: List,     label: 'リスト一覧',   title: '全生徒の進捗を一覧表で表示します' },
+                { key: 'calendar', icon: Calendar, label: 'カレンダー', title: '月別カレンダーで実習日・事前挨拶・巡回を可視化します' }
+              ].map(({ key, icon: Icon, label, title }) => (
+                <button key={key} onClick={() => setCurrentView(key)} title={title}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentView === key ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+
+            {hasActiveFilter && (
+              <button onClick={clearFilters} className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                <RotateCcw className="w-3 h-3" />
+                <span>解除</span>
+              </button>
+            )}
           </div>
 
         </div>
@@ -2572,7 +2538,7 @@ function App() {
               <span className="font-semibold text-slate-600">※ 各進捗ボタンをクリックするとその場で進捗状況を切り替えることができます。</span>
             </div>
           </div>
-        ) : currentView === 'calendar' ? (
+        ) : (
           <div key="view-calendar" className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col animate-fadeIn">
             <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 rounded-t-2xl sticky top-[60px] z-30 shadow-sm">
               <div className="flex items-center gap-2">
@@ -2683,70 +2649,6 @@ function App() {
                     >
                       <Plus className="w-3.5 h-3.5 text-slate-500 hover:text-indigo-600" />
                     </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <div key="view-kanban" className="space-y-4 animate-fadeIn">
-            <div className="bg-white p-3 border border-slate-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-sm">
-              <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
-                <LayoutGrid className="w-4 h-4 text-indigo-600" />
-                <span>進捗変更ステップ切り替え：</span>
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(STEP_CONFIG).map(([key, cfg]) => (
-                  <button key={key} onClick={() => setKanbanStep(key)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-xl border transition-all cursor-pointer ${kanbanStep === key ? cfg.activeColor : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'}`}>
-                    {cfg.label}
-                  </button>
-                ))}
-              </div>
-              <span className="text-[11px] text-slate-500 font-medium">※ 生徒カードをドラッグして各列にドロップするだけで、瞬時に進捗ステータスを更新できます。</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {kanbanColumns.cols.map((col) => {
-                const groupStudents = kanbanColumns.groups[col.key] || [];
-                return (
-                  <div key={col.key}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => { if (draggingStudentId) { handleKanbanDrop(draggingStudentId, col.key); setDraggingStudentId(null); } }}
-                    className="bg-white border-2 border-dashed border-slate-200 rounded-2xl p-4 min-h-[400px] flex flex-col space-y-3 shadow-sm">
-                    <div className={`p-2.5 rounded-xl border-l-4 font-extrabold text-xs flex items-center justify-between ${col.styles}`}>
-                      <span>{col.title}</span>
-                      <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full text-[10px]">{groupStudents.length}名</span>
-                    </div>
-                    <div className="flex-1 space-y-2.5 overflow-y-auto max-h-[550px] p-0.5">
-                      {groupStudents.length === 0 ? (
-                        <div className="text-center text-slate-400 text-[10px] py-12">該当生徒はいません</div>
-                      ) : (
-                        groupStudents.map((student) => {
-                          const isMy = myTeacherName && student.teacher === myTeacherName;
-                          return (
-                            <div key={student.id} draggable
-                              onDragStart={() => setDraggingStudentId(student.id)}
-                              className={`p-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95 cursor-grab active:cursor-grabbing group relative ${isMy ? 'ring-1 ring-indigo-400 bg-indigo-50/10' : ''}`}>
-                              <div className="flex items-center justify-between">
-                                <span className="font-extrabold text-sm text-slate-900">{student.name}</span>
-                                <span className="text-[9px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded">
-                                  {student.grade ? `${student.grade}年` : ''}{student.classVal ? `${student.classVal}組` : ''}
-                                </span>
-                              </div>
-                              <p className="text-xs text-slate-700 font-bold mt-1.5 truncate">{student.location}</p>
-                              {(student.internshipDates || []).length > 0 && (
-                                <p className="text-[10px] text-slate-400 mt-0.5 truncate">📅 {student.internshipDates.length}日間: {formatShortDate(student.internshipDates[0])} 〜 {formatShortDate(student.internshipDates[student.internshipDates.length - 1])}</p>
-                              )}
-                              <div className="flex items-center justify-between border-t border-slate-100 mt-2.5 pt-2 text-[10px] text-slate-500">
-                                <span className="font-bold">担当教員: {student.teacher}</span>
-                                <button onClick={() => setSelectedStudentDetail(student)} className="text-indigo-600 hover:text-indigo-800 font-bold hover:underline cursor-pointer">詳細表示</button>
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
                   </div>
                 );
               })}
