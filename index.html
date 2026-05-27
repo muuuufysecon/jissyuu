@@ -636,23 +636,52 @@ const StatCard = ({ icon: Icon, label, percent, pendingCount, active, onClick, b
   </button>
 );
 
-const ProgressToggleButton = ({ icon: Icon, label, status, palette, onClick, suffix, cellHandlers, clickGate }) => {
+// v3.9: locked / onToggleLock / isAdmin を受け取るよう拡張。
+//   ・locked=true かつ isAdmin=false のときクリックを完全に無反応にし、グレーアウト表示。
+//   ・onToggleLock が渡されていれば（管理者だけ）、ボタン右肩に🔒/🔓トグルを表示。
+const ProgressToggleButton = ({ icon: Icon, label, status, palette, onClick, suffix, cellHandlers, clickGate, locked, onToggleLock, isAdmin }) => {
+  const lockedForUser = locked && !isAdmin;
+  const handleMain = (e) => {
+    if (lockedForUser) { e.preventDefault(); e.stopPropagation(); return; }
+    if (clickGate && !clickGate()) return;
+    if (onClick) onClick(e);
+  };
+  const tooltip = lockedForUser ? '管理者によりロックされています' : label;
+  const lockedStyle = lockedForUser ? ' opacity-40 grayscale cursor-not-allowed' : '';
+  const cursorStyle = lockedForUser ? '' : ' cursor-pointer';
+  const lockBadge = onToggleLock ? (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
+      title={locked ? '管理者ロックを解除' : '一般利用者のクリックを禁止する'}
+      className={`ml-1 shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full border text-[9px] cursor-pointer transition-all ${locked ? 'bg-amber-100 border-amber-400' : 'bg-white border-slate-300 hover:border-amber-300'}`}
+    >
+      <span>{locked ? '🔒' : '🔓'}</span>
+    </button>
+  ) : null;
   if (status === 'none') {
     return (
-      <button onClick={(e) => { if (clickGate && !clickGate()) return; if (onClick) onClick(e); }} {...(cellHandlers || {})} title={label} className="w-full py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95 cursor-pointer">ー</button>
+      <span className="w-full flex items-center gap-0.5">
+        <button onClick={handleMain} {...(cellHandlers || {})} title={tooltip} className={`flex-1 py-1.5 px-2.5 text-[10px] font-bold flex items-center justify-center text-slate-500 transition-all active:scale-95${cursorStyle}${lockedStyle}`}>ー</button>
+        {lockBadge}
+      </span>
     );
   }
   return (
-    <button
-      onClick={(e) => { if (clickGate && !clickGate()) return; if (onClick) onClick(e); }} {...(cellHandlers || {})}
-      className={`w-full py-1.5 px-2.5 rounded-lg border text-[10px] font-bold flex items-center justify-between transition-all active:scale-95 cursor-pointer shadow-sm ${palette}`}
-    >
-      <span className="flex items-center gap-1">
-        <Icon className="w-3.5 h-3.5" />
-        {label}
-      </span>
-      <span>{suffix}</span>
-    </button>
+    <span className="w-full flex items-center gap-0.5">
+      <button
+        onClick={handleMain} {...(cellHandlers || {})}
+        title={tooltip}
+        className={`flex-1 py-1.5 px-2.5 rounded-lg border text-[10px] font-bold flex items-center justify-between transition-all active:scale-95 shadow-sm ${palette}${cursorStyle}${lockedStyle}`}
+      >
+        <span className="flex items-center gap-1">
+          <Icon className="w-3.5 h-3.5" />
+          {label}
+        </span>
+        <span>{suffix}</span>
+      </button>
+      {lockBadge}
+    </span>
   );
 };
 
@@ -1064,6 +1093,20 @@ function App() {
   const [printOptions, setPrintOptions] = useState({ onlySelected: false, breakByClass: false, compactColumns: false });
   const [selectedIds, setSelectedIds] = useState(() => new Set());
 
+  // v3.9: 管理者モード / ロック機能
+  //   ・管理者用パスワードはルームごとに Firestore (rooms/{roomKey}) と localStorage に保存。
+  //   ・端末ごとに「管理者としてログイン」した状態を localStorage に保持。
+  //   ・各生徒の lockedFields[] に含まれるフィールド名（例: 'phoneStatus' / 'docStatus' / 'patrol:p-xxx'）は
+  //     一般利用者にはクリック不可＋グレーアウト。
+  const [adminPasswordHash, setAdminPasswordHash] = useState(() => { try { return localStorage.getItem(`admin_password_hash_${localStorage.getItem('school_room_key') || '3-1'}`) || ''; } catch (e) { return ''; } });
+  const [isAdmin, setIsAdmin] = useState(() => { try { return localStorage.getItem(`is_admin_${localStorage.getItem('school_room_key') || '3-1'}`) === '1'; } catch (e) { return false; } });
+  const [adminLoginOpen, setAdminLoginOpen] = useState(false);
+  const [adminLoginInput, setAdminLoginInput] = useState('');
+  const [adminSetupOpen, setAdminSetupOpen] = useState(false);
+  const [adminSetupOldPw, setAdminSetupOldPw] = useState('');
+  const [adminSetupNewPw, setAdminSetupNewPw] = useState('');
+  const [adminSetupNewPw2, setAdminSetupNewPw2] = useState('');
+
   // v3.9: 「登録」ボタンを押すまで実データを作成しない方式に変更。
   // 以前は ＋ ボタンや FAB を押した時点で Firestore / localStorage に
   // 空レコードを追加していたため、誤クリックで予定が増えてしまっていた。
@@ -1372,6 +1415,111 @@ function App() {
       }, 500);
     }, 120);
   }, [printOptions, selectedIds]);
+
+  // v3.9: 管理者パスワードをハッシュ化して保存。
+  // 教室内ツールなので厳密な暗号化ではなく、roomKeyをソルトにした簡易ハッシュとする。
+  const computeAdminHash = useCallback((pw) => {
+    try { return btoa(unescape(encodeURIComponent('jissyuu_v39_admin:' + roomKey + ':' + (pw || '')))); }
+    catch (e) { return ''; }
+  }, [roomKey]);
+
+  // ルーム切り替え時に管理者状態を再読込
+  useEffect(() => {
+    try {
+      setAdminPasswordHash(localStorage.getItem(`admin_password_hash_${roomKey}`) || '');
+      setIsAdmin(localStorage.getItem(`is_admin_${roomKey}`) === '1');
+    } catch (e) {}
+  }, [roomKey]);
+
+  // Firestore の rooms/{roomKey} ドキュメントから管理者パスワードハッシュを購読。
+  // 初期化時にクラウド側にないがローカルにある場合はクラウドへ上げる。
+  useEffect(() => {
+    if (connectionStatus !== 'connected' || !window.firebase) return;
+    const db = window.firebase.app().firestore();
+    const ref = db.collection('rooms').doc(roomKey);
+    const unsub = ref.onSnapshot((snap) => {
+      const data = snap.data() || {};
+      const cloudHash = data.adminPasswordHash || '';
+      let localHash = '';
+      try { localHash = localStorage.getItem(`admin_password_hash_${roomKey}`) || ''; } catch (e) {}
+      if (cloudHash) {
+        setAdminPasswordHash(cloudHash);
+        try { localStorage.setItem(`admin_password_hash_${roomKey}`, cloudHash); } catch (e) {}
+        // クラウドと一致しない “以前設定した管理者状態” を強制クリアしない（他端末で変更しただけの可能性もあるため）
+      } else if (localHash) {
+        // クラウド未設定だがローカルにはある → クラウドへ同期
+        ref.set({ adminPasswordHash: localHash }, { merge: true }).catch(() => {});
+      }
+    }, (err) => { console.warn('admin hash snapshot:', err.message); });
+    return () => { try { unsub(); } catch (e) {} };
+  }, [connectionStatus, roomKey]);
+
+  // 管理者パスワードを設定/変更。未設定時は旧パスワード不要、設定済み時は旧パスワード必須。
+  const setAdminPasswordTo = async (newPassword, oldPassword) => {
+    if (adminPasswordHash) {
+      if (computeAdminHash(oldPassword) !== adminPasswordHash) {
+        showAlert('現在の管理者パスワードが違います。');
+        return false;
+      }
+    }
+    if (!newPassword || newPassword.length < 4) {
+      showAlert('管理者パスワードは4文字以上にしてください。');
+      return false;
+    }
+    const newHash = computeAdminHash(newPassword);
+    try {
+      if (connectionStatus === 'connected' && window.firebase) {
+        const db = window.firebase.app().firestore();
+        await db.collection('rooms').doc(roomKey).set({ adminPasswordHash: newHash }, { merge: true });
+      }
+      localStorage.setItem(`admin_password_hash_${roomKey}`, newHash);
+      setAdminPasswordHash(newHash);
+      localStorage.setItem(`is_admin_${roomKey}`, '1');
+      setIsAdmin(true);
+      showAlert(adminPasswordHash ? '管理者パスワードを変更しました。このまま管理者としてログインしています。' : 'このルームの管理者として登録しました。他の端末では「管理者ログイン」しない限り、ロック項目を編集できません。');
+      return true;
+    } catch (e) {
+      showAlert('管理者パスワードの保存に失敗しました: ' + e.message);
+      return false;
+    }
+  };
+
+  // 管理者ログイン / ログアウト
+  const loginAsAdmin = (password) => {
+    if (!adminPasswordHash) {
+      showAlert('このルームにはまだ管理者パスワードが設定されていません。「新規設定」から登録してください。');
+      return false;
+    }
+    if (computeAdminHash(password) !== adminPasswordHash) {
+      showAlert('管理者パスワードが違います。');
+      return false;
+    }
+    try { localStorage.setItem(`is_admin_${roomKey}`, '1'); } catch (e) {}
+    setIsAdmin(true);
+    return true;
+  };
+  const logoutAdmin = () => {
+    try { localStorage.removeItem(`is_admin_${roomKey}`); } catch (e) {}
+    setIsAdmin(false);
+  };
+
+  // ロック判定：student.lockedFields[] に含まれていて一般利用者なら true。
+  const isFieldLocked = useCallback((student, fieldName) => {
+    if (isAdmin) return false;
+    const arr = (student && student.lockedFields) || [];
+    return arr.includes(fieldName);
+  }, [isAdmin]);
+
+  // 管理者のみ：ある生徒のあるフィールドのロック ON/OFF を切替。
+  const toggleLockField = async (student, fieldName) => {
+    if (!isAdmin || !student) return;
+    const current = student.lockedFields || [];
+    const next = current.includes(fieldName)
+      ? current.filter((f) => f !== fieldName)
+      : [...current, fieldName];
+    recordUpdate(student.id, { lockedFields: current }, { lockedFields: next });
+    await persistPartial(student.id, { lockedFields: next });
+  };
 
   const handleRoomKeyChange = (e) => {
     e.preventDefault();
@@ -2097,6 +2245,18 @@ function App() {
 
           <div className="flex items-center gap-2">
             <ConnectionBadge status={connectionStatus} roomKey={roomKey} />
+            {/* v3.9: 管理者バッジ。管理者としてログイン中のときだけ表示。クリックでログアウト確認。 */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => { showConfirm('管理者モードからログアウトしますか？ロック項目が再び編集できなくなります。', () => logoutAdmin()); }}
+                title="クリックで管理者ログアウト"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-800 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer"
+              >
+                <span className="text-sm leading-none">🛡️</span>
+                <span>管理者</span>
+              </button>
+            )}
             {/* v3.6: 編集者名バッジ。未設定のときは赤くパルスして気づかせる。 */}
             <button
               onClick={() => { setTempTeacherName(myTeacherName || ''); setIsNamePromptOpen(true); }}
@@ -2453,6 +2613,7 @@ function App() {
                               <ProgressToggleButton icon={Phone} label={s.phoneStatus === 'completed' ? '連絡済み' : s.phoneStatus === 'none' ? '必要なし' : '未連絡'}
                                 status={s.phoneStatus} palette={phonePalette}
                                 onClick={() => handleInstantToggle(s, 'phoneStatus', s.phoneStatus)} cellHandlers={statusCellHandlers(s.id, 'phone')} clickGate={statusClickGate(s.id, 'phone')}
+                                locked={isFieldLocked(s, 'phoneStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'phoneStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                               {s.phoneStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.phoneDate || '', title: `${s.name} の電話連絡日`, onSelect: (v) => persistPartial(s.id, { phoneDate: v }) })}
@@ -2465,6 +2626,7 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.docStatus === 'completed' ? '配付済み' : s.docStatus === 'none' ? '配付の必要なし' : '未配付'}
                                 status={s.docStatus} palette={docPalette}
                                 onClick={() => handleInstantToggle(s, 'docStatus', s.docStatus)} cellHandlers={statusCellHandlers(s.id, 'doc')} clickGate={statusClickGate(s.id, 'doc')}
+                                locked={isFieldLocked(s, 'docStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'docStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                               {s.docStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.docDate || '', title: `${s.name} の保護者お知らせ配付日`, onSelect: (v) => persistPartial(s.id, { docDate: v }) })}
@@ -2502,6 +2664,7 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.studentThankYouStatus === 'completed' ? '送付済' : s.studentThankYouStatus === 'none' ? '不要' : '未送付'}
                                 status={s.studentThankYouStatus} palette={studentThankYouPalette}
                                 onClick={() => handleInstantToggle(s, 'studentThankYouStatus', s.studentThankYouStatus)}
+                                locked={isFieldLocked(s, 'studentThankYouStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'studentThankYouStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                               {s.studentThankYouStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.studentThankYouDate || '', title: `${s.name} の生徒お礼状送付日`, onSelect: (v) => persistPartial(s.id, { studentThankYouDate: v }) })}
@@ -2514,6 +2677,7 @@ function App() {
                               <ProgressToggleButton icon={FileText} label={s.teacherThankYouStatus === 'completed' ? '送付済' : s.teacherThankYouStatus === 'none' ? '不要' : '未送付'}
                                 status={s.teacherThankYouStatus} palette={teacherThankYouPalette}
                                 onClick={() => handleInstantToggle(s, 'teacherThankYouStatus', s.teacherThankYouStatus)}
+                                locked={isFieldLocked(s, 'teacherThankYouStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'teacherThankYouStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                               {s.teacherThankYouStatus === 'completed' && (
                                 <button onClick={() => setDatePickerState({ value: s.teacherThankYouDate || '', title: `${s.name} の教師お礼状送付日`, onSelect: (v) => persistPartial(s.id, { teacherThankYouDate: v }) })}
@@ -3103,6 +3267,52 @@ function App() {
                 </div>
               )}
               <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">※ 別のルームを開くにはパスワードの入力が必要です。<br />※ 切り替えると、Firebase / ローカル両方の保存先がそのルームに切り替わります。</p>
+            </div>
+            {/* v3.9: 管理者モード設定（パスワード登録 / ログイン / 変更 / ログアウト） */}
+            <div className="space-y-3 p-4 bg-amber-50/40 border border-amber-300 rounded-xl">
+              <h4 className="text-xs font-bold text-amber-800 flex items-center gap-1.5">
+                <span className="text-sm leading-none">🛡️</span>
+                <span>管理者モード（このルームの権限設定）</span>
+                {isAdmin && (<span className="ml-1 text-[10px] bg-amber-200 border border-amber-400 text-amber-900 font-bold px-1.5 py-0.5 rounded-full">ログイン中</span>)}
+              </h4>
+              <p className="text-[11px] text-amber-900 leading-relaxed">
+                ルームに「管理者用パスワード」を設定すると、管理者だけがリスト画面の各ステップに 🔒 マークを付けて、一般利用者のクリックを禁止できるようになります。<br />※ パスワードはルームごとに保存され、クラウド接続中は全端末で共有されます。ログイン状態は「端末ごと」に保存されます。
+              </p>
+              {!adminPasswordHash ? (
+                <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); setAdminPasswordTo(fd.get('newPw'), ''); e.currentTarget.reset(); }} className="space-y-2">
+                  <div className="text-[11px] font-bold text-amber-900">🆕 管理者として新規登録（このボタンを押した人がこのルームの管理者になります）</div>
+                  <div className="flex gap-2">
+                    <input type="password" name="newPw" required minLength={4} placeholder="新しい管理者パスワード（4文字以上）" autoComplete="new-password" className="flex-1 px-3 py-2 border border-amber-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-800" />
+                    <button type="submit" className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm shrink-0 cursor-pointer">管理者として登録</button>
+                  </div>
+                </form>
+              ) : isAdmin ? (
+                <div className="space-y-2">
+                  <div className="text-[11px] font-bold text-amber-900 flex items-center gap-1.5 bg-amber-100 px-3 py-2 rounded-lg border border-amber-300">
+                    <span className="text-sm leading-none">🛡️</span>
+                    <span>あなたは現在「管理者」としてログイン中です。リスト画面の各ステップ右肩の 🔓 マークを押すとロックを設定できます。</span>
+                  </div>
+                  <button type="button" onClick={() => { showConfirm('管理者モードからログアウトしますか？ロック項目が再び編集できなくなります。', () => logoutAdmin()); }} className="w-full px-3 py-2 bg-white border border-amber-300 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-bold cursor-pointer">管理者からログアウト</button>
+                  <details className="bg-white border border-amber-200 rounded-xl">
+                    <summary className="px-3 py-2 text-[11px] font-bold text-amber-800 cursor-pointer select-none">🔑 管理者パスワードを変更する</summary>
+                    <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); const newPw = fd.get('newPw'); const newPw2 = fd.get('newPw2'); const oldPw = fd.get('oldPw'); if (newPw !== newPw2) { showAlert('新しいパスワードが一致しません。'); return; } setAdminPasswordTo(newPw, oldPw).then((ok) => { if (ok) e.currentTarget && e.currentTarget.reset && e.currentTarget.reset(); }); }} className="p-3 space-y-2">
+                      <input type="password" name="oldPw" required placeholder="現在のパスワード" autoComplete="current-password" className="w-full px-3 py-2 border border-amber-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-800" />
+                      <input type="password" name="newPw" required minLength={4} placeholder="新しいパスワード（4文字以上）" autoComplete="new-password" className="w-full px-3 py-2 border border-amber-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-800" />
+                      <input type="password" name="newPw2" required minLength={4} placeholder="新しいパスワード（確認）" autoComplete="new-password" className="w-full px-3 py-2 border border-amber-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-800" />
+                      <button type="submit" className="w-full px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm cursor-pointer">パスワードを変更</button>
+                    </form>
+                  </details>
+                </div>
+              ) : (
+                <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.currentTarget); if (loginAsAdmin(fd.get('loginPw'))) e.currentTarget.reset(); }} className="space-y-2">
+                  <div className="text-[11px] font-bold text-amber-900">🔑 管理者としてログイン（ロック項目を編集可能にする）</div>
+                  <div className="flex gap-2">
+                    <input type="password" name="loginPw" required placeholder="管理者パスワード" autoComplete="current-password" className="flex-1 px-3 py-2 border border-amber-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-amber-400 text-slate-800" />
+                    <button type="submit" className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm shrink-0 cursor-pointer">ログイン</button>
+                  </div>
+                  <p className="text-[10px] text-amber-800 leading-relaxed">※ ログインはこの端末とこのルームだけに有効です。別の端末では再度パスワード入力が必要です。</p>
+                </form>
+              )}
             </div>
             {/* v3.6: 危険ゾーン：過去データ一括削除（パスワード「@kirari」必須） */}
             <div className="space-y-3 p-4 bg-rose-50/40 border border-rose-200 rounded-xl">
