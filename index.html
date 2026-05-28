@@ -1626,29 +1626,42 @@ function App() {
     await persistPartial(student.id, { lockedFields: next });
   };
 
-  // v3.10 fix: 指定された roomKey がすでに作成済みかどうかを判定する。
-  //   クラウド接続中は rooms/{rk} ドキュメント、または students サブコレクションの
-  //   存在で判定。ローカルモード時は localStorage / visited_rooms 履歴で判定する。
-  //   この判定をルーム切替・新規入力時に挟むことで、一般利用者が誤って
-  //   存在しないルームを新規作成してしまうのを防ぎ、管理者だけが作成できるようにする。
+  // v3.12 fix: 指定された roomKey がすでに作成済みかどうかを判定する。
+  //   非管理者でも実在ルームに入れるよう、判定を「複数シグナルのうち
+  //   いずれか1つでも見つかれば存在する」と緩める。
+  //   ・先にローカル痕跡（local_students_* / visited_rooms）をチェックすることで、
+  //     Firestore セキュリティルールで rooms/{rk} doc 自体の read が拒否される
+  //     環境でも誤って「存在しない」と判定されないようにする。
+  //   ・クラウドでは rooms/{rk} doc / students / presence / board / visitors を
+  //     Promise.all で並列に limit(1) read。個別の read 失敗（権限なし等）は
+  //     .catch で個別に握りつぶし、他のシグナルで救えるようにする。
+  //   ・管理者が作成直後で students が空のときも、presence や board / visitors
+  //     のいずれかにデータがあれば true を返す。
   const roomExists = useCallback(async (rk) => {
     const target = String(rk || '').trim();
     if (!target) return false;
-    if (connectionStatus === 'connected' && window.firebase) {
-      try {
-        const db = window.firebase.app().firestore();
-        const snap = await db.collection('rooms').doc(target).get();
-        if (snap.exists) return true;
-        // rooms/{rk} ドキュメントが無くても、students サブコレクションだけ存在するケースを救う
-        const studentsSnap = await db.collection('rooms').doc(target).collection('students').limit(1).get();
-        return !studentsSnap.empty;
-      } catch (e) { return false; }
-    }
+    // 1) まずローカル痕跡をチェック（権限エラーで誤判定されるのを防ぐ）
     try {
       if (localStorage.getItem('local_students_' + target)) return true;
       const visited = JSON.parse(localStorage.getItem('visited_rooms') || '[]');
-      return Array.isArray(visited) && visited.includes(target);
-    } catch (e) { return false; }
+      if (Array.isArray(visited) && visited.includes(target)) return true;
+    } catch (e) {}
+    // 2) クラウド接続中なら複数シグナルを並列でチェック
+    if (connectionStatus === 'connected' && window.firebase) {
+      try {
+        const db = window.firebase.app().firestore();
+        const roomRef = db.collection('rooms').doc(target);
+        const checks = await Promise.all([
+          roomRef.get().then((s) => !!s.exists).catch(() => false),
+          roomRef.collection('students').limit(1).get().then((s) => !s.empty).catch(() => false),
+          roomRef.collection('presence').limit(1).get().then((s) => !s.empty).catch(() => false),
+          roomRef.collection('board').limit(1).get().then((s) => !s.empty).catch(() => false),
+          roomRef.collection('visitors').limit(1).get().then((s) => !s.empty).catch(() => false),
+        ]);
+        if (checks.some(Boolean)) return true;
+      } catch (e) { /* 全体失敗時はそのまま false 扱いに落とす */ }
+    }
+    return false;
   }, [connectionStatus]);
 
   const handleRoomKeyChange = async (e) => {
