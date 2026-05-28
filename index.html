@@ -2584,7 +2584,8 @@ function App() {
                 )}
               </div>
             )}
-            {/* v3.9: 今日の訪問者ボタン。編集者名を設定して開いた人だけが記録される。 */}
+            {/* v3.9: 今日の訪問者ボタン（管理者のみ表示） */}
+            {isAdmin && (
             <div className="relative">
               <button
                 type="button"
@@ -2658,6 +2659,7 @@ function App() {
                 </>
               )}
             </div>
+            )}
             <button
               onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
               title="Firebase接続設定・ルーム名の切替・担当教員名の保存を行います"
