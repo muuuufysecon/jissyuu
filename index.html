@@ -1626,11 +1626,53 @@ function App() {
     await persistPartial(student.id, { lockedFields: next });
   };
 
-  const handleRoomKeyChange = (e) => {
+  // v3.10 fix: 指定された roomKey がすでに作成済みかどうかを判定する。
+  //   クラウド接続中は rooms/{rk} ドキュメント、または students サブコレクションの
+  //   存在で判定。ローカルモード時は localStorage / visited_rooms 履歴で判定する。
+  //   この判定をルーム切替・新規入力時に挟むことで、一般利用者が誤って
+  //   存在しないルームを新規作成してしまうのを防ぎ、管理者だけが作成できるようにする。
+  const roomExists = useCallback(async (rk) => {
+    const target = String(rk || '').trim();
+    if (!target) return false;
+    if (connectionStatus === 'connected' && window.firebase) {
+      try {
+        const db = window.firebase.app().firestore();
+        const snap = await db.collection('rooms').doc(target).get();
+        if (snap.exists) return true;
+        // rooms/{rk} ドキュメントが無くても、students サブコレクションだけ存在するケースを救う
+        const studentsSnap = await db.collection('rooms').doc(target).collection('students').limit(1).get();
+        return !studentsSnap.empty;
+      } catch (e) { return false; }
+    }
+    try {
+      if (localStorage.getItem('local_students_' + target)) return true;
+      const visited = JSON.parse(localStorage.getItem('visited_rooms') || '[]');
+      return Array.isArray(visited) && visited.includes(target);
+    } catch (e) { return false; }
+  }, [connectionStatus]);
+
+  const handleRoomKeyChange = async (e) => {
     e.preventDefault();
-    if (!tempRoomKey.trim()) return;
-    localStorage.setItem('school_room_key', tempRoomKey.trim());
-    setRoomKey(tempRoomKey.trim());
+    const target = String(tempRoomKey || '').trim();
+    if (!target) return;
+    if (target === roomKey) { setIsConfigOpen(false); return; }
+    // v3.10 fix: 既存ルームでない場合、一般利用者には新規作成を許可しない。
+    //   管理者は確認ダイアログを経たうえで新規ルームとして作成できる。
+    const exists = await roomExists(target);
+    if (!exists) {
+      if (!isAdmin) {
+        showAlert('このルームは存在しません。\nルーム名（合言葉）を確認するか、管理者にルームの作成を依頼してください。');
+        return;
+      }
+      showConfirm(`ルーム「${target}」はまだ存在しません。\n管理者として新規ルームを作成しますか？`, () => {
+        localStorage.setItem('school_room_key', target);
+        setRoomKey(target);
+        setIsConfigOpen(false);
+      });
+      return;
+    }
+    localStorage.setItem('school_room_key', target);
+    setRoomKey(target);
     setIsConfigOpen(false);
   };
 
@@ -1665,17 +1707,24 @@ function App() {
     }
   }, [connectionStatus, roomKey, showAlert]);
 
-  const handleConfirmRoomSwitch = (e) => {
+  const handleConfirmRoomSwitch = async (e) => {
     e.preventDefault();
     if (String(roomSwitchPassword || '').trim() !== '@kirari') {
       setRoomSwitchError('パスワードが違います。');
       return;
     }
     const target = roomSwitchTarget;
+    if (!target) return;
+    // v3.10 fix: 一覧から選んだルームでも、念のため存在を再確認。
+    //   一般利用者には存在しないルームへの切替（＝新規作成）を許可しない。
+    const exists = await roomExists(target);
+    if (!exists && !isAdmin) {
+      setRoomSwitchError('このルームは存在しません。');
+      return;
+    }
     setRoomSwitchTarget(null);
     setRoomSwitchPassword('');
     setRoomSwitchError('');
-    if (!target) return;
     localStorage.setItem('school_room_key', target);
     setTempRoomKey(target);
     setRoomKey(target);
