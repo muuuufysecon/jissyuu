@@ -1129,6 +1129,12 @@ function App() {
   const [todayVisitors, setTodayVisitors] = useState({});
   const [isTodayVisitorsOpen, setIsTodayVisitorsOpen] = useState(false);
 
+  // v3.13: ルーム登録者一覧（全期間）。teacherName を key とし、
+  //   { firstSeenAt, lastSeenAt, editCount, lastDateKey } を保持する。
+  //   visitors コレクション全体（dateKey フィルタなし）を購読し、
+  //   ローカルモードでは local_visitors_<rk>_* のキーを全期間スキャンして統合する。
+  const [allMembers, setAllMembers] = useState({});
+
   // v3.9: 訪問者ハートビート + 購読。名前 + 最終接続時刻 + 編集件数を rooms/{rk}/visitors に保存。ローカルモードは localStorage。
   useEffect(() => {
     const todayKey = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
@@ -1193,6 +1199,72 @@ function App() {
     }
     return () => { if (unsubscribe) { try { unsubscribe(); } catch (e) {} } if (hbTimer) clearInterval(hbTimer); window.__bumpVisitorEditCount = null; };
   }, [connectionStatus, roomKey, myTeacherName]);
+
+  // v3.13: ルーム登録者一覧（全期間）の購読。
+  //   ・クラウド接続中は visitors コレクション全体（dateKey フィルタなし）を購読し、
+  //     同一 teacherName の複数 dateKey ドキュメントを統合する。
+  //   ・ローカルモードは local_visitors_<rk>_<dateKey> の全期間キーをスキャンして統合。
+  useEffect(() => {
+    const rk = roomKey || '3-1';
+    const fbConnected = connectionStatus === 'connected' && window.firebase;
+    if (fbConnected) {
+      const visitorsRef = window.firebase.firestore().collection('rooms').doc(rk).collection('visitors');
+      const unsub = visitorsRef.onSnapshot((snap) => {
+        const merged = {};
+        snap.forEach((d) => {
+          const v = d.data();
+          if (!v || !v.teacherName) return;
+          const name = v.teacherName;
+          const firstSeen = typeof v.firstSeenAt === 'number' ? v.firstSeenAt : 0;
+          const lastSeen = typeof v.lastSeenAt === 'number' ? v.lastSeenAt : 0;
+          const editCount = typeof v.editCount === 'number' ? v.editCount : 0;
+          const dk = v.dateKey || '';
+          if (!merged[name]) {
+            merged[name] = { firstSeenAt: firstSeen || lastSeen, lastSeenAt: lastSeen, editCount, lastDateKey: dk };
+          } else {
+            const prev = merged[name];
+            const candidateFirst = firstSeen || lastSeen;
+            if (candidateFirst && (!prev.firstSeenAt || candidateFirst < prev.firstSeenAt)) prev.firstSeenAt = candidateFirst;
+            if (lastSeen > prev.lastSeenAt) prev.lastSeenAt = lastSeen;
+            prev.editCount = (prev.editCount || 0) + editCount;
+            if (dk > (prev.lastDateKey || '')) prev.lastDateKey = dk;
+          }
+        });
+        setAllMembers(merged);
+      }, (err) => { console.warn('all visitors snapshot:', err.message); });
+      return () => { try { unsub(); } catch (e) {} };
+    } else {
+      // ローカルモード：localStorage 全体から local_visitors_<rk>_<dateKey> を集める
+      try {
+        const prefix = `local_visitors_${rk}_`;
+        const merged = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k || !k.startsWith(prefix)) continue;
+          const dk = k.slice(prefix.length);
+          let map = {};
+          try { map = JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { map = {}; }
+          Object.entries(map).forEach(([name, info]) => {
+            if (!name) return;
+            const firstSeen = (info && typeof info.firstSeenAt === 'number') ? info.firstSeenAt : 0;
+            const lastSeen = (info && typeof info.lastSeenAt === 'number') ? info.lastSeenAt : 0;
+            const editCount = (info && typeof info.editCount === 'number') ? info.editCount : 0;
+            if (!merged[name]) {
+              merged[name] = { firstSeenAt: firstSeen || lastSeen, lastSeenAt: lastSeen, editCount, lastDateKey: dk };
+            } else {
+              const prev = merged[name];
+              const candidateFirst = firstSeen || lastSeen;
+              if (candidateFirst && (!prev.firstSeenAt || candidateFirst < prev.firstSeenAt)) prev.firstSeenAt = candidateFirst;
+              if (lastSeen > prev.lastSeenAt) prev.lastSeenAt = lastSeen;
+              prev.editCount = (prev.editCount || 0) + editCount;
+              if (dk > (prev.lastDateKey || '')) prev.lastDateKey = dk;
+            }
+          });
+        }
+        setAllMembers(merged);
+      } catch (e) { setAllMembers({}); }
+    }
+  }, [connectionStatus, roomKey, todayVisitors]);
 
   // v3.9: 「登録」ボタンを押すまで実データを作成しない方式に変更。
   // 以前は ＋ ボタンや FAB を押した時点で Firestore / localStorage に
