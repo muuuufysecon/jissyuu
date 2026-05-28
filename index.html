@@ -2590,7 +2590,36 @@ function App() {
                         })}
                       </div>
                     )}
-                    <div className="text-[10px] text-slate-400 px-2 pt-2 pb-1 border-t border-slate-100 mt-1 leading-snug">※ 今日（{(() => { const d = new Date(); return `${d.getMonth()+1}月${d.getDate()}日`; })()}）に編集者名を設定してこのルームを開いた人だけが記録されます。<br />※ 名前未設定の端末は履歴に残りません。</div>
+                    {/* v3.13: ルーム登録者（過去全期間：このルームを編集者名付きで開いたことのある人全員） */}
+                    <div className="mt-2 pt-2 border-t border-slate-200">
+                      <div className="text-[10px] font-bold text-slate-500 px-2 py-1 flex items-center justify-between gap-2">
+                        <span>📋 ルーム登録者 ({Object.keys(allMembers).length}名)</span>
+                        <span className="font-mono text-slate-400">全期間</span>
+                      </div>
+                      {Object.keys(allMembers).length === 0 ? (
+                        <div className="text-xs text-slate-400 italic px-2 py-3 text-center leading-relaxed">登録者はまだいません。<br />※ 編集者名を設定して開いた人だけが記録されます。</div>
+                      ) : (
+                        <div className="max-h-72 overflow-y-auto scrollbar-thin">
+                          {Object.entries(allMembers).sort((a, b) => (b[1].lastSeenAt || 0) - (a[1].lastSeenAt || 0)).map(([name, v]) => {
+                            const lastDate = v.lastSeenAt ? new Date(v.lastSeenAt) : null;
+                            const lastStr = lastDate ? `${lastDate.getFullYear()}/${lastDate.getMonth()+1}/${lastDate.getDate()}` : '?';
+                            const isSelf = name === myTeacherName;
+                            const isToday = !!todayVisitors[name];
+                            return (
+                              <div key={'all-' + name} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 ${isSelf ? 'bg-indigo-50/50' : ''}`}>
+                                <span className="text-sm leading-none">{isSelf ? '🙋' : '👤'}</span>
+                                <span className="text-xs text-slate-800 font-bold flex-1 truncate" title={name}>{name}</span>
+                                {isToday && <span className="text-[9px] bg-emerald-100 text-emerald-700 border border-emerald-200 px-1 py-0.5 rounded font-mono shrink-0" title="今日も訪問">今日</span>}
+                                <span className="text-[10px] font-mono text-slate-500 shrink-0" title="最終訪問日">{lastStr}</span>
+                                <span className="text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-200 px-1.5 py-0.5 rounded shrink-0" title="累計編集件数">{v.editCount || 0}件</span>
+                                {isSelf && <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1 py-0.5 rounded font-mono">あなた</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-[10px] text-slate-400 px-2 pt-2 pb-1 border-t border-slate-100 mt-1 leading-snug">※ 今日（{(() => { const d = new Date(); return `${d.getMonth()+1}月${d.getDate()}日`; })()}）に編集者名を設定してこのルームを開いた人だけが記録されます。<br />※ 名前未設定の端末は履歴に残りません。<br />※ 「ルーム登録者」には過去にこのルームを編集者名付きで開いた人全員が表示されます。</div>
                   </div>
                 </>
               )}
