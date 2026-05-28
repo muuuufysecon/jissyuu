@@ -1462,7 +1462,11 @@ function App() {
     const stepKey = FIELD_TO_STEP[field];
     if (!stepKey) return;
     // v3.9: ロックされたフィールドは管理者以外の変更を拒否（リスト画面の🔒マークで設定）
-    if (!isAdmin && (student.lockedFields || []).includes(field)) {
+    // v3.15: ロック対象は「事前電話・事前挨拶・生徒お礼状」の3項目のみ。
+    //   それ以外（教師お礼状・連絡票配付など）に過去データの lockedFields が
+    //   残っていてもロック扱いしない。
+    const LOCKABLE_FIELDS_ONLY = ['phoneStatus', 'greetingStatus', 'studentThankYouStatus'];
+    if (!isAdmin && LOCKABLE_FIELDS_ONLY.includes(field) && (student.lockedFields || []).includes(field)) {
       showAlert('この項目は管理者によりロックされています。');
       return;
     }
