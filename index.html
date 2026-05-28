@@ -1671,9 +1671,14 @@ function App() {
       });
       return;
     }
-    localStorage.setItem('school_room_key', target);
-    setRoomKey(target);
-    setIsConfigOpen(false);
+    // v3.11 fix: 既存ルームへの切替時も、合言葉の入力ミスで意図しない別の部屋に
+    //   入ってしまうのを防ぐため、「現在のルーム名」と「これから入るルーム名」を
+    //   明示した確認ダイアログを挟む。OKを押した時にだけ実際に切り替える。
+    showConfirm(`これから「${target}」というルームに入ります。\n（現在は「${roomKey}」のルームを開いています）\n\n合言葉が合っているか、もう一度確認してください。\nこのルームに入ってよろしいですか？`, () => {
+      localStorage.setItem('school_room_key', target);
+      setRoomKey(target);
+      setIsConfigOpen(false);
+    });
   };
 
   // v3.7: 作成された全ルーム名の一覧取得（ローカル + クラウド）と、@kirari パスワードでのルーム切替。
