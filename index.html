@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.5</title>
+<title>現場実習進捗マネージャー v3.16</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -527,6 +527,10 @@ function usePresence(connectionStatus, roomKey, teacherName) {
 function useBoardSync(connectionStatus, roomKey) {
   const [posts, setPosts] = useState([]);
   const unsubRef = useRef(null);
+  // v3.16: 削除済み投稿の履歴（ルーム単位・端末ごとに保存）。誰が・いつ削除したかも保持する。
+  const [deletedHistory, setDeletedHistory] = useState(() => { try { return JSON.parse(localStorage.getItem('board_deleted_history_' + roomKey) || '[]'); } catch (e) { return []; } });
+  // v3.16: 自分の画面で非表示にした投稿の履歴（この端末専用）。
+  const [hiddenHistory, setHiddenHistory] = useState(() => { try { return JSON.parse(localStorage.getItem('board_hidden_history_' + roomKey) || '[]'); } catch (e) { return []; } });
 
   useEffect(() => {
     try {
@@ -563,7 +567,15 @@ function useBoardSync(connectionStatus, roomKey) {
     });
   };
 
-  const deletePost = async (postId) => {
+  // v3.16: 削除前に投稿スナップショットを履歴へ保存し、誰がいつ削除したかも記録する。
+  const deletePost = async (postId, deletedBy) => {
+    const snap = posts.find((p) => p.id === postId);
+    if (snap) {
+      const ts = snap.createdAt;
+      const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0);
+      const entry = { id: snap.id, author: snap.author || '匿名', message: snap.message || '', createdAt: ms || Date.now(), deletedAt: Date.now(), deletedBy: deletedBy || '匿名' };
+      setDeletedHistory((prev) => { const next = [entry, ...prev.filter((h) => h.id !== postId)].slice(0, 200); try { localStorage.setItem('board_deleted_history_' + roomKey, JSON.stringify(next)); } catch (e) {} return next; });
+    }
     if (connectionStatus === 'connected' && window.firebase && !String(postId).startsWith('local-')) {
       try {
         const db = window.firebase.app().firestore();
@@ -579,11 +591,32 @@ function useBoardSync(connectionStatus, roomKey) {
   };
 
   const [hiddenIds, setHiddenIds] = useState(() => { try { const v = localStorage.getItem('board_hidden_' + roomKey); return new Set(v ? JSON.parse(v) : []); } catch (e) { return new Set(); } });
-  useEffect(() => { try { const v = localStorage.getItem('board_hidden_' + roomKey); setHiddenIds(new Set(v ? JSON.parse(v) : [])); } catch (e) { setHiddenIds(new Set()); } }, [roomKey]);
-  const hidePost = (postId) => { setHiddenIds((prev) => { const next = new Set(prev); next.add(postId); try { localStorage.setItem('board_hidden_' + roomKey, JSON.stringify(Array.from(next))); } catch (e) {} return next; }); };
+  useEffect(() => {
+    try { const v = localStorage.getItem('board_hidden_' + roomKey); setHiddenIds(new Set(v ? JSON.parse(v) : [])); } catch (e) { setHiddenIds(new Set()); }
+    try { setDeletedHistory(JSON.parse(localStorage.getItem('board_deleted_history_' + roomKey) || '[]')); } catch (e) { setDeletedHistory([]); }
+    try { setHiddenHistory(JSON.parse(localStorage.getItem('board_hidden_history_' + roomKey) || '[]')); } catch (e) { setHiddenHistory([]); }
+  }, [roomKey]);
+  // v3.16: 非表示にした投稿のスナップショットを履歴へ保存（端末ごと）。
+  const hidePost = (postId) => {
+    const snap = posts.find((p) => p.id === postId);
+    if (snap) {
+      const ts = snap.createdAt;
+      const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0);
+      const entry = { id: snap.id, author: snap.author || '匿名', message: snap.message || '', createdAt: ms || Date.now(), hiddenAt: Date.now() };
+      setHiddenHistory((prev) => { const next = [entry, ...prev.filter((h) => h.id !== postId)].slice(0, 200); try { localStorage.setItem('board_hidden_history_' + roomKey, JSON.stringify(next)); } catch (e) {} return next; });
+    }
+    setHiddenIds((prev) => { const next = new Set(prev); next.add(postId); try { localStorage.setItem('board_hidden_' + roomKey, JSON.stringify(Array.from(next))); } catch (e) {} return next; });
+  };
+  // v3.16: 非表示にした投稿を自分の画面に再表示する。
+  const restoreHiddenPost = (postId) => {
+    setHiddenIds((prev) => { const next = new Set(prev); next.delete(postId); try { localStorage.setItem('board_hidden_' + roomKey, JSON.stringify(Array.from(next))); } catch (e) {} return next; });
+    setHiddenHistory((prev) => { const next = prev.filter((h) => h.id !== postId); try { localStorage.setItem('board_hidden_history_' + roomKey, JSON.stringify(next)); } catch (e) {} return next; });
+  };
+  const clearDeletedHistory = () => { setDeletedHistory([]); try { localStorage.removeItem('board_deleted_history_' + roomKey); } catch (e) {} };
+  const clearHiddenHistory = () => { setHiddenHistory([]); try { localStorage.removeItem('board_hidden_history_' + roomKey); } catch (e) {} };
   const visiblePosts = posts.filter((p) => !hiddenIds.has(p.id));
 
-  return { posts: visiblePosts, addPost, deletePost, hidePost };
+  return { posts: visiblePosts, addPost, deletePost, hidePost, deletedHistory, hiddenHistory, restoreHiddenPost, clearDeletedHistory, clearHiddenHistory };
 }
 
 // =============================================================================
@@ -1059,7 +1092,10 @@ function App() {
   const { history, redo, push: pushHistory, popUndo, popRedo } = useHistory(10);
   const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
   const { onlineCount, onlineMembers } = usePresence(connectionStatus, roomKey, myTeacherName);
-  const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost, hidePost: hideBoardPost } = useBoardSync(connectionStatus, roomKey);
+  const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost, hidePost: hideBoardPost, deletedHistory: boardDeletedHistory, hiddenHistory: boardHiddenHistory, restoreHiddenPost: restoreHiddenBoardPost, clearDeletedHistory: clearBoardDeletedHistory, clearHiddenHistory: clearBoardHiddenHistory } = useBoardSync(connectionStatus, roomKey);
+  // v3.16: 掲示板の履歴モーダル開閉と表示タブ（'deleted' | 'hidden'）
+  const [isBoardHistoryOpen, setIsBoardHistoryOpen] = useState(false);
+  const [boardHistoryTab, setBoardHistoryTab] = useState('deleted');
   const [boardInput, setBoardInput] = useState('');
   const [isBoardOpen, setIsBoardOpen] = useState(true);
   const [isOnlineListOpen, setIsOnlineListOpen] = useState(false);
@@ -1087,6 +1123,16 @@ function App() {
   const [dragOverId, setDragOverId] = useState(null);
   const [dragHandleArmed, setDragHandleArmed] = useState(null);
   const [customOrder, setCustomOrder] = useState(() => { try { return JSON.parse(localStorage.getItem('list_custom_order_' + (localStorage.getItem('school_room_key') || '3-1')) || '{}'); } catch (e) { return {}; } });
+  // v3.16: 学年・組セクションの折りたたみ状態（key: 'g-c' / 'g-_nocls' / 'other'）
+  const [collapsedSections, setCollapsedSections] = useState(() => { try { return new Set(JSON.parse(localStorage.getItem('list_collapsed_sections_' + (localStorage.getItem('school_room_key') || '3-1')) || '[]')); } catch (e) { return new Set(); } });
+  const toggleSectionCollapsed = (key) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      try { localStorage.setItem('list_collapsed_sections_' + roomKey, JSON.stringify(Array.from(next))); } catch (e) {}
+      return next;
+    });
+  };
 
   const [datePickerState, setDatePickerState] = useState(null);
   const [formDates, setFormDates] = useState({
@@ -2003,6 +2049,9 @@ function App() {
   useEffect(() => {
     try { setCustomOrder(JSON.parse(localStorage.getItem('list_custom_order_' + roomKey) || '{}')); }
     catch (e) { setCustomOrder({}); }
+    // v3.16: ルーム切替時に折りたたみ状態も再読込
+    try { setCollapsedSections(new Set(JSON.parse(localStorage.getItem('list_collapsed_sections_' + roomKey) || '[]'))); }
+    catch (e) { setCollapsedSections(new Set()); }
   }, [roomKey]);
 
   const sortByCustomOrder = (list, gradeKey) => {
@@ -2362,7 +2411,14 @@ function App() {
               <span className="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full text-[10px] font-mono">{boardPosts.length}件</span>
               <ChevronDown className={"w-3.5 h-3.5 transition-transform " + (isBoardOpen ? "rotate-180" : "")} />
             </button>
-            {!isBoardOpen && boardPosts[0] && (
+            <button type="button" onClick={(e) => { e.stopPropagation(); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }} title="掲示板の「削除された投稿」と「非表示にした投稿」の履歴を表示します" className="shrink-0 inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-indigo-50 active:bg-indigo-100 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-300 rounded-lg text-[10px] font-bold cursor-pointer shadow-sm transition-all">
+<span className="text-[11px] leading-none">📜</span>
+<span>履歴</span>
+{((boardDeletedHistory || []).length + (boardHiddenHistory || []).length) > 0 && (
+<span className="text-[9px] font-mono bg-slate-100 text-slate-600 border border-slate-200 rounded px-1 py-0.5">{(boardDeletedHistory || []).length + (boardHiddenHistory || []).length}</span>
+)}
+</button>
+{!isBoardOpen && boardPosts[0] && (
               <div className="text-[11px] text-amber-900 truncate flex-1 min-w-0">
                 <span className="font-bold">{boardPosts[0].author || '匿名'}:</span> {boardPosts[0].message}
               </div>
@@ -2388,7 +2444,7 @@ function App() {
                         <div className="text-[9px] text-slate-500 font-mono">{timeStr}</div>
                       </div>
                       <div className="flex-1 text-slate-800 whitespace-pre-wrap break-words leading-relaxed">{p.message}</div>
-                      <div className="shrink-0 flex flex-col gap-1">{myTeacherName && p.author === myTeacherName ? (<><button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button><button type="button" onClick={() => showConfirm('この投稿を全員の画面から削除しますか？この操作は取り消せません。', () => deleteBoardPost(p.id))} title="自分の投稿を全員の画面から削除します" className="px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">全員削除</button></>) : (<button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button>)}</div>
+                      <div className="shrink-0 flex flex-col gap-1">{myTeacherName && p.author === myTeacherName ? (<><button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button><button type="button" onClick={() => showConfirm('この投稿を全員の画面から削除しますか？この操作は取り消せません。', () => deleteBoardPost(p.id, myTeacherName || '匿名'))} title="自分の投稿を全員の画面から削除します" className="px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">全員削除</button></>) : (<button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button>)}</div>
                     </div>
                   ); })}
                 </div>
@@ -2518,7 +2574,7 @@ function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.5 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.16 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
@@ -2895,9 +2951,9 @@ function App() {
                     if (ungraded.length > 0) sections.push({ key: 'other', label: '学年未設定', list: sortByCustomOrder(ungraded, 'other'), accent: 'bg-slate-100 border-slate-100 text-slate-700' });
                     return sections.flatMap(({ key, label, list, accent }) => [
                       <tr key={`grade-header-${key}`} className={accent + ' border-y-4 class-section-header-row'}>
-                        <td colSpan={10} className="class-section-header-cell px-4 py-3 text-sm font-extrabold"><div className="flex items-center justify-between gap-2"><span>{label}<span className="ml-2 text-[10px] font-mono bg-white border border-slate-300 text-slate-700 rounded px-1.5 py-0.5 font-bold">{list.length}件</span></span><button type="button" onClick={(e) => { const headers = Array.from(document.querySelectorAll('.class-section-header-cell')); const cur = e.currentTarget.closest('.class-section-header-cell'); const idx = headers.indexOf(cur); const target = headers[idx + 1] || headers[0]; if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="shrink-0 text-[11px] font-bold px-2.5 py-1 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 cursor-pointer shadow-sm whitespace-nowrap transition-colors" title="次の組の先頭へスクロールします（最後の組にいるときは先頭に戻ります）">次の組へ ↓</button></div></td>
+                        <td colSpan={10} className="class-section-header-cell px-4 py-3 text-sm font-extrabold"><div className="flex items-center justify-between gap-2"><span className="flex items-center gap-1.5"><button type="button" onClick={() => toggleSectionCollapsed(key)} title={collapsedSections.has(key) ? 'クリックで展開（このセクションの生徒一覧を表示）' : 'クリックで折りたたみ（このセクションの生徒一覧を非表示）'} className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/80 border border-slate-300 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 cursor-pointer transition-colors font-bold text-sm leading-none">{collapsedSections.has(key) ? '▶' : '▼'}</button><span>{label}<span className="ml-2 text-[10px] font-mono bg-white border border-slate-300 text-slate-700 rounded px-1.5 py-0.5 font-bold">{list.length}件</span>{collapsedSections.has(key) && (<span className="ml-1 text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-300 rounded px-1.5 py-0.5">折りたたみ中</span>)}</span></span><button type="button" onClick={(e) => { const headers = Array.from(document.querySelectorAll('.class-section-header-cell')); const cur = e.currentTarget.closest('.class-section-header-cell'); const idx = headers.indexOf(cur); const target = headers[idx + 1] || headers[0]; if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} className="shrink-0 text-[11px] font-bold px-2.5 py-1 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 cursor-pointer shadow-sm whitespace-nowrap transition-colors" title="次の組の先頭へスクロールします（最後の組にいるときは先頭に戻ります）">次の組へ ↓</button></div></td>
                       </tr>,
-                      ...(list.length === 0 ? [<tr key={`grade-empty-${key}`} className="bg-white"><td colSpan={10} className="p-6 text-center text-xs text-slate-400 italic">表示するデータがありません</td></tr>] : list.map((s, idx) => {
+                      ...(collapsedSections.has(key) ? [] : list.length === 0 ? [<tr key={`grade-empty-${key}`} className="bg-white"><td colSpan={10} className="p-6 text-center text-xs text-slate-400 italic">表示するデータがありません</td></tr>] : list.map((s, idx) => {
                         // グレードヘッダの絵文字は下で削除済み
                       const isMyStudent = myTeacherName && s.teacher === myTeacherName;
                       const zebraBg = idx % 2 === 1 ? 'bg-sky-50/60' : 'bg-white';
@@ -3711,7 +3767,79 @@ function App() {
         </div>
       )}
 
-      {/* カスタムアラート */}
+      {/* 掲示板履歴モーダル */}
+{isBoardHistoryOpen && (
+<div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsBoardHistoryOpen(false)}>
+<div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden animate-scaleIn flex flex-col max-h-[85vh]">
+<div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+<h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+<span className="text-base leading-none">📜</span>
+<span>掲示板の履歴</span>
+</h3>
+<button type="button" onClick={() => setIsBoardHistoryOpen(false)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
+</div>
+<div className="flex items-center bg-slate-100 px-3 pt-3 gap-1 border-b border-slate-200">
+<button type="button" onClick={() => setBoardHistoryTab('deleted')} className={`px-3 py-1.5 rounded-t-lg text-xs font-bold cursor-pointer transition-all ${boardHistoryTab === 'deleted' ? 'bg-white text-indigo-700 border-t border-l border-r border-slate-200 -mb-px' : 'text-slate-600 hover:text-slate-900'}`}>🗑 削除された投稿<span className="ml-1 text-[10px] font-mono bg-slate-200 text-slate-700 rounded px-1.5 py-0.5">{(boardDeletedHistory || []).length}件</span></button>
+<button type="button" onClick={() => setBoardHistoryTab('hidden')} className={`px-3 py-1.5 rounded-t-lg text-xs font-bold cursor-pointer transition-all ${boardHistoryTab === 'hidden' ? 'bg-white text-indigo-700 border-t border-l border-r border-slate-200 -mb-px' : 'text-slate-600 hover:text-slate-900'}`}>🙈 非表示にした投稿<span className="ml-1 text-[10px] font-mono bg-slate-200 text-slate-700 rounded px-1.5 py-0.5">{(boardHiddenHistory || []).length}件</span></button>
+</div>
+<div className="p-4 overflow-y-auto flex-1">
+{boardHistoryTab === 'deleted' ? (
+<div className="space-y-2">
+<p className="text-[10px] text-slate-500 leading-relaxed bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">※ 削除された投稿はクラウド上の履歴として全員で共有されます。投稿そのものは復元できませんが、内容と削除者・削除時刻の記録は残ります。</p>
+{(boardDeletedHistory || []).length === 0 ? (
+<div className="text-center py-8 text-xs text-slate-400 italic">削除された投稿はありません</div>
+) : (<>
+{[...(boardDeletedHistory || [])].sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0)).map((it, i) => (
+<div key={'del-' + (it.id || i)} className="border border-rose-200 bg-rose-50/40 rounded-xl p-3 space-y-1.5">
+<div className="flex items-center justify-between gap-2 flex-wrap text-[10px] text-slate-600">
+<span className="font-bold">投稿者: <span className="text-slate-800">{it.author || '匿名'}</span></span>
+<span className="font-mono">{it.createdAt ? new Date(it.createdAt).toLocaleString('ja-JP') : '?'}</span>
+</div>
+<div className="text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">{it.text}</div>
+<div className="text-[10px] text-rose-700 font-bold border-t border-rose-100 pt-1.5 flex items-center justify-between gap-2 flex-wrap">
+<span>🗑 削除: {it.deletedBy || '匿名'}</span>
+<span className="font-mono text-rose-600">{it.deletedAt ? new Date(it.deletedAt).toLocaleString('ja-JP') : '?'}</span>
+</div>
+</div>
+))}
+<div className="pt-2 flex justify-end">
+<button type="button" onClick={() => showConfirm('削除された投稿の履歴をすべて消去しますか？この操作は取り消せません。', () => clearBoardDeletedHistory())} className="px-3 py-1.5 bg-white border border-rose-300 hover:bg-rose-50 text-rose-700 rounded-lg text-xs font-bold cursor-pointer">履歴をクリア</button>
+</div>
+</>)}
+</div>
+) : (
+<div className="space-y-2">
+<p className="text-[10px] text-slate-500 leading-relaxed bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">※ 「非表示」はこの端末でのみ有効です。下の「一覧に復元」を押すと、掲示板の一覧に戻ります。</p>
+{(boardHiddenHistory || []).length === 0 ? (
+<div className="text-center py-8 text-xs text-slate-400 italic">非表示にした投稿はありません</div>
+) : (<>
+{[...(boardHiddenHistory || [])].sort((a, b) => (b.hiddenAt || 0) - (a.hiddenAt || 0)).map((it, i) => (
+<div key={'hid-' + (it.id || i)} className="border border-slate-200 bg-slate-50/60 rounded-xl p-3 space-y-1.5">
+<div className="flex items-center justify-between gap-2 flex-wrap text-[10px] text-slate-600">
+<span className="font-bold">投稿者: <span className="text-slate-800">{it.author || '匿名'}</span></span>
+<span className="font-mono">{it.createdAt ? new Date(it.createdAt).toLocaleString('ja-JP') : '?'}</span>
+</div>
+<div className="text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">{it.text}</div>
+<div className="border-t border-slate-100 pt-1.5 flex items-center justify-between gap-2 flex-wrap">
+<span className="text-[10px] text-slate-500 font-mono">🙈 {it.hiddenAt ? new Date(it.hiddenAt).toLocaleString('ja-JP') : '?'}</span>
+<button type="button" onClick={() => restoreHiddenBoardPost(it.id)} className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg text-[11px] font-bold cursor-pointer flex items-center gap-1"><RotateCcw className="w-3 h-3" />一覧に復元</button>
+</div>
+</div>
+))}
+<div className="pt-2 flex justify-end">
+<button type="button" onClick={() => showConfirm('この端末の「非表示」履歴をすべて消去しますか？元の投稿には影響しません。', () => clearBoardHiddenHistory())} className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold cursor-pointer">履歴をクリア</button>
+</div>
+</>)}
+</div>
+)}
+</div>
+<div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+<button type="button" onClick={() => setIsBoardHistoryOpen(false)} className="px-4 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">閉じる</button>
+</div>
+</div>
+</div>
+)}
+{/* カスタムアラート */}
       {alertState && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
           <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-scaleIn">
