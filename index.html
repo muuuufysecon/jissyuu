@@ -1129,13 +1129,32 @@ function App() {
   const [dragOverId, setDragOverId] = useState(null);
   const [dragHandleArmed, setDragHandleArmed] = useState(null);
   const [customOrder, setCustomOrder] = useState(() => { try { return JSON.parse(localStorage.getItem('list_custom_order_' + (localStorage.getItem('school_room_key') || '3-1')) || '{}'); } catch (e) { return {}; } });
-  // v3.16: 学年・組セクションの折りたたみ状態（key: 'g-c' / 'g-_nocls' / 'other'）
-  const [collapsedSections, setCollapsedSections] = useState(() => { try { return new Set(JSON.parse(localStorage.getItem('list_collapsed_sections_' + (localStorage.getItem('school_room_key') || '3-1')) || '[]')); } catch (e) { return new Set(); } });
+  // v3.17: 学年・組セクションの折りたたみ状態（リロード時は全セクションを畳んだ状態にする）
+  const [collapsedSections, setCollapsedSections] = useState(() => new Set());
+  const collapsedInitializedRoomRef = useRef(null);
+  const buildSectionKeys = useCallback((list) => {
+    const grades = ['1', '2', '3'];
+    const keys = [];
+    grades.forEach((g) => {
+      const gradeStudents = (list || []).filter((s) => s.grade === g);
+      if (gradeStudents.length === 0) return;
+      const classes = Array.from(new Set(gradeStudents.map((s) => s.classVal).filter(Boolean))).sort();
+      classes.forEach((c) => keys.push(g + '-' + c));
+      if (gradeStudents.some((s) => !s.classVal)) keys.push(g + '-_nocls');
+    });
+    if ((list || []).some((s) => !grades.includes(s.grade))) keys.push('other');
+    return keys;
+  }, []);
+  useEffect(() => {
+    if (collapsedInitializedRoomRef.current === roomKey) return;
+    if (!students || students.length === 0) return;
+    setCollapsedSections(new Set(buildSectionKeys(students)));
+    collapsedInitializedRoomRef.current = roomKey;
+  }, [students, roomKey, buildSectionKeys]);
   const toggleSectionCollapsed = (key) => {
     setCollapsedSections((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
-      try { localStorage.setItem('list_collapsed_sections_' + roomKey, JSON.stringify(Array.from(next))); } catch (e) {}
       return next;
     });
   };
@@ -2055,9 +2074,9 @@ function App() {
   useEffect(() => {
     try { setCustomOrder(JSON.parse(localStorage.getItem('list_custom_order_' + roomKey) || '{}')); }
     catch (e) { setCustomOrder({}); }
-    // v3.16: ルーム切替時に折りたたみ状態も再読込
-    try { setCollapsedSections(new Set(JSON.parse(localStorage.getItem('list_collapsed_sections_' + roomKey) || '[]'))); }
-    catch (e) { setCollapsedSections(new Set()); }
+    // v3.17: ルーム切替時も、次にデータを読み込んだ時点で全セクションを畳む
+    collapsedInitializedRoomRef.current = null;
+    setCollapsedSections(new Set());
   }, [roomKey]);
 
   const sortByCustomOrder = (list, gradeKey) => {
