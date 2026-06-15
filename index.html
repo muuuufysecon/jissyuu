@@ -163,7 +163,7 @@ const STEP_CONFIG = {
   },
   gift: {
     field: 'giftStatus',
-    cycle: ['none', 'bring'],
+    cycle: ['none', 'bring', 'brought'],
     label: '🍪 4. 菓子折',
     activeColor: 'bg-orange-500 border-orange-500 text-white shadow-sm'
   },
@@ -2317,7 +2317,7 @@ function App() {
       labelOf.phone(s.phoneStatus), s.phoneDate || '',
       labelOf.doc(s.docStatus), s.docDate || '',
       labelOf.greeting(s.greetingStatus), s.greetingDate || '', s.greetingTime || '', s.greetingVisitor || '',
-      (s.giftStatus || 'none') === 'bring' ? '持参する' : 'ー',
+      (s.giftStatus || 'none') === 'brought' ? '持参済み' : (s.giftStatus || 'none') === 'bring' ? '持参する' : 'ー',
       (s.patrols || []).map((p) => `${p.teacher ? p.teacher + ' ' : ''}${p.date}${p.time ? ' ' + p.time : ''}${p.done ? '(済)' : ''}`).join(' / '), (s.patrols || []).filter((p) => p.done).length,
       s.notes || ''
     ]);
@@ -3084,8 +3084,8 @@ function App() {
                           </td>
                           <td className="p-4 align-top">
                             <div className="space-y-1.5">
-                              <ProgressToggleButton icon={Paperclip} label={(s.giftStatus || 'none') === 'bring' ? '持参する' : 'ー'}
-                                status={s.giftStatus || 'none'} palette={(s.giftStatus || 'none') === 'bring' ? 'bg-orange-50 border-orange-200 text-orange-800 hover:bg-orange-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200'}
+                              <ProgressToggleButton icon={Paperclip} label={(s.giftStatus || 'none') === 'brought' ? '持参済み' : (s.giftStatus || 'none') === 'bring' ? '持参する' : 'ー'}
+                                status={s.giftStatus || 'none'} palette={(s.giftStatus || 'none') === 'brought' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100' : (s.giftStatus || 'none') === 'bring' ? 'bg-orange-50 border-orange-200 text-orange-800 hover:bg-orange-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200'}
                                 onClick={() => handleInstantToggle(s, 'giftStatus', s.giftStatus || 'none')}
                                 suffix={''} />
                             </div>
