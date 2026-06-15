@@ -1517,7 +1517,7 @@ function App() {
     // v3.15: ロック対象は「事前電話・事前挨拶・生徒お礼状」の3項目のみ。
     //   それ以外（教師お礼状・連絡票配付など）に過去データの lockedFields が
     //   残っていてもロック扱いしない。
-    const LOCKABLE_FIELDS_ONLY = ['phoneStatus', 'greetingStatus', 'studentThankYouStatus'];
+    const LOCKABLE_FIELDS_ONLY = ['phoneStatus', 'greetingStatus', 'giftStatus', 'studentThankYouStatus'];
     if (!isAdmin && LOCKABLE_FIELDS_ONLY.includes(field) && (student.lockedFields || []).includes(field)) {
       showAlert('この項目は管理者によりロックされています。');
       return;
@@ -3087,6 +3087,7 @@ function App() {
                               <ProgressToggleButton icon={Paperclip} label={(s.giftStatus || 'none') === 'brought' ? '持参済み' : (s.giftStatus || 'none') === 'bring' ? '持参する' : 'ー'}
                                 status={s.giftStatus || 'none'} palette={(s.giftStatus || 'none') === 'brought' ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100' : (s.giftStatus || 'none') === 'bring' ? 'bg-orange-50 border-orange-200 text-orange-800 hover:bg-orange-100' : 'bg-slate-100 border-slate-200 text-slate-500 hover:bg-slate-200'}
                                 onClick={() => handleInstantToggle(s, 'giftStatus', s.giftStatus || 'none')}
+                                locked={(s.lockedFields || []).includes('giftStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'giftStatus') : null} isAdmin={isAdmin}
                                 suffix={''} />
                             </div>
                           </td>
