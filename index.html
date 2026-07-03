@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.16</title>
+<title>現場実習進捗マネージャー v3.18</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -208,7 +208,8 @@ const loadFirebaseSDK = () => new Promise((resolve, reject) => {
   const urls = [
     'https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js',
     'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js',
-    'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js'
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js',
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js'
   ];
   const load = (i) => {
     if (i >= urls.length) return resolve(window.firebase);
@@ -742,6 +743,23 @@ const ProgressToggleButton = ({ icon: Icon, label, status, palette, onClick, suf
   );
 };
 
+// v3.18: 添付ファイルのダウンロード。旧データ（dataUrl）はそのまま、Storage 保存分（url）は fetch→blob 経由でダウンロードする。
+const downloadMaterialFile = async (m) => {
+  const trigger = (href) => { const a = document.createElement('a'); a.href = href; a.download = m.name || 'file'; document.body.appendChild(a); a.click(); document.body.removeChild(a); };
+  if (m.dataUrl) { trigger(m.dataUrl); return; }
+  if (!m.url) return;
+  try {
+    const res = await fetch(m.url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const objUrl = URL.createObjectURL(blob);
+    trigger(objUrl);
+    setTimeout(() => URL.revokeObjectURL(objUrl), 10000);
+  } catch (e) {
+    window.open(m.url, '_blank', 'noopener');
+  }
+};
+
 const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, onRename }) => {
   // v3.6: 保存ファイル(kind:'file')のプレビュー/DLはパスワードゲートを介して動作させる。URL登録はゲート不要。
   const gateFile = (action) => { if (typeof window.__requestFileUnlock === 'function') window.__requestFileUnlock(action); else action(); };
@@ -752,18 +770,14 @@ const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 4 * 1024 * 1024) {
-      onAlert('ファイルサイズは4MB以下にしてください。大きなファイルはGoogle Drive等の共有URLとして登録してください。');
+    if (file.size > 20 * 1024 * 1024) {
+      onAlert('ファイルサイズは20MB以下にしてください。大きなファイルはGoogle Drive等の共有URLとして登録してください。');
       e.target.value = '';
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      onAdd({ name: file.name, kind: 'file', dataUrl: reader.result, mimeType: file.type, size: file.size });
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    };
-    reader.onerror = () => onAlert('ファイルの読み込みに失敗しました。');
-    reader.readAsDataURL(file);
+    // v3.18: ファイル本体は App 側で Firebase Storage にアップロードする（オフライン時のみ dataUrl で保存）。
+    onAdd({ name: file.name, kind: 'file', file, mimeType: file.type, size: file.size });
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
   const iconFor = (m) => {
     if (m.kind === 'url') return '🔗';
@@ -797,7 +811,7 @@ const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, 
                   </div>
                   <button onClick={() => { if (m.kind === 'file') gateFile(() => onPreview(m)); else onPreview(m); }} className="px-2 py-1 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 text-indigo-700 rounded-lg text-[10px] font-bold cursor-pointer shrink-0">プレビュー</button>
                   {m.kind === 'file' ? (
-                    <button onClick={() => gateFile(() => { const a = document.createElement('a'); a.href = m.dataUrl; a.download = m.name; document.body.appendChild(a); a.click(); document.body.removeChild(a); })} className="px-2 py-1 bg-white border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 text-emerald-700 rounded-lg text-[10px] font-bold cursor-pointer shrink-0">DL</button>
+                    <button onClick={() => gateFile(() => downloadMaterialFile(m))} className="px-2 py-1 bg-white border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 text-emerald-700 rounded-lg text-[10px] font-bold cursor-pointer shrink-0">DL</button>
                   ) : (
                     <a href={m.url} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-white border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 text-emerald-700 rounded-lg text-[10px] font-bold cursor-pointer shrink-0">開く</a>
                   )}
@@ -813,7 +827,7 @@ const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, 
             <button type="button" onClick={() => { if (!urlInput.trim()) { onAlert('URLを入力してください。'); return; } onAdd({ name: urlNameInput.trim() || urlInput.trim(), kind: 'url', url: urlInput.trim() }); setUrlInput(''); setUrlNameInput(''); }} className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer">URLを追加</button>
           </div>
           <div className="p-3 bg-emerald-50/30 border border-emerald-100 rounded-xl space-y-2">
-            <div className="text-xs font-bold text-emerald-800">📎 ファイルをアップロード（〜4MB）</div>
+            <div className="text-xs font-bold text-emerald-800">📎 ファイルをアップロード（〜20MB）</div>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="w-full text-xs text-slate-700 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 file:cursor-pointer cursor-pointer" />
             <p className="text-[10px] text-slate-500 leading-relaxed">画像 / PDF はモーダル内でプレビュー、その他はダウンロードで開けます。大きいファイルはURL登録をご利用ください。</p>
           </div>
@@ -1585,11 +1599,50 @@ function App() {
     await persistPartial(student.id, { patrols: next });
   };
 
+  // v3.18: ファイル本体は Firebase Storage に保存し、Firestore にはダウンロードURLと保存パスのみ持たせる。
+  //（base64 を Firestore ドキュメントへ保存すると 1MB 上限を超えて保存に失敗するため。オフライン時は従来どおり dataUrl で localStorage に保存する。）
+  const uploadMaterialFile = async (studentId, matId, file) => {
+    const storage = window.firebase.app().storage();
+    const safeName = (file.name || 'file').split('/').join('_');
+    const path = 'rooms/' + roomKey + '/materials/' + studentId + '/' + matId + '_' + safeName;
+    const storageRef = storage.ref().child(path);
+    await storageRef.put(file, { contentType: file.type || 'application/octet-stream', contentDisposition: 'inline' });
+    const url = await storageRef.getDownloadURL();
+    return { url, storagePath: path };
+  };
+
+  const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('ファイルの読み込みに失敗しました。'));
+    reader.readAsDataURL(file);
+  });
+
   const handleAddMaterial = async (material) => {
     const target = students.find((s) => s.id === materialModalStudentId);
     if (!target) return;
+    const matId = 'mat-' + Date.now();
+    let item = { ...material, id: matId };
+    if (material.kind === 'file' && material.file) {
+      const { file, ...rest } = material;
+      setIsLoading(true);
+      try {
+        if (connectionStatus === 'connected' && window.firebase) {
+          const uploaded = await uploadMaterialFile(target.id, matId, file);
+          item = { ...rest, id: matId, url: uploaded.url, storagePath: uploaded.storagePath };
+        } else {
+          const dataUrl = await readFileAsDataUrl(file);
+          item = { ...rest, id: matId, dataUrl };
+        }
+      } catch (e) {
+        setIsLoading(false);
+        showAlert('ファイルのアップロードに失敗しました: ' + e.message);
+        return;
+      }
+      setIsLoading(false);
+    }
     const current = target.materials || [];
-    const next = [...current, { ...material, id: 'mat-' + Date.now() }];
+    const next = [...current, item];
     recordUpdate(target.id, { materials: current }, { materials: next });
     await persistPartial(target.id, { materials: next });
   };
@@ -1598,6 +1651,12 @@ function App() {
     const target = students.find((s) => s.id === materialModalStudentId);
     if (!target) return;
     const current = target.materials || [];
+    const removed = current.find((m) => m.id === materialId);
+    // v3.18: Storage 上のファイル本体も削除する（本体削除に失敗しても一覧からは消す）。
+    if (removed && removed.storagePath && connectionStatus === 'connected' && window.firebase) {
+      try { await window.firebase.app().storage().ref().child(removed.storagePath).delete(); }
+      catch (e) { console.warn('Storage ファイルの削除に失敗:', e.message); }
+    }
     const next = current.filter((m) => m.id !== materialId);
     recordUpdate(target.id, { materials: current }, { materials: next });
     await persistPartial(target.id, { materials: next });
@@ -1614,25 +1673,35 @@ function App() {
     await persistPartial(target.id, { materials: next });
   };
 
-  // v3.6: リスト画面の「追加」ボタンへのファイルドロップで、その生徒の関連資料として一括インポートし、Firestore / localStorage に保存する。
-  // 1ファイル 4MB 以上は、Firestore ドキュメントサイズを超えないように警告を出してスキップする。
+  // v3.6: リスト画面の「追加」ボタンへのファイルドロップで、その生徒の関連資料として一括インポートする。
+  // v3.18: ファイル本体は Firebase Storage にアップロードし、Firestore にはURLのみ保存する（1ファイル 20MB まで。オフライン時は dataUrl で localStorage 保存）。
   const handleDropFilesForMaterial = async (studentId, files) => {
     const target = students.find((s) => s.id === studentId);
     if (!target || !files || files.length === 0) return;
     const arr = Array.from(files);
-    const tooLarge = arr.filter((f) => f.size > 4 * 1024 * 1024);
-    const ok = arr.filter((f) => f.size <= 4 * 1024 * 1024);
+    const tooLarge = arr.filter((f) => f.size > 20 * 1024 * 1024);
+    const ok = arr.filter((f) => f.size <= 20 * 1024 * 1024);
     if (tooLarge.length > 0) {
-      showAlert('次のファイルは4MBを超えているため取り込めません: ' + tooLarge.map((f) => f.name).join('、') + '\n大きなファイルは関連資料モーダルから Google Drive 等の共有URLとして登録してください。');
+      showAlert('次のファイルは20MBを超えているため取り込めません: ' + tooLarge.map((f) => f.name).join('、') + '\n大きなファイルは関連資料モーダルから Google Drive 等の共有URLとして登録してください。');
     }
     if (ok.length === 0) return;
-    const readFile = (file) => new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve({ ok: true, item: { id: 'mat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8), name: file.name, kind: 'file', dataUrl: reader.result, mimeType: file.type, size: file.size } });
-      reader.onerror = () => resolve({ ok: false, name: file.name });
-      reader.readAsDataURL(file);
-    });
-    const results = await Promise.all(ok.map(readFile));
+    const importOne = async (file) => {
+      const matId = 'mat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+      const base = { id: matId, name: file.name, kind: 'file', mimeType: file.type, size: file.size };
+      try {
+        if (connectionStatus === 'connected' && window.firebase) {
+          const uploaded = await uploadMaterialFile(studentId, matId, file);
+          return { ok: true, item: { ...base, url: uploaded.url, storagePath: uploaded.storagePath } };
+        }
+        const dataUrl = await readFileAsDataUrl(file);
+        return { ok: true, item: { ...base, dataUrl } };
+      } catch (e) {
+        return { ok: false, name: file.name };
+      }
+    };
+    setIsLoading(true);
+    const results = await Promise.all(ok.map(importOne));
+    setIsLoading(false);
     const failed = results.filter((r) => !r.ok).map((r) => r.name);
     const items = results.filter((r) => r.ok).map((r) => r.item);
     if (failed.length > 0) showAlert('読み込みに失敗したファイル: ' + failed.join('、'));
@@ -2601,7 +2670,7 @@ function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.16 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.18 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
@@ -3921,13 +3990,13 @@ function App() {
                   <a href={materialPreview.url} target="_blank" rel="noopener noreferrer" className="inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold">新しいタブで開く</a>
                 </div>
               ) : materialPreview.mimeType?.startsWith('image/') ? (
-                <img src={materialPreview.dataUrl} alt={materialPreview.name} className="max-w-full max-h-full object-contain" />
+                <img src={materialPreview.url || materialPreview.dataUrl} alt={materialPreview.name} className="max-w-full max-h-full object-contain" />
               ) : materialPreview.mimeType === 'application/pdf' ? (
-                <iframe src={materialPreview.dataUrl} title={materialPreview.name} className="w-full h-[80vh] bg-white" />
+                <iframe src={materialPreview.url || materialPreview.dataUrl} title={materialPreview.name} className="w-full h-[80vh] bg-white" />
               ) : (
                 <div className="text-center p-8 space-y-3">
                   <p className="text-sm text-slate-600">この種類のファイルはプレビューできません</p>
-                  <a href={materialPreview.dataUrl} download={materialPreview.name} className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold">ダウンロード</a>
+                  <button type="button" onClick={() => downloadMaterialFile(materialPreview)} className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold">ダウンロード</button>
                 </div>
               )}
             </div>
