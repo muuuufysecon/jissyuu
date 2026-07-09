@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.22</title>
+<title>現場実習進捗マネージャー v3.23</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -208,8 +208,7 @@ const loadFirebaseSDK = () => new Promise((resolve, reject) => {
   const urls = [
     'https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js',
     'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js',
-    'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js',
-    'https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js'
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js'
   ];
   const load = (i) => {
     if (i >= urls.length) return resolve(window.firebase);
@@ -768,12 +767,12 @@ const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 20 * 1024 * 1024) {
-      onAlert('ファイルサイズは20MB以下にしてください。大きなファイルはGoogle Drive等の共有URLとして登録してください。');
+    if (file.size > 500 * 1024) {
+      onAlert('ファイルサイズは500KB以下にしてください。大きなファイルはGoogle Drive等の共有URLとして登録してください。');
       e.target.value = '';
       return;
     }
-    // v3.18: ファイル本体は App 側で Firebase Storage にアップロードする（オフライン時のみ dataUrl で保存）。
+    // v3.23: ファイル本体は App 側で dataUrl に変換して Firestore / localStorage に保存する（Firebase Storage 不使用）。
     onAdd({ name: file.name, kind: 'file', file, mimeType: file.type, size: file.size });
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -825,9 +824,9 @@ const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, 
             <button type="button" onClick={() => { if (!urlInput.trim()) { onAlert('URLを入力してください。'); return; } onAdd({ name: urlNameInput.trim() || urlInput.trim(), kind: 'url', url: urlInput.trim() }); setUrlInput(''); setUrlNameInput(''); }} className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer">URLを追加</button>
           </div>
           <div className="p-3 bg-emerald-50/30 border border-emerald-100 rounded-xl space-y-2">
-            <div className="text-xs font-bold text-emerald-800">📎 ファイルをアップロード（〜20MB）</div>
+            <div className="text-xs font-bold text-emerald-800">📎 ファイルをアップロード（〜500KB）</div>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="w-full text-xs text-slate-700 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 file:cursor-pointer cursor-pointer" />
-            <p className="text-[10px] text-slate-500 leading-relaxed">画像 / PDF はモーダル内でプレビュー、その他はダウンロードで開けます。大きいファイルはURL登録をご利用ください。</p>
+            <p className="text-[10px] text-slate-500 leading-relaxed">画像 / PDF はモーダル内でプレビュー、その他はダウンロードで開けます。保存先の制限のため、1ファイル500KB・生徒1人あたり合計約900KBまでです。大きいファイルはURL登録をご利用ください。</p>
           </div>
         </div>
       </div>
@@ -1589,16 +1588,13 @@ function App() {
     await persistPartial(student.id, { patrols: next });
   };
 
-  // v3.18: ファイル本体は Firebase Storage に保存し、Firestore にはダウンロードURLと保存パスのみ持たせる。
-  //（base64 を Firestore ドキュメントへ保存すると 1MB 上限を超えて保存に失敗するため。オフライン時は従来どおり dataUrl で localStorage に保存する。）
-  const uploadMaterialFile = async (studentId, matId, file) => {
-    const storage = window.firebase.app().storage();
-    const safeName = (file.name || 'file').split('/').join('_');
-    const path = 'rooms/' + roomKey + '/materials/' + studentId + '/' + matId + '_' + safeName;
-    const storageRef = storage.ref().child(path);
-    await storageRef.put(file, { contentType: file.type || 'application/octet-stream', contentDisposition: 'inline' });
-    const url = await storageRef.getDownloadURL();
-    return { url, storagePath: path };
+  // v3.23: Firebase Storage の利用を廃止し、v3.17 までの方式（dataUrl を Firestore / localStorage に保存）に戻した。
+  //（Storage 未有効化（Sparkプラン）のプロジェクトでは put() が 404 を長時間リトライし続け、
+  //  「同期中」のままアップロードが止まって見えるため。Firestore は1ドキュメント約1MiB上限のため、
+  //  1ファイル500KB・生徒1人あたりの関連資料合計を約900KB（JSON換算）に制限する。）
+  const MATERIALS_TOTAL_LIMIT = 900 * 1024;
+  const materialsTotalSizeOk = (materialsArr) => {
+    try { return JSON.stringify(materialsArr || []).length <= MATERIALS_TOTAL_LIMIT; } catch (e) { return true; }
   };
 
   const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
@@ -1617,22 +1613,21 @@ function App() {
       const { file, ...rest } = material;
       setIsLoading(true);
       try {
-        if (connectionStatus === 'connected' && window.firebase) {
-          const uploaded = await uploadMaterialFile(target.id, matId, file);
-          item = { ...rest, id: matId, url: uploaded.url, storagePath: uploaded.storagePath };
-        } else {
-          const dataUrl = await readFileAsDataUrl(file);
-          item = { ...rest, id: matId, dataUrl };
-        }
+        const dataUrl = await readFileAsDataUrl(file);
+        item = { ...rest, id: matId, dataUrl };
       } catch (e) {
         setIsLoading(false);
-        showAlert('ファイルのアップロードに失敗しました: ' + e.message);
+        showAlert('ファイルの読み込みに失敗しました: ' + e.message);
         return;
       }
       setIsLoading(false);
     }
     const current = target.materials || [];
     const next = [...current, item];
+    if (!materialsTotalSizeOk(next)) {
+      showAlert('この生徒の関連資料の合計サイズが上限（約900KB）を超えるため保存できません。不要なファイルを削除するか、Google Drive 等の共有URLとして登録してください。');
+      return;
+    }
     recordUpdate(target.id, { materials: current }, { materials: next });
     await persistPartial(target.id, { materials: next });
   };
@@ -1664,25 +1659,21 @@ function App() {
   };
 
   // v3.6: リスト画面の「追加」ボタンへのファイルドロップで、その生徒の関連資料として一括インポートする。
-  // v3.18: ファイル本体は Firebase Storage にアップロードし、Firestore にはURLのみ保存する（1ファイル 20MB まで。オフライン時は dataUrl で localStorage 保存）。
+  // v3.23: ファイル本体は dataUrl として Firestore / localStorage に保存する（1ファイル 500KB まで）。
   const handleDropFilesForMaterial = async (studentId, files) => {
     const target = students.find((s) => s.id === studentId);
     if (!target || !files || files.length === 0) return;
     const arr = Array.from(files);
-    const tooLarge = arr.filter((f) => f.size > 20 * 1024 * 1024);
-    const ok = arr.filter((f) => f.size <= 20 * 1024 * 1024);
+    const tooLarge = arr.filter((f) => f.size > 500 * 1024);
+    const ok = arr.filter((f) => f.size <= 500 * 1024);
     if (tooLarge.length > 0) {
-      showAlert('次のファイルは20MBを超えているため取り込めません: ' + tooLarge.map((f) => f.name).join('、') + '\n大きなファイルは関連資料モーダルから Google Drive 等の共有URLとして登録してください。');
+      showAlert('次のファイルは500KBを超えているため取り込めません: ' + tooLarge.map((f) => f.name).join('、') + '\n大きなファイルは関連資料モーダルから Google Drive 等の共有URLとして登録してください。');
     }
     if (ok.length === 0) return;
     const importOne = async (file) => {
       const matId = 'mat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
       const base = { id: matId, name: file.name, kind: 'file', mimeType: file.type, size: file.size };
       try {
-        if (connectionStatus === 'connected' && window.firebase) {
-          const uploaded = await uploadMaterialFile(studentId, matId, file);
-          return { ok: true, item: { ...base, url: uploaded.url, storagePath: uploaded.storagePath } };
-        }
         const dataUrl = await readFileAsDataUrl(file);
         return { ok: true, item: { ...base, dataUrl } };
       } catch (e) {
@@ -1699,6 +1690,10 @@ function App() {
     const latest = students.find((s) => s.id === studentId) || target;
     const current = latest.materials || [];
     const next = [...current, ...items];
+    if (!materialsTotalSizeOk(next)) {
+      showAlert('この生徒の関連資料の合計サイズが上限（約900KB）を超えるため保存できません。不要なファイルを削除するか、Google Drive 等の共有URLとして登録してください。');
+      return;
+    }
     recordUpdate(latest.id, { materials: current }, { materials: next });
     await persistPartial(latest.id, { materials: next });
   };
@@ -2634,7 +2629,7 @@ function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.22 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.23 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
