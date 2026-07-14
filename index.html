@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.23</title>
+<title>現場実習進捗マネージャー v3.24</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -98,7 +98,8 @@ import {
   Plus, Search, Settings, Database, AlertTriangle, Check, CheckCircle2,
   Clock, Phone, FileText, Calendar, User, Filter, RotateCcw, RotateCw, HelpCircle,
   Info, Copy, Trash2, Edit, AlertCircle, Share2, BookOpen, Key, ChevronDown, CheckCircle, Download,
-  ChevronLeft, ChevronRight, List, SlidersHorizontal, Handshake, Paperclip, Upload, GripVertical, Printer
+  ChevronLeft, ChevronRight, List, SlidersHorizontal, Handshake, Paperclip, Upload, GripVertical, Printer,
+  Bell, BellOff
 } from 'lucide-react';
 
 // =============================================================================
@@ -274,6 +275,35 @@ const parseFirebaseConfigText = (text) => {
 };
 
 // =============================================================================
+// v3.24: デスクトップ通知（Web Notifications API）
+//   タブ / アプリウィンドウを開いている間（最小化・背面でも可）、掲示板の新規投稿や
+//   生徒データの更新を Windows の通知センター等に表示する。
+//   ・HTTPS（GitHub Pages 等）で開いている場合のみ利用可（file:// では不可）。
+//   ・オン/オフはこの端末の localStorage に保存（キー: desktop_notify_enabled）。
+//   ・自分がこの画面を見ている（フォーカスがある）ときは通知しない。
+// =============================================================================
+const NOTIFY_ENABLED_KEY = 'desktop_notify_enabled';
+
+const isNotifySupported = () =>
+  typeof window !== 'undefined' && 'Notification' in window && !!window.isSecureContext;
+
+const isNotifyEnabledLS = () => {
+  try { return localStorage.getItem(NOTIFY_ENABLED_KEY) === '1'; } catch (e) { return false; }
+};
+
+const showDesktopNotification = (title, body, tag) => {
+  try {
+    if (!isNotifySupported()) return;
+    if (Notification.permission !== 'granted') return;
+    if (!isNotifyEnabledLS()) return;
+    // 自分がこの画面を見ている（フォーカスがある）ときは通知しない
+    if (typeof document !== 'undefined' && document.hasFocus && document.hasFocus()) return;
+    const n = new Notification(title, { body: String(body || '').slice(0, 120), tag });
+    n.onclick = () => { try { window.focus(); n.close(); } catch (e) {} };
+  } catch (e) { /* 通知の失敗はアプリ本体の動作に影響させない */ }
+};
+
+// =============================================================================
 // カスタムフック / Hooks
 // =============================================================================
 
@@ -283,6 +313,7 @@ function useFirestoreSync(firebaseConfigStr, roomKey) {
   const [connectionStatus, setConnectionStatus] = useState('local');
   const [connectionError, setConnectionError] = useState('');
   const unsubscribeRef = useRef(null);
+  const studentsNotifyReadyRef = useRef(false); // v3.24: 初回スナップショットでは通知しないための判定用
 
   useEffect(() => {
     let active = true;
@@ -327,6 +358,7 @@ function useFirestoreSync(firebaseConfigStr, roomKey) {
         if (unsubscribeRef.current) unsubscribeRef.current();
 
         const queryRef = db.collection('rooms').doc(roomKey).collection('students');
+        studentsNotifyReadyRef.current = false; // v3.24: 購読(再)開始時にリセット
         unsubscribeRef.current = queryRef.onSnapshot(
           (snap) => {
             if (!active) return;
@@ -336,6 +368,23 @@ function useFirestoreSync(firebaseConfigStr, roomKey) {
             setConnectionStatus('connected');
             setIsLoading(false);
             setConnectionError('');
+            // v3.24: 初回以降の「他の端末による追加・更新」をデスクトップ通知する。
+            //   自分の編集（hasPendingWrites）とキャッシュ由来のスナップショット（fromCache）は通知しない。
+            if (!studentsNotifyReadyRef.current) {
+              studentsNotifyReadyRef.current = true;
+            } else if (!snap.metadata.hasPendingWrites && !snap.metadata.fromCache) {
+              const changes = snap.docChanges().filter((ch) => ch.type === 'added' || ch.type === 'modified');
+              if (changes.length === 1) {
+                const s = changes[0].doc.data() || {};
+                showDesktopNotification(
+                  changes[0].type === 'added' ? '👤 生徒が追加されました' : '✏️ 進捗が更新されました',
+                  (s.name || '生徒') + (s.location ? '（' + s.location + '）' : ''),
+                  'students-' + changes[0].doc.id
+                );
+              } else if (changes.length > 1) {
+                showDesktopNotification('✏️ 生徒データが更新されました', changes.length + '件の変更がありました', 'students-bulk');
+              }
+            }
           },
           (error) => {
             if (!active) return;
@@ -533,6 +582,7 @@ function usePresence(connectionStatus, roomKey, teacherName) {
 function useBoardSync(connectionStatus, roomKey) {
   const [posts, setPosts] = useState([]);
   const unsubRef = useRef(null);
+  const boardNotifyReadyRef = useRef(false); // v3.24: 初回スナップショットでは通知しないための判定用
   // v3.16: 削除済み投稿の履歴（ルーム単位・端末ごとに保存）。誰が・いつ削除したかも保持する。
   const [deletedHistory, setDeletedHistory] = useState(() => { try { return JSON.parse(localStorage.getItem('board_deleted_history_' + roomKey) || '[]'); } catch (e) { return []; } });
   // v3.16: 自分の画面で非表示にした投稿の履歴（この端末専用）。
@@ -548,10 +598,25 @@ function useBoardSync(connectionStatus, roomKey) {
       const db = window.firebase.app().firestore();
       const ref = db.collection('rooms').doc(roomKey).collection('board').orderBy('createdAt', 'desc').limit(50);
       if (unsubRef.current) unsubRef.current();
+      boardNotifyReadyRef.current = false; // v3.24: 購読(再)開始時にリセット
       unsubRef.current = ref.onSnapshot((snap) => {
         const list = [];
         snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
         setPosts(list);
+        // v3.24: 初回以降の「他の人による新規投稿」をデスクトップ通知する。
+        //   自分の投稿（hasPendingWrites／author が自分）とキャッシュ由来のスナップショットは通知しない。
+        if (!boardNotifyReadyRef.current) {
+          boardNotifyReadyRef.current = true;
+        } else if (!snap.metadata.hasPendingWrites && !snap.metadata.fromCache) {
+          const myName = (() => { try { return (localStorage.getItem('my_teacher_name') || '').trim(); } catch (e) { return ''; } })();
+          snap.docChanges().forEach((ch) => {
+            if (ch.type !== 'added') return;
+            const p = ch.doc.data() || {};
+            const author = String(p.author || '匿名');
+            if (myName && author === myName) return; // 自分の投稿は通知しない
+            showDesktopNotification('📢 掲示板に新しい投稿：' + author, String(p.message || ''), 'board-' + ch.doc.id);
+          });
+        }
       }, (err) => { console.warn('board snapshot:', err.message); });
     }
 
@@ -1119,6 +1184,30 @@ function App() {
   // v3.6: 接続した各端末で「編集者名」を個別に入力してもらうためのモーダル状態
   const [isNamePromptOpen, setIsNamePromptOpen] = useState(false);
   const [tempTeacherName, setTempTeacherName] = useState('');
+  // v3.24: デスクトップ通知のオン/オフ（この端末のみ有効）
+  const [notifyEnabled, setNotifyEnabled] = useState(() => isNotifyEnabledLS() && isNotifySupported() && Notification.permission === 'granted');
+  const handleToggleNotify = async () => {
+    if (!isNotifySupported()) {
+      showAlert('この環境ではデスクトップ通知を利用できません。GitHub Pages 等の HTTPS の URL で開いているかご確認ください（file:// で直接開いた場合は利用できません）。');
+      return;
+    }
+    if (notifyEnabled) {
+      try { localStorage.setItem(NOTIFY_ENABLED_KEY, '0'); } catch (e) {}
+      setNotifyEnabled(false);
+      return;
+    }
+    let perm = Notification.permission;
+    if (perm === 'default') {
+      try { perm = await Notification.requestPermission(); } catch (e) {}
+    }
+    if (perm !== 'granted') {
+      showAlert('通知がブラウザで許可されていません。アドレスバーの鍵マーク →「通知」を「許可」に変更してから、もう一度お試しください。');
+      return;
+    }
+    try { localStorage.setItem(NOTIFY_ENABLED_KEY, '1'); } catch (e) {}
+    setNotifyEnabled(true);
+    try { new Notification('🔔 デスクトップ通知はオンです', { body: '掲示板の新規投稿や生徒データの更新をお知らせします（この画面を開いている間のみ）。' }); } catch (e) {}
+  };
 
   const [currentView, setCurrentView] = useState('list');
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
@@ -2658,6 +2747,16 @@ function App() {
             >
               <span className="text-sm leading-none">✏️</span>
               <span className="max-w-[120px] truncate">{myTeacherName || '名前を入力'}</span>
+            </button>
+            {/* v3.24: デスクトップ通知トグル。オンのとき掲示板投稿・生徒更新を OS の通知センターへ表示 */}
+            <button
+              type="button"
+              onClick={handleToggleNotify}
+              title={notifyEnabled ? 'デスクトップ通知をオフにする' : 'デスクトップ通知をオンにする（掲示板の新規投稿・生徒データの更新をWindowsの通知センター等に表示します）'}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border cursor-pointer ${notifyEnabled ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'}`}
+            >
+              {notifyEnabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
+              <span>{notifyEnabled ? '通知オン' : '通知オフ'}</span>
             </button>
             {connectionStatus === 'connected' && (
               <div className="relative">
