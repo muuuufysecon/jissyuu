@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.25.2</title>
+<title>現場実習進捗マネージャー v3.25.3</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -288,6 +288,8 @@ const NOTIFY_ENABLED_KEY = 'desktop_notify_enabled';
 const DEFAULT_PERIOD_ID = '2026-first';
 const DEFAULT_PERIOD = { id: DEFAULT_PERIOD_ID, name: '2026年度 前期', locked: false, createdAtClient: 0 };
 const ENV_SUFFIX = '_PROD';
+const PERIOD_META_PREFIX = '__period__';
+const periodMetaDocId = (periodId) => PERIOD_META_PREFIX + String(periodId).replace(/[^a-zA-Z0-9_-]/g, '_');
 
 const isNotifySupported = () =>
   typeof window !== 'undefined' && 'Notification' in window && !!window.isSecureContext;
@@ -368,7 +370,7 @@ function useFirestoreSync(firebaseConfigStr, roomKey) {
           (snap) => {
             if (!active) return;
             const list = [];
-            snap.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+            snap.forEach((doc) => { const data = doc.data() || {}; if (data.recordType !== 'period') list.push({ id: doc.id, ...data }); });
             setStudents(list);
             setConnectionStatus('connected');
             setIsLoading(false);
@@ -378,7 +380,7 @@ function useFirestoreSync(firebaseConfigStr, roomKey) {
             if (!studentsNotifyReadyRef.current) {
               studentsNotifyReadyRef.current = true;
             } else if (!snap.metadata.hasPendingWrites && !snap.metadata.fromCache) {
-              const changes = snap.docChanges().filter((ch) => ch.type === 'added' || ch.type === 'modified');
+              const changes = snap.docChanges().filter((ch) => (ch.type === 'added' || ch.type === 'modified') && (ch.doc.data() || {}).recordType !== 'period');
               if (changes.length === 1) {
                 const s = changes[0].doc.data() || {};
                 showDesktopNotification(
@@ -1238,20 +1240,38 @@ function App() {
 
     if (connectionStatus === 'connected' && window.firebase) {
       const db = window.firebase.app().firestore();
-      const ref = db.collection('rooms').doc(roomKey).collection('periods');
-      unsubscribe = ref.onSnapshot((snap) => {
-        const list = [];
-        snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
-        if (list.length === 0) {
-          ref.doc(DEFAULT_PERIOD_ID).set({ name: DEFAULT_PERIOD.name, locked: false, createdAtClient: 0 }, { merge: true }).catch(() => {});
-          setPeriods([DEFAULT_PERIOD]);
-        } else {
-          list.sort((a, b) => (a.createdAtClient || 0) - (b.createdAtClient || 0));
-          setPeriods(list);
-          const saved = (() => { try { return localStorage.getItem(activeKey); } catch (e) { return null; } })();
-          if (!list.some((x) => x.id === (saved || activePeriodId))) setActivePeriodId(list[list.length - 1].id);
-        }
-      }, (err) => console.warn('periods snapshot:', err.message));
+      // v3.25.3: 既存の students コレクション内にメタデータを保存する。
+      // 新しい periods コレクションを許可していない既存のFirestoreルールでも動作する。
+      const studentsRef = db.collection('rooms').doc(roomKey).collection('students');
+      let metaPeriods = [];
+      let legacyPeriods = [];
+      const publishPeriods = () => {
+        const map = new Map([[DEFAULT_PERIOD_ID, { ...DEFAULT_PERIOD }]]);
+        [...legacyPeriods, ...metaPeriods].forEach((p) => map.set(p.id, { ...map.get(p.id), ...p }));
+        const list = Array.from(map.values()).sort((a, b) => (a.createdAtClient || 0) - (b.createdAtClient || 0));
+        setPeriods(list);
+        const saved = (() => { try { return localStorage.getItem(activeKey); } catch (e) { return null; } })();
+        if (!list.some((x) => x.id === (saved || activePeriodId))) setActivePeriodId(DEFAULT_PERIOD_ID);
+      };
+      unsubscribe = studentsRef.onSnapshot((snap) => {
+        metaPeriods = [];
+        snap.forEach((d) => {
+          const data = d.data() || {};
+          if (data.recordType === 'period') metaPeriods.push({ id: data.periodId || d.id.replace(PERIOD_META_PREFIX, ''), ...data });
+        });
+        publishPeriods();
+      }, (err) => console.warn('period metadata snapshot:', err.message));
+      // v3.25〜v3.25.2で作成済みの periods コレクションがあれば一度だけ読み込み、
+      // students 内のメタデータ文書へ移行する。権限が無い場合は静かに無視する。
+      db.collection('rooms').doc(roomKey).collection('periods').get().then((snap) => {
+        legacyPeriods = [];
+        snap.forEach((d) => legacyPeriods.push({ id: d.id, ...d.data() }));
+        publishPeriods();
+        legacyPeriods.forEach((p) => {
+          const { id, ...body } = p;
+          studentsRef.doc(periodMetaDocId(id)).set({ ...body, recordType: 'period', periodId: id }, { merge: true }).catch(() => {});
+        });
+      }).catch(() => {});
     } else {
       try {
         const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -2669,8 +2689,8 @@ function App() {
     try {
       if (connectionStatus === 'connected' && window.firebase) {
         const db = window.firebase.app().firestore();
-        await db.collection('rooms').doc(roomKey).collection('periods').doc(newId).set({ name, locked: false, createdAtClient: meta.createdAtClient, createdAt: window.firebase.firestore.FieldValue.serverTimestamp() });
-        if (lockPreviousPeriod) await db.collection('rooms').doc(roomKey).collection('periods').doc(activePeriodId).set({ name: activePeriod.name || DEFAULT_PERIOD.name, locked: true, createdAtClient: activePeriod.createdAtClient || 0 }, { merge: true });
+        await db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(newId)).set({ recordType: 'period', periodId: newId, name, locked: false, createdAtClient: meta.createdAtClient, createdAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+        if (lockPreviousPeriod) await db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(activePeriodId)).set({ recordType: 'period', periodId: activePeriodId, name: activePeriod.name || DEFAULT_PERIOD.name, locked: true, createdAtClient: activePeriod.createdAtClient || 0 }, { merge: true });
         const ref = db.collection('rooms').doc(roomKey).collection('students');
         for (const row of copies) await ref.add(row);
       } else {
@@ -2692,7 +2712,7 @@ function App() {
     try {
       if (connectionStatus === 'connected' && window.firebase) {
         const db = window.firebase.app().firestore();
-        await db.collection('rooms').doc(roomKey).collection('periods').doc(period.id).set({ name: period.name, locked, createdAtClient: period.createdAtClient || 0 }, { merge: true });
+        await db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(period.id)).set({ recordType: 'period', periodId: period.id, name: period.name, locked, createdAtClient: period.createdAtClient || 0 }, { merge: true });
       } else {
         const next = periods.map((p) => p.id === period.id ? { ...p, locked } : p);
         setPeriods(next); localStorage.setItem(`internship_periods${ENV_SUFFIX}_${roomKey}`, JSON.stringify(next));
@@ -2720,7 +2740,7 @@ function App() {
           try {
             if (connectionStatus === 'connected' && window.firebase) {
               const db = window.firebase.app().firestore();
-              for (const p of data.periods) { const { id, ...body } = p; await db.collection('rooms').doc(roomKey).collection('periods').doc(id).set(body, { merge: true }); }
+              for (const p of data.periods) { const { id, ...body } = p; await db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(id)).set({ ...body, recordType: 'period', periodId: id }, { merge: true }); }
               for (const s of data.students) { const { id, ...body } = s; await db.collection('rooms').doc(roomKey).collection('students').doc(id).set(body, { merge: true }); }
             } else {
               const pm = new Map(periods.map((p) => [p.id, p])); data.periods.forEach((p) => pm.set(p.id, p));
@@ -2786,7 +2806,7 @@ function App() {
 
       {/* v3.7: 画面上部の掲示板。ルーム単位で共有され、投稿者名と削除ボタン付き。 */}
       <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-300 shadow-sm no-print">
-        <div className="max-w-7xl mx-auto px-4 py-2">
+        <div className="w-full max-w-none px-3 sm:px-4 py-2">
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => setIsBoardOpen((v) => !v)} className="flex items-center gap-2 text-xs font-bold text-amber-900 hover:text-amber-700 cursor-pointer">
               <span className="text-base">📣</span>
@@ -2926,12 +2946,12 @@ function App() {
       )}
 
       <header className="bg-white border-b border-slate-200 shrink-0 shadow-sm no-print">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="w-full max-w-none px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.25.2 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.25.3 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
@@ -3108,7 +3128,7 @@ function App() {
 
       {connectionStatus === 'local' && (
         <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs py-2.5 px-4 shadow-sm no-print">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
+          <div className="w-full max-w-none flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
             <span className="flex items-center gap-2 text-amber-800">
               <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
               現在はPC1台のみの「体験デモ」で稼働しています。右上の<strong className="font-bold">「環境設定」ボタン</strong>から、config の貼り付け または config.js ファイルの読み込みでクラウド接続できます。
@@ -3125,7 +3145,7 @@ function App() {
         </div>
       )}
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 space-y-6">
+      <main className="flex-1 w-full max-w-none mx-auto p-2 sm:p-3 lg:p-4 space-y-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 no-print">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
             <div>
@@ -3655,7 +3675,7 @@ function App() {
         <span>登録</span>
       </button>
       <footer className="bg-white border-t border-slate-200 py-6 px-4 mt-12 shrink-0 no-print">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+        <div className="w-full max-w-none mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
           <div>
             <p className="font-semibold text-slate-700">現場実習進捗マネージャー - HTML スタンドアロン版</p>
             <p className="mt-0.5">Google Firebase Infrastructure 連携対応</p>
