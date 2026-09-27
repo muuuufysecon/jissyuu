@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.25.5</title>
+<title>現場実習進捗マネージャー v3.25.6</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -1328,6 +1328,9 @@ function App() {
   const [tempTeacherName, setTempTeacherName] = useState('');
   // v3.24: デスクトップ通知のオン/オフ（この端末のみ有効）
   const [notifyEnabled, setNotifyEnabled] = useState(() => isNotifyEnabledLS() && isNotifySupported() && Notification.permission === 'granted');
+  // v3.25.6: アプリ起動時に「今日の実習・見学対象者」を案内する。
+  const [isTodayTargetsOpen, setIsTodayTargetsOpen] = useState(false);
+  const todayTargetsShownRef = useRef(false);
   const handleToggleNotify = async () => {
     if (!isNotifySupported()) {
       showAlert('この環境ではデスクトップ通知を利用できません。GitHub Pages 等の HTTPS の URL で開いているかご確認ください（file:// で直接開いた場合は利用できません）。');
@@ -1354,6 +1357,23 @@ function App() {
   const activePeriod = periods.find((p) => p.id === activePeriodId) || periods[0] || DEFAULT_PERIOD;
   const isActivePeriodLocked = !!activePeriod.locked;
   const activeStudents = useMemo(() => students.filter((s) => (s.periodId || DEFAULT_PERIOD_ID) === activePeriodId), [students, activePeriodId]);
+
+  const todayTargetDate = getTodayString();
+  const todayTargets = useMemo(() => students
+    .filter((s) => (s.internshipDates || []).includes(todayTargetDate))
+    .sort((a, b) => (`${a.grade || '9'}-${a.classVal || '9'}-${a.name || ''}`).localeCompare(`${b.grade || '9'}-${b.classVal || '9'}-${b.name || ''}`, 'ja')),
+    [students, todayTargetDate]);
+
+  useEffect(() => {
+    if (isLoading || isNamePromptOpen || todayTargetsShownRef.current || todayTargets.length === 0) return;
+    // クラウド接続直後の編集者名入力モーダルを優先し、閉じた後に表示する。
+    const timer = setTimeout(() => {
+      if (todayTargetsShownRef.current) return;
+      todayTargetsShownRef.current = true;
+      setIsTodayTargetsOpen(true);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [isLoading, isNamePromptOpen, todayTargets]);
 
   const [currentView, setCurrentView] = useState('list');
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
@@ -3003,7 +3023,7 @@ function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.25.5 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.25.6 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
@@ -3040,6 +3060,12 @@ function App() {
               <span className="text-sm leading-none">✏️</span>
               <span className="max-w-[120px] truncate">{myTeacherName || '名前を入力'}</span>
             </button>
+            {todayTargets.length > 0 && (
+              <button type="button" onClick={() => setIsTodayTargetsOpen(true)} title="今日の実習・見学対象者を表示します" className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-900 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer">
+                <span className="text-sm leading-none">📅</span>
+                <span>本日の実習・見学 {todayTargets.length}名</span>
+              </button>
+            )}
             {/* v3.24: デスクトップ通知トグル。オンのとき掲示板投稿・生徒更新を OS の通知センターへ表示 */}
             <button
               type="button"
@@ -4300,6 +4326,53 @@ function App() {
 </div>
 </div>
 )}
+      {/* v3.25.6: 今日の実習・見学対象者ポップアップ */}
+      {isTodayTargetsOpen && todayTargets.length > 0 && (
+        <div className="fixed inset-0 z-[175] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 no-print" onClick={() => setIsTodayTargetsOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-white border border-yellow-300 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden animate-scaleIn">
+            <div className="px-5 py-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-b border-yellow-300 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-extrabold text-yellow-950 flex items-center gap-2"><span>📅</span><span>今日の実習・見学</span></h2>
+                <p className="text-xs text-yellow-800 mt-1">{new Date(todayTargetDate + 'T00:00:00').toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}　対象者 {todayTargets.length}名</p>
+              </div>
+              <button type="button" onClick={() => setIsTodayTargetsOpen(false)} className="text-slate-500 hover:text-slate-900 text-2xl font-bold cursor-pointer leading-none" aria-label="閉じる">×</button>
+            </div>
+            <div className="p-5 overflow-y-auto max-h-[68vh] space-y-3 bg-slate-50">
+              {todayTargets.map((s) => {
+                const info = computeInternshipDayInfo(s, todayTargetDate);
+                const isObservation = s.internshipType === 'observation';
+                const period = periods.find((p) => p.id === (s.periodId || DEFAULT_PERIOD_ID));
+                const patrolsToday = (s.patrols || []).filter((p) => p.date === todayTargetDate);
+                return (
+                  <div key={s.id} className={`bg-white rounded-xl border-l-4 border border-slate-200 p-4 shadow-sm ${isObservation ? 'border-l-pink-500' : 'border-l-yellow-500'}`}>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-extrabold border ${isObservation ? 'bg-pink-100 border-pink-300 text-pink-900' : 'bg-yellow-100 border-yellow-300 text-yellow-900'}`}>{isObservation ? '見学' : '実習'}</span>
+                          <span className="text-base font-extrabold text-slate-950">{s.name}</span>
+                          <span className="text-xs font-bold text-slate-600">{s.grade ? `${s.grade}年` : ''}{s.classVal ? `${s.classVal}組` : ''}</span>
+                        </div>
+                        <div className="mt-2 text-sm font-bold text-slate-800 flex items-start gap-1.5"><span>🏢</span><span>{s.location || '実習先未設定'}</span></div>
+                      </div>
+                      {info && <span className="shrink-0 text-xs font-extrabold bg-indigo-50 border border-indigo-200 text-indigo-800 px-2.5 py-1 rounded-full">{info.dayNumber}日目／全{info.totalDays}日</span>}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                      {s.teacher && <span>👤 担当：<b>{s.teacher}</b></span>}
+                      {period && <span>🗂️ {period.name}</span>}
+                      {patrolsToday.map((p) => <span key={p.id}>🚗 巡回：<b>{p.teacher || '担当未設定'}{p.time ? ` ${p.time}` : ''}</b>{p.done ? '（完了）' : ''}</span>)}
+                    </div>
+                    {s.notes && <div className="mt-2 text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-2 leading-relaxed">📝 {s.notes}</div>}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="px-5 py-3 bg-white border-t border-slate-200 flex justify-end">
+              <button type="button" onClick={() => setIsTodayTargetsOpen(false)} className="px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 border border-yellow-500 rounded-xl text-sm font-extrabold cursor-pointer shadow-sm">確認しました</button>
+            </div>
+          </div>
+        </div>
+      )}
+
 {/* カスタムアラート */}
       {alertState && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
