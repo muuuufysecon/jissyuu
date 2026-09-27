@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.24</title>
+<title>現場実習進捗マネージャー v3.25.2</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -284,6 +284,11 @@ const parseFirebaseConfigText = (text) => {
 // =============================================================================
 const NOTIFY_ENABLED_KEY = 'desktop_notify_enabled';
 
+// v3.25: 実習期管理。periodId が無い既存データは前期データとして扱い、破壊的な移行を行わない。
+const DEFAULT_PERIOD_ID = '2026-first';
+const DEFAULT_PERIOD = { id: DEFAULT_PERIOD_ID, name: '2026年度 前期', locked: false, createdAtClient: 0 };
+const ENV_SUFFIX = '_PROD';
+
 const isNotifySupported = () =>
   typeof window !== 'undefined' && 'Notification' in window && !!window.isSecureContext;
 
@@ -449,7 +454,8 @@ function useHistory(limit = 30) {
     return last;
   }, [redo, limit]);
 
-  return { history, redo, push, popUndo, popRedo };
+  const clear = useCallback(() => { setHistory([]); setRedo([]); }, []);
+  return { history, redo, push, popUndo, popRedo, clear };
 }
 
 function useDialog() {
@@ -824,6 +830,44 @@ const downloadMaterialFile = async (m) => {
   }
 };
 
+// v3.25.2: PDF はアプリ内モーダルではなく、ブラウザの別タブで開く。
+const isPdfMaterial = (m) =>
+  m?.mimeType === 'application/pdf' || /\.pdf(?:$|[?#])/i.test(String(m?.name || '')) || /\.pdf(?:$|[?#])/i.test(String(m?.url || ''));
+
+const openPdfInNewTab = (m) => {
+  try {
+    let href = m?.url || '';
+    let revokeUrl = '';
+    if (!href && m?.dataUrl) {
+      const match = String(m.dataUrl).match(/^data:([^;,]+)?(;base64)?,(.*)$/s);
+      if (!match) throw new Error('PDFデータの形式が正しくありません。');
+      const mime = match[1] || 'application/pdf';
+      const bytes = match[2]
+        ? Uint8Array.from(atob(match[3]), (c) => c.charCodeAt(0))
+        : new TextEncoder().encode(decodeURIComponent(match[3]));
+      revokeUrl = URL.createObjectURL(new Blob([bytes], { type: mime }));
+      href = revokeUrl;
+    }
+    if (!href) throw new Error('PDFの保存先が見つかりません。');
+    const opened = window.open('about:blank', '_blank');
+    if (!opened) throw new Error('別タブを開けませんでした。ブラウザのポップアップを許可してください。');
+    const doc = opened.document;
+    doc.title = m?.name || 'PDF';
+    doc.documentElement.style.height = '100%';
+    doc.body.style.cssText = 'height:100%;margin:0;background:#334155;overflow:hidden';
+    const embed = doc.createElement('embed');
+    embed.src = href; embed.type = 'application/pdf';
+    embed.style.cssText = 'display:block;width:100%;height:100%;border:0';
+    doc.body.appendChild(embed);
+    opened.opener = null;
+    if (revokeUrl) setTimeout(() => URL.revokeObjectURL(revokeUrl), 30 * 60 * 1000);
+    return true;
+  } catch (e) {
+    console.warn('PDFを別タブで開けませんでした:', e.message);
+    return false;
+  }
+};
+
 const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, onRename }) => {
   const [urlInput, setUrlInput] = useState('');
   const [urlNameInput, setUrlNameInput] = useState('');
@@ -871,7 +915,7 @@ const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, 
                     {m.kind === 'url' && <div className="text-[10px] text-slate-500 truncate">{m.url}</div>}
                     {m.kind === 'file' && m.size && <div className="text-[10px] text-slate-500">{Math.round(m.size / 1024)} KB · {m.mimeType || 'file'}</div>}
                   </div>
-                  <button onClick={() => onPreview(m)} className="px-2 py-1 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 text-indigo-700 rounded-lg text-[10px] font-bold cursor-pointer shrink-0">プレビュー</button>
+                  <button onClick={() => { if (isPdfMaterial(m)) { if (!openPdfInNewTab(m)) onAlert('PDFを別タブで開けませんでした。ブラウザのポップアップ許可をご確認ください。'); } else { onPreview(m); } }} className="px-2 py-1 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 text-indigo-700 rounded-lg text-[10px] font-bold cursor-pointer shrink-0">{isPdfMaterial(m) ? '別タブで開く' : 'プレビュー'}</button>
                   {m.kind === 'file' ? (
                     <button onClick={() => downloadMaterialFile(m)} className="px-2 py-1 bg-white border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 text-emerald-700 rounded-lg text-[10px] font-bold cursor-pointer shrink-0">DL</button>
                   ) : (
@@ -891,7 +935,7 @@ const MaterialModal = ({ student, onClose, onAdd, onDelete, onPreview, onAlert, 
           <div className="p-3 bg-emerald-50/30 border border-emerald-100 rounded-xl space-y-2">
             <div className="text-xs font-bold text-emerald-800">📎 ファイルをアップロード（〜500KB）</div>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="w-full text-xs text-slate-700 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 file:cursor-pointer cursor-pointer" />
-            <p className="text-[10px] text-slate-500 leading-relaxed">画像 / PDF はモーダル内でプレビュー、その他はダウンロードで開けます。保存先の制限のため、1ファイル500KB・生徒1人あたり合計約900KBまでです。大きいファイルはURL登録をご利用ください。</p>
+            <p className="text-[10px] text-slate-500 leading-relaxed">画像はモーダル内でプレビュー、PDFはブラウザの別タブで開きます。その他はダウンロードで開けます。保存先の制限のため、1ファイル500KB・生徒1人あたり合計約900KBまでです。大きいファイルはURL登録をご利用ください。</p>
           </div>
         </div>
       </div>
@@ -1171,8 +1215,65 @@ function App() {
 
   const { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError } =
     useFirestoreSync(firebaseConfigStr, roomKey);
-  const { history, redo, push: pushHistory, popUndo, popRedo } = useHistory(10);
+  const { history, redo, push: pushHistory, popUndo, popRedo, clear: clearHistory } = useHistory(10);
   const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
+
+  // v3.25: 実習期（前期・後期・年度別など）をルーム内で共有する。
+  const [periods, setPeriods] = useState([DEFAULT_PERIOD]);
+  const [activePeriodId, setActivePeriodId] = useState(() => {
+    try { return localStorage.getItem(`active_internship_period${ENV_SUFFIX}_${localStorage.getItem('school_room_key') || '3-1'}`) || DEFAULT_PERIOD_ID; }
+    catch (e) { return DEFAULT_PERIOD_ID; }
+  });
+  const [isPeriodManagerOpen, setIsPeriodManagerOpen] = useState(false);
+  const [newPeriodName, setNewPeriodName] = useState('2026年度 後期');
+  const [copyPreviousRoster, setCopyPreviousRoster] = useState(true);
+  const [lockPreviousPeriod, setLockPreviousPeriod] = useState(true);
+  const periodBackupInputRef = useRef(null);
+
+  useEffect(() => {
+    const storageKey = `internship_periods${ENV_SUFFIX}_${roomKey}`;
+    const activeKey = `active_internship_period${ENV_SUFFIX}_${roomKey}`;
+    let unsubscribe = null;
+    try { setActivePeriodId(localStorage.getItem(activeKey) || DEFAULT_PERIOD_ID); } catch (e) { setActivePeriodId(DEFAULT_PERIOD_ID); }
+
+    if (connectionStatus === 'connected' && window.firebase) {
+      const db = window.firebase.app().firestore();
+      const ref = db.collection('rooms').doc(roomKey).collection('periods');
+      unsubscribe = ref.onSnapshot((snap) => {
+        const list = [];
+        snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
+        if (list.length === 0) {
+          ref.doc(DEFAULT_PERIOD_ID).set({ name: DEFAULT_PERIOD.name, locked: false, createdAtClient: 0 }, { merge: true }).catch(() => {});
+          setPeriods([DEFAULT_PERIOD]);
+        } else {
+          list.sort((a, b) => (a.createdAtClient || 0) - (b.createdAtClient || 0));
+          setPeriods(list);
+          const saved = (() => { try { return localStorage.getItem(activeKey); } catch (e) { return null; } })();
+          if (!list.some((x) => x.id === (saved || activePeriodId))) setActivePeriodId(list[list.length - 1].id);
+        }
+      }, (err) => console.warn('periods snapshot:', err.message));
+    } else {
+      try {
+        const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        setPeriods(stored.length ? stored : [DEFAULT_PERIOD]);
+      } catch (e) { setPeriods([DEFAULT_PERIOD]); }
+    }
+    return () => { if (unsubscribe) unsubscribe(); };
+  }, [connectionStatus, roomKey]);
+
+  useEffect(() => {
+    try { localStorage.setItem(`active_internship_period${ENV_SUFFIX}_${roomKey}`, activePeriodId); } catch (e) {}
+    setSelectedIds(new Set());
+    clearHistory();
+    setSelectedStudentDetail(null);
+    setIsAddEditOpen(false);
+    setSearchQuery('');
+    setFilterProgress('all');
+    setFilterGrade('all'); setFilterClass('all'); setFilterInternshipType('all');
+  }, [activePeriodId, roomKey, clearHistory]);
+
+  // GitHub Pages / 端末保存時の自動削除リスクを下げる。
+  useEffect(() => { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); }, []);
   const { onlineCount, onlineMembers } = usePresence(connectionStatus, roomKey, myTeacherName);
   const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost, hidePost: hideBoardPost, deletedHistory: boardDeletedHistory, hiddenHistory: boardHiddenHistory, restoreHiddenPost: restoreHiddenBoardPost, clearDeletedHistory: clearBoardDeletedHistory, clearHiddenHistory: clearBoardHiddenHistory } = useBoardSync(connectionStatus, roomKey);
   // v3.16: 掲示板の履歴モーダル開閉と表示タブ（'deleted' | 'hidden'）
@@ -1209,6 +1310,10 @@ function App() {
     try { new Notification('🔔 デスクトップ通知はオンです', { body: '掲示板の新規投稿や生徒データの更新をお知らせします（この画面を開いている間のみ）。' }); } catch (e) {}
   };
 
+  const activePeriod = periods.find((p) => p.id === activePeriodId) || periods[0] || DEFAULT_PERIOD;
+  const isActivePeriodLocked = !!activePeriod.locked;
+  const activeStudents = useMemo(() => students.filter((s) => (s.periodId || DEFAULT_PERIOD_ID) === activePeriodId), [students, activePeriodId]);
+
   const [currentView, setCurrentView] = useState('list');
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth());
@@ -1238,11 +1343,12 @@ function App() {
     return keys;
   }, []);
   useEffect(() => {
-    if (collapsedInitializedRoomRef.current === roomKey) return;
-    if (!students || students.length === 0) return;
-    setCollapsedSections(new Set(buildSectionKeys(students)));
-    collapsedInitializedRoomRef.current = roomKey;
-  }, [students, roomKey, buildSectionKeys]);
+    const collapseKey = roomKey + ':' + activePeriodId;
+    if (collapsedInitializedRoomRef.current === collapseKey) return;
+    if (!activeStudents || activeStudents.length === 0) return;
+    setCollapsedSections(new Set(buildSectionKeys(activeStudents)));
+    collapsedInitializedRoomRef.current = collapseKey;
+  }, [activeStudents, roomKey, activePeriodId, buildSectionKeys]);
   const toggleSectionCollapsed = (key) => {
     setCollapsedSections((prev) => {
       const next = new Set(prev);
@@ -1273,6 +1379,7 @@ function App() {
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [printOptions, setPrintOptions] = useState({ onlySelected: false, breakByClass: false, compactColumns: false });
   const [selectedIds, setSelectedIds] = useState(() => new Set());
+
 
   // v3.9: 管理者モード / ロック機能
   //   ・管理者用パスワードはルームごとに Firestore (rooms/{roomKey}) と localStorage に保存。
@@ -1469,6 +1576,7 @@ function App() {
   // 今後は AddEditModal を開くだけにして、モーダル内の保存ボタンを
   // 押した時にだけ handleSaveStudent 経由で実際の登録が行われる。
   const openAddModal = (initialInternshipDates = []) => {
+    if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。管理者にロック解除を依頼してください。'); return; }
     setEditingStudent(null);
     setFormDates({
       internshipDates: [...initialInternshipDates],
@@ -1478,6 +1586,7 @@ function App() {
   };
 
   const openEditModal = (student) => {
+    if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。管理者にロック解除を依頼してください。'); return; }
     setEditingStudent(student);
     setFormDates({
       internshipDates: [...(student.internshipDates || [])].sort(),
@@ -1502,6 +1611,10 @@ function App() {
   const [filterTeacherThankYouStatus, setFilterTeacherThankYouStatus] = useState('all');
 
   const persistPartial = async (studentId, partial) => {
+    const targetStudent = students.find((s) => s.id === studentId);
+    const targetPeriodId = targetStudent?.periodId || DEFAULT_PERIOD_ID;
+    const targetPeriod = periods.find((p) => p.id === targetPeriodId);
+    if (targetPeriod?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return; }
     if (connectionStatus === 'connected' && window.firebase) {
       try {
         const db = window.firebase.app().firestore();
@@ -1575,16 +1688,18 @@ function App() {
   };
 
   // v3.9: 編集アクションと同時に「今日の訪問者」の編集件数を +1 する。undo/redo からは呼ばれないので重複カウントしない。
-  const recordUpdate = (studentId, before, after) => { pushHistory({ kind: 'update', studentId, before, after }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
+  const recordUpdate = (studentId, before, after) => { const s = students.find((x) => x.id === studentId); const p = periods.find((x) => x.id === (s?.periodId || DEFAULT_PERIOD_ID)); if (p?.locked && !isAdmin) return false; pushHistory({ kind: 'update', studentId, before, after }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} return true; };
   const recordCreate = (student) => { pushHistory({ kind: 'create', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
   const recordDelete = (student) => { pushHistory({ kind: 'delete', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
 
   const handleSaveStudent = async (studentData) => {
+    if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため登録・編集できません。'); return; }
     setIsLoading(true);
     const today = getTodayString();
 
     const prepared = {
       ...studentData,
+      periodId: editingStudent?.periodId || activePeriodId,
       materials: editingStudent?.materials || [],
       phoneDate: studentData.phoneStatus === 'completed' && !studentData.phoneDate ? today : studentData.phoneDate,
       docDate:   studentData.docStatus   === 'completed' && !studentData.docDate   ? today : studentData.docDate
@@ -1622,6 +1737,8 @@ function App() {
   };
 
   const handleInstantToggle = async (student, field, currentStatus) => {
+    const studentPeriod = periods.find((p) => p.id === (student.periodId || DEFAULT_PERIOD_ID));
+    if (studentPeriod?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return; }
     const stepKey = FIELD_TO_STEP[field];
     if (!stepKey) return;
     // v3.9: ロックされたフィールドは管理者以外の変更を拒否（リスト画面の🔒マークで設定）
@@ -1788,6 +1905,7 @@ function App() {
   };
 
   const handleDeleteStudent = (studentId) => {
+    if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため削除できません。'); return; }
     showConfirm('この生徒の実習進捗データを削除してもよろしいですか？', async () => {
       const target = students.find((s) => s.id === studentId);
       if (target) recordDelete(target);
@@ -2231,13 +2349,13 @@ function App() {
     if (!draggedId || draggedId === targetId) return;
     let sectionAll;
     if (sectionKey === 'other') {
-      sectionAll = students.filter((s) => !['1','2','3'].includes(s.grade));
+      sectionAll = activeStudents.filter((s) => !['1','2','3'].includes(s.grade));
     } else if (sectionKey.endsWith('-_nocls')) {
       const g = sectionKey.split('-')[0];
-      sectionAll = students.filter((s) => s.grade === g && !s.classVal);
+      sectionAll = activeStudents.filter((s) => s.grade === g && !s.classVal);
     } else {
       const [g, c] = sectionKey.split('-');
-      sectionAll = students.filter((s) => s.grade === g && s.classVal === c);
+      sectionAll = activeStudents.filter((s) => s.grade === g && s.classVal === c);
     }
     const currentArr = customOrder[sectionKey] || [];
     let ordered = sectionAll.map((s) => s.id).sort((a, b) => { const ia = currentArr.indexOf(a); const ib = currentArr.indexOf(b); if (ia === -1 && ib === -1) return 0; if (ia === -1) return 1; if (ib === -1) return -1; return ia - ib; });
@@ -2252,7 +2370,7 @@ function App() {
 
   const filteredStudents = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return students.filter((s) => {
+    return activeStudents.filter((s) => {
       const matchSearch = !q ||
         s.name.toLowerCase().includes(q) ||
         s.location.toLowerCase().includes(q) ||
@@ -2288,12 +2406,12 @@ function App() {
 
       return true;
     });
-  }, [students, searchQuery, filterProgress, filterGrade, filterClass,
+  }, [activeStudents, searchQuery, filterProgress, filterGrade, filterClass,
       filterPhoneStatus, filterDocStatus, filterGreetingStatus, filterPatrolStatus,
       filterStudentThankYouStatus, filterTeacherThankYouStatus, filterInternshipType]);
 
   const stats = useMemo(() => {
-    const total = students.length;
+    const total = activeStudents.length;
     if (total === 0) return {
       total: 0, phonePercent: 0, docPercent: 0, greetingPercent: 0, patrolPercent: 0,
       phonePendingCount: 0, docPendingCount: 0, greetingPendingCount: 0, patrolPendingCount: 0,
@@ -2302,45 +2420,45 @@ function App() {
       teacherThankYouPercent: 0, teacherThankYouPendingCount: 0
     };
     const todayKey = getTodayString();
-    const phoneNeeded = students.filter((s) => (s.phoneStatus || 'pending') !== 'none').length;
-    const phoneDone = students.filter((s) => s.phoneStatus === 'completed').length;
-    const docNeeded = students.filter((s) => (s.docStatus || 'pending') !== 'none').length;
-    const docDone = students.filter((s) => s.docStatus === 'completed').length;
-    const greetingNeeded = students.filter((s) => (s.greetingStatus || 'pending') !== 'none').length;
-    const greetingDone = students.filter((s) => s.greetingStatus === 'completed').length;
-    const patrolNeeded = students.filter((s) => (s.patrols || []).length > 0).length;
-    const patrolDone = students.filter((s) => { const ps = s.patrols || []; return ps.length > 0 && ps.every((p) => p.done); }).length;
-    const internshipNeeded = students.filter((s) => (s.internshipDates || []).length > 0).length;
-    const internshipImplDone = students.filter((s) => { const dates = s.internshipDates || []; if (dates.length === 0) return false; const last = [...dates].sort().pop(); return last < todayKey; }).length;
-    const internshipInProgressCount = students.filter((s) => (s.internshipDates || []).includes(todayKey)).length;
-    const studentTYNeeded = students.filter((s) => (s.studentThankYouStatus || 'pending') !== 'none').length;
-    const studentTYDone = students.filter((s) => s.studentThankYouStatus === 'completed').length;
-    const teacherTYNeeded = students.filter((s) => (s.teacherThankYouStatus || 'pending') !== 'none').length;
-    const teacherTYDone = students.filter((s) => s.teacherThankYouStatus === 'completed').length;
+    const phoneNeeded = activeStudents.filter((s) => (s.phoneStatus || 'pending') !== 'none').length;
+    const phoneDone = activeStudents.filter((s) => s.phoneStatus === 'completed').length;
+    const docNeeded = activeStudents.filter((s) => (s.docStatus || 'pending') !== 'none').length;
+    const docDone = activeStudents.filter((s) => s.docStatus === 'completed').length;
+    const greetingNeeded = activeStudents.filter((s) => (s.greetingStatus || 'pending') !== 'none').length;
+    const greetingDone = activeStudents.filter((s) => s.greetingStatus === 'completed').length;
+    const patrolNeeded = activeStudents.filter((s) => (s.patrols || []).length > 0).length;
+    const patrolDone = activeStudents.filter((s) => { const ps = s.patrols || []; return ps.length > 0 && ps.every((p) => p.done); }).length;
+    const internshipNeeded = activeStudents.filter((s) => (s.internshipDates || []).length > 0).length;
+    const internshipImplDone = activeStudents.filter((s) => { const dates = s.internshipDates || []; if (dates.length === 0) return false; const last = [...dates].sort().pop(); return last < todayKey; }).length;
+    const internshipInProgressCount = activeStudents.filter((s) => (s.internshipDates || []).includes(todayKey)).length;
+    const studentTYNeeded = activeStudents.filter((s) => (s.studentThankYouStatus || 'pending') !== 'none').length;
+    const studentTYDone = activeStudents.filter((s) => s.studentThankYouStatus === 'completed').length;
+    const teacherTYNeeded = activeStudents.filter((s) => (s.teacherThankYouStatus || 'pending') !== 'none').length;
+    const teacherTYDone = activeStudents.filter((s) => s.teacherThankYouStatus === 'completed').length;
     return {
       total,
       phonePercent:    phoneNeeded > 0 ? Math.round((phoneDone / phoneNeeded) * 100) : 0,
       docPercent:      docNeeded > 0 ? Math.round((docDone / docNeeded) * 100) : 0,
       greetingPercent: greetingNeeded > 0 ? Math.round((greetingDone / greetingNeeded) * 100) : 0,
       patrolPercent:   patrolNeeded > 0 ? Math.round((patrolDone / patrolNeeded) * 100) : 0,
-      phonePendingCount:    students.filter((s) => s.phoneStatus === 'pending').length,
-      docPendingCount:      students.filter((s) => s.docStatus   === 'pending').length,
-      greetingPendingCount: students.filter((s) => s.greetingStatus === 'pending' || s.greetingStatus === 'scheduled').length,
-      patrolPendingCount:   students.filter((s) => (s.patrols || []).some((p) => !p.done)).length,
+      phonePendingCount:    activeStudents.filter((s) => s.phoneStatus === 'pending').length,
+      docPendingCount:      activeStudents.filter((s) => s.docStatus   === 'pending').length,
+      greetingPendingCount: activeStudents.filter((s) => s.greetingStatus === 'pending' || s.greetingStatus === 'scheduled').length,
+      patrolPendingCount:   activeStudents.filter((s) => (s.patrols || []).some((p) => !p.done)).length,
       internshipImplPercent: internshipNeeded > 0 ? Math.round((internshipImplDone / internshipNeeded) * 100) : 0,
       internshipInProgressCount,
       studentThankYouPercent: studentTYNeeded > 0 ? Math.round((studentTYDone / studentTYNeeded) * 100) : 0,
-      studentThankYouPendingCount: students.filter((s) => (s.studentThankYouStatus || 'pending') === 'pending').length,
+      studentThankYouPendingCount: activeStudents.filter((s) => (s.studentThankYouStatus || 'pending') === 'pending').length,
       teacherThankYouPercent: teacherTYNeeded > 0 ? Math.round((teacherTYDone / teacherTYNeeded) * 100) : 0,
-      teacherThankYouPendingCount: students.filter((s) => (s.teacherThankYouStatus || 'pending') === 'pending').length
+      teacherThankYouPendingCount: activeStudents.filter((s) => (s.teacherThankYouStatus || 'pending') === 'pending').length
     };
-  }, [students]);
+  }, [activeStudents]);
 
   const uniqueTeachers = useMemo(() => {
     const set = new Set();
-    students.forEach((s) => { if (s.teacher) set.add(s.teacher); });
+    activeStudents.forEach((s) => { if (s.teacher) set.add(s.teacher); });
     return Array.from(set);
-  }, [students]);
+  }, [activeStudents]);
 
   const calendarDays = useMemo(() => {
     const firstDayIndex = new Date(calendarYear, calendarMonth, 1).getDay();
@@ -2493,7 +2611,7 @@ function App() {
     const link = document.createElement('a');
     const dateStr = new Date().toLocaleDateString('ja-JP').replace(/\//g, '');
     link.href = url;
-    link.download = `現場実習進捗リスト_${roomKey}_${dateStr}.csv`;
+    link.download = `現場実習進捗リスト_${activePeriod.name.replace(/[\\/:*?"<>|]/g, '_')}_${roomKey}_${dateStr}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -2501,6 +2619,8 @@ function App() {
   };
 
   const handleBulkImport = async (rows) => {
+    if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため一括登録できません。'); return; }
+    rows = rows.map((r) => ({ ...r, periodId: activePeriodId }));
     setIsLoading(true);
     try {
       if (connectionStatus === 'connected' && window.firebase) {
@@ -2528,6 +2648,98 @@ function App() {
     }
   };
 
+  const buildPeriodCopy = (s, periodId) => ({
+    periodId, name: s.name || '', grade: s.grade || '', classVal: s.classVal || '', teacher: s.teacher || '',
+    location: '', internshipType: 'internship', internshipDates: [],
+    phoneStatus: 'pending', phoneDate: '', docStatus: 'pending', docDate: '',
+    greetingStatus: 'pending', greetingDate: '', greetingTime: '', greetingVisitor: '',
+    giftStatus: 'none', patrols: [], studentThankYouStatus: 'pending', studentThankYouDate: '',
+    teacherThankYouStatus: 'pending', teacherThankYouDate: '', notes: '', materials: [], lockedFields: []
+  });
+
+  const handleCreatePeriod = async () => {
+    if (!isAdmin) { showAlert('新しい実習期の作成は管理者のみ行えます。'); return; }
+    const name = newPeriodName.trim();
+    if (!name) { showAlert('実習期の名前を入力してください。'); return; }
+    if (periods.some((p) => p.name === name)) { showAlert('同じ名前の実習期が既にあります。'); return; }
+    const newId = 'period-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+    const meta = { id: newId, name, locked: false, createdAtClient: Date.now() };
+    const copies = copyPreviousRoster ? activeStudents.map((s) => buildPeriodCopy(s, newId)) : [];
+    setIsLoading(true);
+    try {
+      if (connectionStatus === 'connected' && window.firebase) {
+        const db = window.firebase.app().firestore();
+        await db.collection('rooms').doc(roomKey).collection('periods').doc(newId).set({ name, locked: false, createdAtClient: meta.createdAtClient, createdAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+        if (lockPreviousPeriod) await db.collection('rooms').doc(roomKey).collection('periods').doc(activePeriodId).set({ name: activePeriod.name || DEFAULT_PERIOD.name, locked: true, createdAtClient: activePeriod.createdAtClient || 0 }, { merge: true });
+        const ref = db.collection('rooms').doc(roomKey).collection('students');
+        for (const row of copies) await ref.add(row);
+      } else {
+        const nextPeriods = [...periods.map((p) => p.id === activePeriodId && lockPreviousPeriod ? { ...p, locked: true } : p), meta];
+        const copiesWithIds = copies.map((row, i) => ({ id: 'local-' + Date.now() + '-' + i, ...row }));
+        setPeriods(nextPeriods); setStudents((prev) => [...prev, ...copiesWithIds]);
+        localStorage.setItem(`internship_periods${ENV_SUFFIX}_${roomKey}`, JSON.stringify(nextPeriods));
+        localStorage.setItem(`local_students_${roomKey}`, JSON.stringify([...students, ...copiesWithIds]));
+      }
+      setActivePeriodId(newId); setIsPeriodManagerOpen(false);
+      showAlert(`「${name}」を作成しました。${copies.length ? `前の実習期から${copies.length}名の基本情報をコピーしました。` : ''}`);
+    } catch (e) { showAlert('実習期の作成に失敗しました: ' + e.message); }
+    finally { setIsLoading(false); }
+  };
+
+  const handleTogglePeriodLock = async (period) => {
+    if (!isAdmin) { showAlert('実習期のロック変更は管理者のみ行えます。'); return; }
+    const locked = !period.locked;
+    try {
+      if (connectionStatus === 'connected' && window.firebase) {
+        const db = window.firebase.app().firestore();
+        await db.collection('rooms').doc(roomKey).collection('periods').doc(period.id).set({ name: period.name, locked, createdAtClient: period.createdAtClient || 0 }, { merge: true });
+      } else {
+        const next = periods.map((p) => p.id === period.id ? { ...p, locked } : p);
+        setPeriods(next); localStorage.setItem(`internship_periods${ENV_SUFFIX}_${roomKey}`, JSON.stringify(next));
+      }
+    } catch (e) { showAlert('ロック変更に失敗しました: ' + e.message); }
+  };
+
+  const handleExportAllData = () => {
+    const payload = { app: 'internship-manager', version: 325, exportedAt: new Date().toISOString(), roomKey, periods, students };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = `現場実習_全期間バックアップ_${getTodayString()}.json`; a.click(); URL.revokeObjectURL(url);
+  };
+
+  const handleImportAllData = (file) => {
+    if (!isAdmin) { showAlert('バックアップの読み込みは管理者のみ行えます。'); return; }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result));
+        if (data.app !== 'internship-manager' || !Array.isArray(data.periods) || !Array.isArray(data.students)) throw new Error('対応するバックアップ形式ではありません。');
+        showConfirm(`バックアップから実習期${data.periods.length}件・生徒記録${data.students.length}件を復元します。既存の同じIDは上書きされます。`, async () => {
+          setIsLoading(true);
+          try {
+            if (connectionStatus === 'connected' && window.firebase) {
+              const db = window.firebase.app().firestore();
+              for (const p of data.periods) { const { id, ...body } = p; await db.collection('rooms').doc(roomKey).collection('periods').doc(id).set(body, { merge: true }); }
+              for (const s of data.students) { const { id, ...body } = s; await db.collection('rooms').doc(roomKey).collection('students').doc(id).set(body, { merge: true }); }
+            } else {
+              const pm = new Map(periods.map((p) => [p.id, p])); data.periods.forEach((p) => pm.set(p.id, p));
+              const sm = new Map(students.map((x) => [x.id, x])); data.students.forEach((x) => sm.set(x.id, x));
+              const nextP = Array.from(pm.values()), nextS = Array.from(sm.values());
+              setPeriods(nextP); setStudents(nextS);
+              localStorage.setItem(`internship_periods${ENV_SUFFIX}_${roomKey}`, JSON.stringify(nextP));
+              localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(nextS));
+            }
+            showAlert('バックアップを復元しました。');
+          } catch (e) { showAlert('復元に失敗しました: ' + e.message); }
+          finally { setIsLoading(false); }
+        });
+      } catch (e) { showAlert('バックアップを読み込めません: ' + e.message); }
+    };
+    reader.readAsText(file);
+    if (periodBackupInputRef.current) periodBackupInputRef.current.value = '';
+  };
+
   const toggleSelectAll = () => {
     if (filteredStudents.length > 0 && selectedIds.size === filteredStudents.length) {
       setSelectedIds(new Set());
@@ -2541,9 +2753,10 @@ function App() {
   };
 
   const handleBulkDelete = () => {
+    if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため削除できません。'); return; }
     if (selectedIds.size === 0) return;
     showConfirm(`選択中の${selectedIds.size}名の進捗データを削除してもよろしいですか？「戻る」ボタンで取り消せます。`, async () => {
-      const targets = students.filter((s) => selectedIds.has(s.id));
+      const targets = activeStudents.filter((s) => selectedIds.has(s.id));
       setIsLoading(true);
       try {
         if (connectionStatus === 'connected' && window.firebase) {
@@ -2718,7 +2931,7 @@ function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.23 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.25.2 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
@@ -2726,6 +2939,13 @@ function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-violet-50 border border-violet-200 rounded-full px-2 py-1 shadow-sm" title="表示する実習期を切り替えます">
+              <span className="text-xs">🗂️</span>
+              <select value={activePeriodId} onChange={(e) => setActivePeriodId(e.target.value)} className="bg-transparent text-xs font-bold text-violet-900 outline-none cursor-pointer max-w-[170px]">
+                {periods.map((p) => <option key={p.id} value={p.id}>{p.locked ? '🔒 ' : ''}{p.name}</option>)}
+              </select>
+              <button type="button" onClick={() => setIsPeriodManagerOpen(true)} className="w-6 h-6 rounded-full bg-white border border-violet-200 hover:bg-violet-100 text-violet-800 font-bold cursor-pointer" title="実習期を管理">＋</button>
+            </div>
             <ConnectionBadge status={connectionStatus} roomKey={roomKey} />
             {/* v3.9: 管理者バッジ。管理者としてログイン中のときだけ表示。クリックでログアウト確認。 */}
             {isAdmin && (
@@ -3007,7 +3227,7 @@ function App() {
               <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} title="表示する組を選んでください"
                 className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
                 <option value="all">組: すべて</option>
-                {Array.from(new Set(students.map((st) => st.classVal).filter(Boolean))).sort().map((c) => (
+                {Array.from(new Set(activeStudents.map((st) => st.classVal).filter(Boolean))).sort().map((c) => (
                   <option key={c} value={c}>{c}組</option>
                 ))}
               </select>
@@ -3268,7 +3488,7 @@ function App() {
                             <div className="flex items-start gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
                               <div className="flex-1 min-w-0 w-[150px] max-w-[150px] space-y-1">
                                 {(s.materials || []).map((m) => (
-                                  <button key={m.id} onClick={() => setMaterialPreview(m)} title={m.name}
+                                  <button key={m.id} onClick={() => { if (isPdfMaterial(m)) { if (!openPdfInNewTab(m)) showAlert('PDFを別タブで開けませんでした。ブラウザのポップアップ許可をご確認ください。'); } else { setMaterialPreview(m); } }} title={isPdfMaterial(m) ? `${m.name}（別タブで開く）` : m.name}
                                     className={`w-full max-w-full flex items-center gap-1 px-1.5 py-1 rounded-md text-[10px] font-bold cursor-pointer transition-all overflow-hidden border ${(m.name || '').includes('評価') ? 'bg-purple-300 hover:bg-purple-400 border-purple-500 text-purple-950 hover:text-purple-950' : 'bg-amber-50/60 hover:bg-amber-100 border-amber-200 text-slate-700 hover:text-amber-800'}`}>
                                     <span className="shrink-0 text-[11px] leading-none">{m.kind === 'url' ? '🔗' : m.mimeType?.startsWith('image/') ? '🖼️' : m.mimeType === 'application/pdf' ? '📄' : '📎'}</span>
                                     <span className="truncate flex-1 min-w-0 text-left whitespace-nowrap overflow-hidden">{m.name}</span>
@@ -3290,10 +3510,12 @@ function App() {
                                   className="p-1.5 text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 hover:border-indigo-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
                                   <Edit className="w-4 h-4" />
                                 </button>
-                                <button onClick={() => handleDeleteStudent(s.id)} title="削除"
-                                  className="p-1.5 text-slate-400 hover:text-rose-600 bg-white border border-slate-200 hover:border-rose-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                {isAdmin && (
+                                  <button onClick={() => handleDeleteStudent(s.id)} title="削除（管理者のみ）"
+                                    className="p-1.5 text-slate-400 hover:text-rose-600 bg-white border border-slate-200 hover:border-rose-200 rounded-lg shadow-sm transition-all active:scale-90 cursor-pointer">
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </td>
@@ -3306,7 +3528,7 @@ function App() {
               </table>
             </div>
             <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 text-slate-500 text-[11px] flex flex-col sm:flex-row justify-between items-center gap-2">
-              <span>表示中: {filteredStudents.length}名 / 全生徒: {students.length}名</span>
+              <span>表示中: {filteredStudents.length}名 / この実習期: {activeStudents.length}名　（{activePeriod.name}{isActivePeriodLocked ? "・終了済み" : ""}）</span>
               <span className="font-semibold text-slate-600">※ 各進捗ボタンをクリックするとその場で進捗状況を切り替えることができます。</span>
             </div>
           </div>
@@ -4000,7 +4222,7 @@ function App() {
 )}
 {/* カスタムアラート */}
       {alertState && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
           <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-scaleIn">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 mb-4 text-indigo-600">
               <Info className="h-6 w-6" />
@@ -4152,9 +4374,54 @@ function App() {
         </div>
       )}
 
+      {/* v3.25: 実習期管理 */}
+      {isPeriodManagerOpen && (
+        <div className="fixed inset-0 z-[115] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsPeriodManagerOpen(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-scaleIn">
+            <div className="px-5 py-3 bg-violet-50 border-b border-violet-200 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-violet-950">🗂️ 実習期の管理</h3>
+              <button onClick={() => setIsPeriodManagerOpen(false)} className="text-slate-500 hover:text-slate-900 text-xl font-bold cursor-pointer">×</button>
+            </div>
+            <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+              <div>
+                <div className="text-xs font-bold text-slate-700 mb-2">登録済みの実習期</div>
+                <div className="space-y-1.5">
+                  {periods.map((p) => (
+                    <div key={p.id} className={`flex items-center gap-2 p-2.5 rounded-xl border ${p.id === activePeriodId ? 'bg-violet-50 border-violet-300' : 'bg-slate-50 border-slate-200'}`}>
+                      <button onClick={() => { setActivePeriodId(p.id); setIsPeriodManagerOpen(false); }} className="flex-1 text-left text-xs font-bold text-slate-800 cursor-pointer">{p.locked ? '🔒 ' : '📂 '}{p.name}</button>
+                      {isAdmin && <button onClick={() => handleTogglePeriodLock(p)} className="px-2 py-1 bg-white border border-slate-300 rounded-lg text-[10px] font-bold cursor-pointer">{p.locked ? 'ロック解除' : '終了・ロック'}</button>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {isAdmin ? (
+                <div className="border-t border-slate-200 pt-4 space-y-3">
+                  <div className="text-xs font-bold text-slate-700">新しい実習期を作成</div>
+                  <input value={newPeriodName} onChange={(e) => setNewPeriodName(e.target.value)} placeholder="例：2026年度 後期" className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+                  <label className="flex items-start gap-2 text-xs text-slate-700 cursor-pointer"><input type="checkbox" checked={copyPreviousRoster} onChange={(e) => setCopyPreviousRoster(e.target.checked)} className="mt-0.5 accent-violet-600" /><span>現在の実習期から氏名・学年・組・担当教員をコピーする<br/><span className="text-[10px] text-slate-500">実習先・日程・進捗・資料・備考は空の状態で作成します。</span></span></label>
+                  <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer"><input type="checkbox" checked={lockPreviousPeriod} onChange={(e) => setLockPreviousPeriod(e.target.checked)} className="accent-violet-600" /><span>現在の実習期を終了済みとしてロックする</span></label>
+                  <button onClick={handleCreatePeriod} className="w-full py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-bold cursor-pointer shadow-sm">新しい実習期を作成</button>
+                </div>
+              ) : (
+                <div className="border-t border-slate-200 pt-4 text-[11px] text-slate-500 bg-slate-50 rounded-xl p-3">新しい実習期の作成とロック変更は、管理者モードで行えます。</div>
+              )}
+              <div className="border-t border-slate-200 pt-4">
+                <div className="text-xs font-bold text-slate-700 mb-2">全期間バックアップ</div>
+                <div className="flex gap-2">
+                  <button onClick={handleExportAllData} className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold cursor-pointer">JSON書き出し</button>
+                  <button disabled={!isAdmin} onClick={() => periodBackupInputRef.current?.click()} className={`flex-1 py-2 border rounded-xl text-xs font-bold ${isAdmin ? 'bg-sky-50 hover:bg-sky-100 border-sky-200 text-sky-800 cursor-pointer' : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'}`}>JSON読み込み</button>
+                  <input ref={periodBackupInputRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => handleImportAllData(e.target.files?.[0])} />
+                </div>
+                <p className="text-[10px] text-slate-500 mt-2">実習期と全生徒記録をまとめて保存します。後期作成前にも書き出してください。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* カスタム確認ダイアログ */}
       {confirmState && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-sm">
           <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-scaleIn">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-rose-100 mb-4 text-rose-600">
               <AlertTriangle className="h-6 w-6" />
