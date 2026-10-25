@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.29.0</title>
+<title>現場実習進捗マネージャー v3.29.1</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -316,10 +316,13 @@
 .gs-dialog .wf-footer { padding:8px 20px; justify-content:flex-end; }
 @media(max-width:640px) { .wf-dialog.gs-dialog { width:100%; height:98dvh; border-radius:10px; } .gs-dialog .wf-scroll { padding:12px; } .gs-dialog .wf-header { padding:10px 12px; } .gs-dialog .wf-header h2 { font-size:18px; } .gs-person-summary strong { font-size:18px; } .gs-person-summary { gap:4px 10px; } .gs-person-summary .gs-detail-toggle { margin-left:0; } .gs-toolbar { padding:12px; } .gs-navigation { gap:6px; } .gs-toolbar p { max-width:280px; } .gs-table { min-width:1040px; } .gs-table .gs-label { width:124px; } .gs-legend { padding:8px 12px; gap:6px 12px; } }
 .gs-row-state { display:none !important; }
-.gs-navigation>button:first-child,.gs-navigation>button[aria-label="工程表を2週間後へ"] { font-size:22px !important; }
+.gs-navigation>button:first-child,.gs-navigation>button[aria-label="工程表を翌月へ"] { font-size:22px !important; }
 .gs-mark { height:44px; min-height:44px; top:4px; }
 @media(max-width:640px) { .gs-label .gs-row-state { display:inline-block !important; font-size:14px; padding:1px 4px; border-radius:3px; align-self:flex-start; } .gs-label .gs-row-state+small { display:none; } .gs-label button { gap:2px; } }
 
+
+.gs-table thead th span { font-variant-numeric:tabular-nums; }
+.gs-mark { overflow:hidden; white-space:nowrap; }
 </style>
 
 <!-- React 18 / lucide-react を ESM CDN 経由で読み込むための importmap -->
@@ -1087,23 +1090,25 @@ const getWorkflowDates = (student, task) => {
 };
 function WorkflowSchedule({ student, model, selected, onSelect }) {
   const initial = model.days.find(workflowDayKey) || getTodayString();
-  const [start, setStart] = useState(() => shiftWorkflowDay(initial,-3));
-  const days = Array.from({length:14},(_,i)=>shiftWorkflowDay(start,i));
-  const end = days[13];
+  const [start, setStart] = useState(() => initial.slice(0,7) + '-01');
+  const shiftMonth = (offset) => { const d = new Date(start + 'T12:00:00Z'); d.setUTCMonth(d.getUTCMonth()+offset); setStart(d.toISOString().slice(0,10)); };
+  const monthDays = new Date(Date.UTC(Number(start.slice(0,4)), Number(start.slice(5,7)), 0)).getUTCDate();
+  const days = Array.from({length:monthDays},(_,i)=>shiftWorkflowDay(start,i));
+  const end = days[days.length-1];
   const tasks = model.phases.flatMap(phase=>phase.tasks.map(task=>({...task,phase:phase.title})));
   const allDates = tasks.flatMap(task=>getWorkflowDates(student,task)).sort();
   const stateText = {done:'完了',todo:'未完了',unknown:'要確認',scheduled:'予定',exempt:'対象外',deferred:'終了後'};
   return <section className="gs-schedule" aria-label="業務工程表">
-    <div className="gs-toolbar"><div><h3>業務工程表</h3><p>日付のある業務を表示。行を押すと編集できます。</p></div><div className="gs-navigation"><button type="button" aria-label="工程表を2週間前へ" onClick={()=>setStart(shiftWorkflowDay(start,-14))}>‹</button><strong>{formatShortDate(start)} 〜 {formatShortDate(end)} <small>({start.slice(0,4)})</small></strong><button type="button" aria-label="工程表を2週間後へ" onClick={()=>setStart(shiftWorkflowDay(start,14))}>›</button><button type="button" onClick={()=>setStart(shiftWorkflowDay(initial,-3))}>実施日へ</button></div></div>
+    <div className="gs-toolbar"><div><h3>業務工程表</h3><p>日付のある業務を表示。行を押すと編集できます。</p></div><div className="gs-navigation"><button type="button" aria-label="工程表を前月へ" onClick={()=>shiftMonth(-1)}>‹</button><strong aria-live="polite">{start.slice(0,4)}年 {Number(start.slice(5,7))}月</strong><button type="button" aria-label="工程表を翌月へ" onClick={()=>shiftMonth(1)}>›</button><button type="button" onClick={()=>setStart(initial.slice(0,7) + '-01')}>実施日へ</button></div></div>
     <div className="gs-scroll" tabIndex={0} role="region" aria-label="工程表。狭い画面では左右にスクロールできます">
-      <table className="gs-table"><thead><tr><th scope="col" className="gs-label">業務</th>{days.map(day=>{const dow=new Date(day+'T12:00:00Z').getUTCDay();return <th key={day} scope="col" className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}><span>{parseInt(day.slice(5,7))}/{parseInt(day.slice(8))}</span><small>{'日月火水木金土'[dow]}</small></th>})}<th scope="col" className="gs-status-heading">進捗</th></tr></thead><tbody>{tasks.map((task,index)=>{
+      <table className="gs-table" style={{minWidth: `${268 + days.length * 34}px`}}><thead><tr><th scope="col" className="gs-label">業務</th>{days.map(day=>{const dow=new Date(day+'T12:00:00Z').getUTCDay();return <th key={day} scope="col" className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}><span>{parseInt(day.slice(8))}</span><small>{'日月火水木金土'[dow]}</small></th>})}<th scope="col" className="gs-status-heading">進捗</th></tr></thead><tbody>{tasks.map((task,index)=>{
         const dates=task.state==='exempt'?[]:getWorkflowDates(student,task), visible=dates.filter(d=>d>=start&&d<=end), outside=dates.length > 0 && visible.length === 0;
         const shortTitle={doc:'書類配付',greeting:'事前挨拶',dates:student.internshipType==='observation'?'施設見学':'現場実習',patrol:'巡回・同行',studentThankYou:'生徒お礼状',teacherThankYou:'教師お礼状',phone:'事前電話',gift:'菓子折'}[task.key];
         return <tr key={task.key} className={`${selected===task.key?'gs-selected':''} ${index===4||index===6?'gs-phase-divider':''}`}><th scope="row" className="gs-label"><button type="button" aria-label={`${task.title}を編集`} aria-pressed={selected===task.key} onClick={()=>onSelect(task.key)}><span>{shortTitle}</span><small className={`gs-row-state gs-${task.state}`}>{stateText[task.state]}</small>{index===0||index===4||index===6?<small>{task.phase}</small>:null}</button></th>{days.map((day,i)=>{
           const hit=dates.includes(day), previous=dates.includes(shiftWorkflowDay(day,-1)), next=dates.includes(shiftWorkflowDay(day,1));
           const dow=new Date(day+'T12:00:00Z').getUTCDay();
-          return <td key={day} className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}>{hit&&<button type="button" className={`gs-mark gs-${task.state} ${previous&&i>0?'gs-join-left':''} ${next&&i<13?'gs-join-right':''}`} title={`${task.title} ${day}：${task.label}`} aria-label={`${task.title} ${day} ${task.label}を編集`} onClick={()=>onSelect(task.key)}>{!previous||i===0?<span>{task.key==='dates'?'実施':task.key==='patrol'?'巡回':task.state==='done'?'✓':'予定'}</span>:<span aria-hidden="true">—</span>}</button>}</td>;
-        })}<td className="gs-status"><button type="button" onClick={()=>onSelect(task.key)} aria-label={`${task.title}の詳細を開く`}><WorkflowBadge state={task.state}>{stateText[task.state]}</WorkflowBadge><small>{outside?'表示期間外':!dates.length&&task.state!=='exempt'?(task.state==='deferred'?'日付未設定':'日付なし'):task.state==='exempt'?'':task.key==='dates'?`${dates.length}日`:''}</small></button>{outside&&<button type="button" className="gs-show-date" onClick={()=>setStart(shiftWorkflowDay(dates[0],-3))}>日付へ →</button>}</td></tr>;
+          return <td key={day} className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}>{hit&&<button type="button" className={`gs-mark gs-${task.state} ${previous&&i>0?'gs-join-left':''} ${next&&i<days.length-1?'gs-join-right':''}`} title={`${task.title} ${day}：${task.label}`} aria-label={`${task.title} ${day} ${task.label}を編集`} onClick={()=>onSelect(task.key)}>{!previous||i===0?<span>{task.key==='dates'?'実施':task.key==='patrol'?'巡回':task.state==='done'?'✓':'予定'}</span>:<span aria-hidden="true">—</span>}</button>}</td>;
+        })}<td className="gs-status"><button type="button" onClick={()=>onSelect(task.key)} aria-label={`${task.title}の詳細を開く`}><WorkflowBadge state={task.state}>{stateText[task.state]}</WorkflowBadge><small>{outside?'表示期間外':!dates.length&&task.state!=='exempt'?(task.state==='deferred'?'日付未設定':'日付なし'):task.state==='exempt'?'':task.key==='dates'?`${dates.length}日`:''}</small></button>{outside&&<button type="button" className="gs-show-date" onClick={()=>setStart(dates[0].slice(0,7) + '-01')}>日付へ →</button>}</td></tr>;
       })}</tbody></table>
     </div>
     <div className="gs-legend"><span className="gs-legend-item"><i className="gs-done"/>完了</span><span className="gs-legend-item"><i className="gs-scheduled"/>予定</span><span className="gs-legend-item"><i className="gs-todo"/>未完了・要確認</span><span className="gs-legend-note">未設定の期限は推定しません。</span></div>
@@ -3566,7 +3571,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.29.0 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.29.1 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
