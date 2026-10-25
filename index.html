@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.27.0</title>
+<title>現場実習進捗マネージャー v3.29.0</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -154,6 +154,171 @@
 @media (max-width:899px) { .wf-board { grid-template-columns:1fr; gap:24px; } .wf-prep-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } .wf-basics { grid-template-columns:repeat(2,minmax(0,1fr)); } .wf-phase-summary { grid-template-columns:1fr; gap:8px; } .wf-extras { grid-template-columns:1fr; } }
 @media (max-width:540px) { .wf-overlay { padding:6px; } .wf-dialog { width:100%; height:calc(100dvh - 12px); max-height:none; border-radius:12px; } .wf-header { padding:12px 16px; gap:8px; } .wf-header h2 { font-size:18px; gap:2px; display:block; } .wf-header h2 span { display:block; font-size:14px; } .wf-scroll { padding:16px; } .wf-basics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:12px; } .wf-basics .wf-basic-edit-help { display:none; } .wf-phase-chip { padding:10px 12px; } .wf-basic-name { font-size:20px !important; } .wf-prep-cards { grid-template-columns:1fr; } .wf-phase-summary { gap:8px; } .wf-footer { padding:12px 16px; } .wf-footer p { display:none; } .wf-footer { justify-content:flex-end; } }
 @media (prefers-reduced-motion:reduce) { .wf-dialog * { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+
+/* v3.28.0: サイドバー・フローティング操作。既存の業務データ保存先は変更しない。 */
+.sb-app { min-width:0; }
+.sb-sidebar { position:fixed; inset:0 auto 0 0; width:292px; max-width:calc(100vw - 24px); z-index:45; background:#fff; border-right:1px solid #dce4ec; display:flex; flex-direction:column; transform:translateX(-102%); visibility:hidden; transition:transform .18s ease,visibility .18s; font-size:14px; }
+.sb-open .sb-sidebar { transform:translateX(0); visibility:visible; }
+.sb-sidebar * { box-sizing:border-box; }
+.sb-sidebar button,.sb-sidebar select,.sb-topbar button,.sb-floating button { min-height:44px; }
+.sb-sidebar select { min-width:0; max-width:100%; }
+.sb-sidebar .text-xs,.sb-sidebar [class*="text-[10px]"],.sb-sidebar [class*="text-[11px]"] { font-size:14px !important; }
+.sb-sidebar :focus-visible,.sb-topbar :focus-visible,.sb-floating :focus-visible,.sb-utility-dialog :focus-visible { outline:3px solid #2783de; outline-offset:3px; }
+.sb-sidebar-top { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 16px; border-bottom:1px solid #e4e9ef; flex-shrink:0; }
+.sb-sidebar-top strong { font-size:14px; color:#52657a !important; }
+.sb-icon-button { min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; background:#fff; border:1px solid #d8e1eb; border-radius:8px; cursor:pointer; font-size:14px; }
+.sb-sidebar-scroll { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:16px; }
+.sb-header { margin-bottom:16px; }
+.sb-brand { margin-bottom:16px; }
+.sb-brand-title { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.sb-brand h1 { font-size:19px; line-height:1.4; font-weight:800; overflow-wrap:anywhere; }
+.sb-brand p { margin-top:6px; font-size:14px; line-height:1.5; color:#5b6b7d !important; }
+.sb-header-controls { display:flex; flex-direction:column; align-items:stretch; gap:8px; }
+.sb-header-controls>* { width:100%; min-width:0; }
+.sb-header-controls>button,.sb-header-controls>div>button { width:100%; border-radius:8px; justify-content:flex-start; flex-wrap:wrap; }
+.sb-header-controls>div[title="表示する実習期を切り替えます"] { border-radius:8px; min-height:48px; }
+.sb-header-controls>div[title="表示する実習期を切り替えます"] select { flex:1; max-width:none; }
+.sb-header-controls>div[title="表示する実習期を切り替えます"] button { width:36px; min-width:36px; min-height:44px; flex-shrink:0; }
+.sb-connection>div { width:100%; display:flex; flex-wrap:wrap; border-radius:8px; gap:6px; padding:8px 10px; }
+.sb-connection span { max-width:100%; overflow-wrap:anywhere; white-space:normal; }
+.sb-inline-panel { margin-top:8px; padding:8px; background:#f8fafc; border:1px solid #dce4ec; border-radius:8px; width:100%; min-width:0; max-height:300px; overflow:auto; font-size:14px; }
+.sb-inline-panel .truncate { white-space:normal; overflow-wrap:anywhere; }
+.sb-inline-panel [class*="text-[9px]"] { font-size:13px !important; }
+.sb-sidebar-section { border-top:1px solid #e4e9ef; padding-top:16px; margin-top:16px; }
+.sb-sidebar-section h2 { font-size:14px; font-weight:800; color:#52657a !important; margin:0 0 10px; }
+.sb-board-actions { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+.sb-board-actions button { min-height:44px; padding:8px 10px; border:1px solid #e4d6b4; border-radius:8px; background:#fffaf0; text-align:left; font-size:14px; font-weight:700; }
+.sb-operation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.sb-operation-grid button { min-width:0; justify-content:center; border-radius:8px; }
+.sb-filter-list { display:flex; flex-direction:column; align-items:stretch; gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid #e4e9ef; }
+.sb-filter-list>div { min-height:44px; width:100%; border-radius:8px; }
+.sb-filter-list select { flex:1; min-width:0; width:100%; min-height:44px; font-size:14px !important; }
+.sb-filter-list>button { width:100%; justify-content:center; }
+.sb-presets { margin-top:16px; border-top:1px solid #e4e9ef; padding-top:16px; }
+.sb-presets>[role=group] { display:flex; flex-wrap:wrap; gap:6px; }
+.sb-presets>[role=group]>span { width:100%; margin-bottom:4px; font-size:14px !important; }
+.sb-presets button { flex:1 1 calc(50% - 6px); border-radius:8px; text-align:center; }
+.sb-presets p { font-size:14px !important; line-height:1.5; margin-top:10px; color:#5b6b7d !important; }
+.sb-topbar { position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; min-height:64px; border-bottom:1px solid #dce4ec; background:rgba(255,255,255,.97); }
+.sb-topbar-title { display:flex; flex-wrap:wrap; align-items:center; gap:10px; min-width:0; }
+.sb-topbar-title strong { font-size:16px; font-weight:800; }
+.sb-topbar-subtitle { font-size:14px; color:#5b6b7d !important; }
+.sb-filter-chips { display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:8px; min-width:0; }
+.sb-keyword-chip { display:inline-flex; align-items:center; gap:6px; min-height:40px; max-width:260px; background:#e5f2fc; border:1px solid #bcd6ee; padding:4px 8px; border-radius:8px; font-size:14px; }
+.sb-keyword-chip>span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sb-keyword-chip button { min-height:32px; min-width:32px; border:0; background:transparent; cursor:pointer; }
+.sb-backdrop { position:fixed; inset:0; z-index:44; background:rgba(15,23,42,.4); border:0; }
+.sb-demo-note { padding:10px 16px; border-bottom:1px solid #efdfbd; background:#fffaf0; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; font-size:14px; }
+.sb-demo-note button { border:1px solid #e4d6b4; border-radius:8px; padding:4px 8px; background:#fff; min-height:40px; font-weight:700; }
+.sb-floating { gap:10px !important; }
+.sb-float-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
+.sb-float-actions button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:48px; padding:10px 14px; background:#fff; border:1px solid #cbd6e2; border-radius:24px; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 4px 16px rgba(15,23,42,.12); }
+.sb-float-actions .sb-register { background:#fde68a; border-color:#e8bf44; }
+.sb-float-actions .sb-search-active { background:#e5f2fc; border-color:#8cbce7; }
+.sb-float-actions button:hover { background:#edf4fb; }
+.sb-float-actions .sb-register:hover { background:#fcd34d; }
+.sb-utility-overlay { position:fixed; inset:0; z-index:115; background:rgba(15,23,42,.48); display:flex; justify-content:center; align-items:center; padding:16px; }
+.sb-utility-dialog { display:flex; flex-direction:column; width:min(580px,100%); max-height:90dvh; border:1px solid #dce4ec; background:#fff; border-radius:12px; box-shadow:0 16px 56px rgba(15,23,42,.2); color:#233044 !important; font-size:15px; }
+.sb-utility-dialog header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 20px; border-bottom:1px solid #e1e7ee; }
+.sb-utility-dialog h2 { font-size:18px; font-weight:800; margin:0; }
+.sb-utility-body { padding:20px; min-height:0; overflow:auto; }
+.sb-utility-dialog p { margin:0 0 12px; font-size:14px; color:#5b6b7d !important; line-height:1.5; }
+.sb-search-form label { display:block; font-size:14px; font-weight:700; margin-bottom:8px; }
+.sb-search-form input { width:100%; min-height:48px; font-size:16px; border:1px solid #bbcddd; border-radius:8px; padding:10px 12px; background:#fff; }
+.sb-dialog-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:16px; }
+.sb-dialog-actions button { min-height:44px; padding:8px 12px; border:1px solid #cfd9e4; border-radius:8px; background:#fff; font-size:14px; font-weight:700; }
+.sb-dialog-actions .sb-primary { background:#e5f2fc; border-color:#a4c9e9; }
+.sb-board-dialog { width:min(920px,100%); }
+.sb-board-panel { min-width:0; }
+.sb-board-panel textarea { width:100%; min-width:0; min-height:72px; }
+.sb-board-panel form { display:grid; grid-template-columns:minmax(0,1fr) auto; }
+.sb-board-panel form>div:first-child { grid-column:1/-1; justify-self:start; }
+.sb-board-panel button { min-height:44px; }
+.sb-board-panel [class*="text-[9px]"],.sb-board-panel [class*="text-[10px]"],.sb-board-panel [class*="text-[11px]"],.sb-board-panel .text-xs { font-size:14px !important; }
+@media(min-width:1100px) { .sb-app.sb-open { padding-left:292px; } .sb-backdrop { display:none; } }
+@media(max-width:1099px) { .sb-topbar-title strong { font-size:15px; } }
+@media(max-width:540px) { .sb-topbar { padding:8px; gap:8px; flex-wrap:wrap; } .sb-topbar-subtitle { font-size:14px; } .sb-topbar-title { gap:8px; } .sb-filter-chips { width:100%; justify-content:flex-start; } .sb-filter-chips:empty { display:none; } .sb-floating { right:12px !important; bottom:max(12px,env(safe-area-inset-bottom)) !important; } .sb-float-actions { gap:6px; } .sb-float-actions button { padding:10px 12px; } .sb-utility-overlay { padding:8px; } .sb-utility-dialog header { padding:12px 16px; } .sb-utility-body { padding:16px; } .sb-board-panel .space-y-1>div { flex-wrap:wrap; } .sb-board-panel .space-y-1>div>div:first-child { min-width:0; width:100%; } }
+@media(prefers-reduced-motion:reduce) { .sb-sidebar { transition:none; } }
+@media print { .sb-app,.sb-app.sb-open { padding-left:0 !important; } .sb-sidebar,.sb-backdrop,.sb-topbar,.sb-floating,.sb-utility-overlay { display:none !important; } }
+/* 進捗カードはサイドバーを除いた実際の作業幅に合わせる。 */
+.sb-app main>div.grid:first-child { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.sb-app main>div.grid:first-child>button,.sb-app main>div.grid:first-child>div { min-width:0; gap:8px; }
+.sb-app main>div.grid:first-child>button>div:first-child,.sb-app main>div.grid:first-child>div>div:first-child { flex:1; min-width:0; }
+.sb-app main>div.grid:first-child .w-32 { width:100%; max-width:128px; }
+@media(min-width:700px) { .sb-app main>div.grid:first-child { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(min-width:1700px) { .sb-app main>div.grid:first-child { grid-template-columns:repeat(6,minmax(0,1fr)); } }
+@media(max-width:540px) { .sb-app main>div.grid:first-child>button>div:last-child,.sb-app main>div.grid:first-child>div>div:last-child { display:none; } .sb-app main>div.grid:first-child { gap:8px; } }
+.sb-icon-button { font-family:Arial,sans-serif; }
+.sb-calendar-toolbar>div:last-child { flex-wrap:wrap; min-width:0; }
+.sb-calendar-toolbar button { white-space:nowrap; min-height:40px; flex-shrink:0; }
+@media(max-width:540px) { .sb-calendar-toolbar { padding:12px !important; } .sb-calendar-toolbar>div:last-child { gap:8px; } .sb-calendar-toolbar>div:last-child>div:last-child { width:100%; } }
+
+/* v3.29.0: 工程表を主役にし、編集カードは選択した業務だけを表示。 */
+.wf-dialog.gs-dialog { width:min(1540px,98vw); }
+.gs-person-summary { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:0 0 12px; }
+.gs-person-summary strong { font-size:20px; }
+.gs-person-summary span { font-size:14px; color:#52657a !important; }
+.gs-person-summary button,.gs-detail-toggle { min-height:44px; border:1px solid #ccd8e4; background:#fff; border-radius:8px; padding:8px 12px; font-size:14px !important; }
+.gs-compact-basics { margin-bottom:16px; }
+.gs-detail-toggle { margin-left:auto; }
+.gs-schedule { border:1px solid #ced9e4; border-radius:10px; background:#fff; overflow:hidden; }
+.gs-toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; }
+.gs-toolbar h3 { font-size:17px; font-weight:800; }
+.gs-toolbar p { font-size:14px; color:#52657a !important; }
+.gs-navigation { display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:14px; }
+.gs-navigation button { min-width:44px; min-height:44px; background:#fff; border:1px solid #cbd7e3; border-radius:8px; padding:6px 10px; }
+.gs-navigation small { font-size:14px; font-weight:400; }
+.gs-scroll { overflow:auto; max-width:100%; }
+.gs-table { width:100%; min-width:1080px; table-layout:fixed; border-collapse:separate; border-spacing:0; font-size:14px; }
+.gs-table th,.gs-table td { border-right:1px solid #dce4ec; border-bottom:1px solid #dce4ec; text-align:center; height:53px; padding:0; }
+.gs-table thead th { background:#3d505b; color:#fff !important; height:52px; font-weight:700; }
+.gs-table thead th * { color:#fff !important; }
+.gs-table thead small { display:block; font-size:14px; font-weight:400; }
+.gs-table .gs-label { width:144px; position:sticky; left:0; z-index:2; background:#f2f5f7; text-align:left; padding:0 10px; }
+.gs-table thead .gs-label { background:#3d505b; z-index:3; }
+.gs-label button { display:flex; flex-direction:column; justify-content:center; width:100%; min-height:52px; text-align:left; font-size:14px; font-weight:700; }
+.gs-label small { display:block; font-size:14px; font-weight:400; color:#52657a !important; }
+.gs-table td { background:#fff; position:relative; }
+.gs-table tr:nth-child(even) td { background:#f3f6f8; }
+.gs-table td.gs-weekend,.gs-table tr:nth-child(even) td.gs-weekend { background:#fff0dd; }
+.gs-table thead th.gs-weekend { background:#775431; }
+.gs-table td.gs-today { box-shadow:inset 2px 0 #2783de,inset -2px 0 #2783de; }
+.gs-table thead .gs-today { background:#245d91; }
+.gs-table .gs-status-heading { width:124px; }
+.gs-status button { min-height:44px; font-size:14px; }
+.gs-status small { display:block; font-size:14px; color:#52657a !important; }
+.gs-status .wf-badge { padding:2px 5px; font-size:14px; }
+.gs-mark { position:absolute; left:3px; right:3px; top:9px; height:36px; width:calc(100% - 6px); min-height:36px; border:1px solid; border-radius:5px; padding:0; font-size:14px !important; font-weight:700 !important; z-index:1; }
+.gs-mark.gs-join-left { left:-1px; width:calc(100% - 2px); border-left:0; border-radius:0 5px 5px 0; }
+.gs-mark.gs-join-right { right:-1px; width:calc(100% - 2px); border-right:0; border-radius:5px 0 0 5px; }
+.gs-mark.gs-join-left.gs-join-right { width:calc(100% + 2px); border-radius:0; }
+.gs-done { background:#dcefe4; color:#245a3a !important; border-color:#75a68a; }
+.gs-scheduled { background:#dcecff; color:#245583 !important; border-color:#83afd4; }
+.gs-todo,.gs-unknown { background:#fff0d8; color:#754610 !important; border-color:#d6aa67; }
+.gs-deferred,.gs-exempt { background:#eef1f4; color:#52657a !important; border-color:#cbd5df; }
+.gs-selected .gs-label { box-shadow:inset 4px 0 #2783de; background:#e5f2fc; }
+.gs-phase-divider>* { border-top:3px solid #b6c5d2; }
+.gs-legend { padding:10px 16px; display:flex; flex-wrap:wrap; gap:8px 18px; font-size:14px; }
+.gs-legend-item { display:inline-flex; align-items:center; gap:6px; }
+.gs-legend-item i { width:18px; height:12px; display:inline-block; border:1px solid #91a6b8; border-radius:2px; }
+.gs-legend-note { color:#52657a !important; }
+.gs-editor-title { margin:16px 0 8px; display:flex; align-items:center; justify-content:space-between; font-size:16px; font-weight:700; }
+.gs-editor-title button { font-size:14px; min-height:44px; padding:6px 12px; border:1px solid #ccd8e4; border-radius:8px; background:#fff; }
+.gs-dialog .wf-board { display:block; max-width:760px; margin:auto; }
+.gs-dialog .wf-phase,.gs-dialog .wf-prep-cards,.gs-dialog .wf-stack { display:contents; }
+.gs-dialog .wf-phase-heading,.gs-dialog .wf-stack>.wf-help { display:none; }
+.gs-dialog .wf-task { display:none; }
+.gs-dialog .wf-task.gs-active-task { display:flex; }
+.gs-dialog .wf-extras { margin-top:16px; }
+.gs-dialog .wf-footer p { display:none; }
+.gs-dialog .wf-header { padding:12px 20px; }
+.gs-dialog .wf-header .wf-eyebrow { display:none; }
+.gs-dialog .wf-footer { padding:8px 20px; justify-content:flex-end; }
+@media(max-width:640px) { .wf-dialog.gs-dialog { width:100%; height:98dvh; border-radius:10px; } .gs-dialog .wf-scroll { padding:12px; } .gs-dialog .wf-header { padding:10px 12px; } .gs-dialog .wf-header h2 { font-size:18px; } .gs-person-summary strong { font-size:18px; } .gs-person-summary { gap:4px 10px; } .gs-person-summary .gs-detail-toggle { margin-left:0; } .gs-toolbar { padding:12px; } .gs-navigation { gap:6px; } .gs-toolbar p { max-width:280px; } .gs-table { min-width:1040px; } .gs-table .gs-label { width:124px; } .gs-legend { padding:8px 12px; gap:6px 12px; } }
+.gs-row-state { display:none !important; }
+.gs-navigation>button:first-child,.gs-navigation>button[aria-label="工程表を2週間後へ"] { font-size:22px !important; }
+.gs-mark { height:44px; min-height:44px; top:4px; }
+@media(max-width:640px) { .gs-label .gs-row-state { display:inline-block !important; font-size:14px; padding:1px 4px; border-radius:3px; align-self:flex-start; } .gs-label .gs-row-state+small { display:none; } .gs-label button { gap:2px; } }
 
 </style>
 
@@ -908,9 +1073,48 @@ const getWorkflowModel = (s, today = getTodayString()) => {
 };
 const WorkflowBadge = ({ state, children }) => <span className={`wf-badge wf-${state}`}><span aria-hidden="true">{state === 'done' ? '✓' : state === 'scheduled' ? <Clock style={{width:14,height:14}} /> : state === 'exempt' ? '—' : state === 'deferred' ? '…' : state === 'unknown' ? '?' : '○'}</span>{children}</span>;
 
+// v3.29.0: 登録済みの日付だけを配置する、クリック編集付き工程表。
+const workflowDayKey = (value) => {
+  const match = String(value || '').match(/^\d{4}-\d{2}-\d{2}$/);
+  return match && !Number.isNaN(Date.parse(value + 'T12:00:00Z')) ? value : '';
+};
+const shiftWorkflowDay = (day, count) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate()+count); return d.toISOString().slice(0,10); };
+const getWorkflowDates = (student, task) => {
+  if (task.key === 'dates') return [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
+  if (task.key === 'patrol') return [...new Set((student.patrols || []).map(p => p.date))].filter(workflowDayKey).sort();
+  const field = {phone:'phoneDate',doc:'docDate',greeting:'greetingDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'}[task.key];
+  return field && workflowDayKey(student[field]) ? [student[field]] : [];
+};
+function WorkflowSchedule({ student, model, selected, onSelect }) {
+  const initial = model.days.find(workflowDayKey) || getTodayString();
+  const [start, setStart] = useState(() => shiftWorkflowDay(initial,-3));
+  const days = Array.from({length:14},(_,i)=>shiftWorkflowDay(start,i));
+  const end = days[13];
+  const tasks = model.phases.flatMap(phase=>phase.tasks.map(task=>({...task,phase:phase.title})));
+  const allDates = tasks.flatMap(task=>getWorkflowDates(student,task)).sort();
+  const stateText = {done:'完了',todo:'未完了',unknown:'要確認',scheduled:'予定',exempt:'対象外',deferred:'終了後'};
+  return <section className="gs-schedule" aria-label="業務工程表">
+    <div className="gs-toolbar"><div><h3>業務工程表</h3><p>日付のある業務を表示。行を押すと編集できます。</p></div><div className="gs-navigation"><button type="button" aria-label="工程表を2週間前へ" onClick={()=>setStart(shiftWorkflowDay(start,-14))}>‹</button><strong>{formatShortDate(start)} 〜 {formatShortDate(end)} <small>({start.slice(0,4)})</small></strong><button type="button" aria-label="工程表を2週間後へ" onClick={()=>setStart(shiftWorkflowDay(start,14))}>›</button><button type="button" onClick={()=>setStart(shiftWorkflowDay(initial,-3))}>実施日へ</button></div></div>
+    <div className="gs-scroll" tabIndex={0} role="region" aria-label="工程表。狭い画面では左右にスクロールできます">
+      <table className="gs-table"><thead><tr><th scope="col" className="gs-label">業務</th>{days.map(day=>{const dow=new Date(day+'T12:00:00Z').getUTCDay();return <th key={day} scope="col" className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}><span>{parseInt(day.slice(5,7))}/{parseInt(day.slice(8))}</span><small>{'日月火水木金土'[dow]}</small></th>})}<th scope="col" className="gs-status-heading">進捗</th></tr></thead><tbody>{tasks.map((task,index)=>{
+        const dates=task.state==='exempt'?[]:getWorkflowDates(student,task), visible=dates.filter(d=>d>=start&&d<=end), outside=dates.length > 0 && visible.length === 0;
+        const shortTitle={doc:'書類配付',greeting:'事前挨拶',dates:student.internshipType==='observation'?'施設見学':'現場実習',patrol:'巡回・同行',studentThankYou:'生徒お礼状',teacherThankYou:'教師お礼状',phone:'事前電話',gift:'菓子折'}[task.key];
+        return <tr key={task.key} className={`${selected===task.key?'gs-selected':''} ${index===4||index===6?'gs-phase-divider':''}`}><th scope="row" className="gs-label"><button type="button" aria-label={`${task.title}を編集`} aria-pressed={selected===task.key} onClick={()=>onSelect(task.key)}><span>{shortTitle}</span><small className={`gs-row-state gs-${task.state}`}>{stateText[task.state]}</small>{index===0||index===4||index===6?<small>{task.phase}</small>:null}</button></th>{days.map((day,i)=>{
+          const hit=dates.includes(day), previous=dates.includes(shiftWorkflowDay(day,-1)), next=dates.includes(shiftWorkflowDay(day,1));
+          const dow=new Date(day+'T12:00:00Z').getUTCDay();
+          return <td key={day} className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}>{hit&&<button type="button" className={`gs-mark gs-${task.state} ${previous&&i>0?'gs-join-left':''} ${next&&i<13?'gs-join-right':''}`} title={`${task.title} ${day}：${task.label}`} aria-label={`${task.title} ${day} ${task.label}を編集`} onClick={()=>onSelect(task.key)}>{!previous||i===0?<span>{task.key==='dates'?'実施':task.key==='patrol'?'巡回':task.state==='done'?'✓':'予定'}</span>:<span aria-hidden="true">—</span>}</button>}</td>;
+        })}<td className="gs-status"><button type="button" onClick={()=>onSelect(task.key)} aria-label={`${task.title}の詳細を開く`}><WorkflowBadge state={task.state}>{stateText[task.state]}</WorkflowBadge><small>{outside?'表示期間外':!dates.length&&task.state!=='exempt'?(task.state==='deferred'?'日付未設定':'日付なし'):task.state==='exempt'?'':task.key==='dates'?`${dates.length}日`:''}</small></button>{outside&&<button type="button" className="gs-show-date" onClick={()=>setStart(shiftWorkflowDay(dates[0],-3))}>日付へ →</button>}</td></tr>;
+      })}</tbody></table>
+    </div>
+    <div className="gs-legend"><span className="gs-legend-item"><i className="gs-done"/>完了</span><span className="gs-legend-item"><i className="gs-scheduled"/>予定</span><span className="gs-legend-item"><i className="gs-todo"/>未完了・要確認</span><span className="gs-legend-note">未設定の期限は推定しません。</span></div>
+  </section>;
+}
+
 function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onEditPatrol, onConfirm }) {
   const rootRef = useRef(null);
   const [addingPatrol, setAddingPatrol] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showBasics, setShowBasics] = useState(false);
   const [patrolDraft, setPatrolDraft] = useState({ date: '', time: '', teacher: s.teacher || '' });
   const model = getWorkflowModel(s);
   const exemptions = workflowExemptions(s);
@@ -936,7 +1140,12 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
     document.addEventListener('keydown', keydown);
     return () => document.removeEventListener('keydown', keydown);
   }, [suspended, onClose]);
-  const scrollToTask = (key) => rootRef.current?.querySelector(`[data-wf-task="${key}"]`)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  const scrollToTask = (key) => setSelectedTask(key);
+  useEffect(() => {
+    const cards = rootRef.current?.querySelectorAll('[data-wf-task]') || [];
+    cards.forEach(card => card.classList.toggle('gs-active-task', card.dataset.wfTask === selectedTask));
+    if (selectedTask) rootRef.current?.querySelector('.gs-active-task')?.scrollIntoView({block:'center',behavior:'auto'});
+  }, [selectedTask, s]);
   const editText = (field, title, multiline = false, extra = {}) => onText({ value: s[field] || '', title, label: title, multiline, onSave: (v) => onPatch(s, { [field]: v, ...extra }) });
   const changeTask = (task, value) => {
     if (fieldLocked(task.field)) return;
@@ -978,20 +1187,21 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
   const dateTask = model.phases[1].tasks[0], patrolTask = model.phases[1].tasks[1];
   const patrolLocked = readOnly || (!isAdmin && (s.lockedFields || []).some((field) => field === 'patrolStatus'));
   return <div className="wf-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <div ref={rootRef} role="dialog" aria-modal="true" aria-labelledby="wf-title" className="wf-dialog">
-      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・施設見学</p><h2 id="wf-title">実習生 詳細情報 <span>業務ワークフロー</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label="ワークフローを閉じる" onClick={onClose}>×</button></header>
+    <div ref={rootRef} role="dialog" aria-modal="true" aria-labelledby="wf-title" className="wf-dialog gs-dialog">
+      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・施設見学</p><h2 id="wf-title">業務ワークフロー <span>工程表</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label="ワークフローを閉じる" onClick={onClose}>×</button></header>
       <div className="wf-scroll">
         {readOnly && <p className="wf-readonly" role="status">🔒 この実習期は終了済みのため閲覧のみです。管理者に確認してください。</p>}
+        <div className="gs-person-summary"><strong>{s.name || '氏名未設定'}（{s.location || '実習先未設定'}）</strong><span>{s.grade ? `${s.grade}年${s.classVal || '―'}組` : ''} {s.teacher || '担当未設定'}</span><button type="button" className="gs-detail-toggle" aria-expanded={showBasics} onClick={()=>setShowBasics(v=>!v)}>基本情報 {showBasics?'を閉じる':'を編集'}</button></div>
+        {showBasics && <div className="gs-compact-basics">
         <section className="wf-basics" aria-label="実習生の基本情報">
           <div><p className="wf-field-label">生徒・学級</p><button type="button" disabled={readOnly} className="wf-basic-name" onClick={() => editText('name', '生徒氏名を編集')}>{s.name || '氏名未設定'}</button><div className="wf-inline"><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.grade || '3', title: '学年を選択', options: [['1','1年'],['2','2年'],['3','3年'],['other','他']], onSave: (v) => onPatch(s, { grade: v }) })}>{s.grade ? `${s.grade}年` : '学年未設定'}</button><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.classVal || '', title: '組を変更', options: [['','未設定'],['1','1組'],['2','2組'],['3','3組']], onSave: (v) => onPatch(s, { classVal: v }) })}>{s.classVal ? `${s.classVal}組` : '組未設定'}</button></div></div>
           <div><p className="wf-field-label">実習先・活動種別</p><button type="button" className="wf-basic-value" disabled={readOnly} onClick={() => editText('location', '実習先を編集')}>{s.location || '実習先未設定'}</button><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.internshipType || 'internship', title: '活動種別を選択', options: [['internship','実習'],['observation','見学']], onSave: (v) => onPatch(s, { internshipType: v }) })}>{s.internshipType === 'observation' ? '見学' : '実習'}</button></div>
           <div><p className="wf-field-label">実施期間</p><button type="button" className="wf-basic-value" onClick={() => scrollToTask('dates')}>{model.days.length ? formatShortDate(model.days[0]) + (model.days.length > 1 ? ' 〜 ' + formatShortDate(model.days[model.days.length - 1]) : '') : '日程未設定'}</button><p className="wf-muted">{model.days.length ? `実施 ${model.days.length}日・日程カードで確認` : '実施日を設定してください'}</p></div>
           <div><p className="wf-field-label">担当教員</p><button type="button" className="wf-basic-value" disabled={readOnly} onClick={() => editText('teacher', '担当教員を編集')}>{s.teacher || '担当未設定'}</button><p className="wf-muted wf-basic-edit-help">基本情報は各項目から編集できます</p></div>
         </section>
-        <section className="wf-overview" aria-label="進捗の概要">
-          <div className="wf-phase-summary">{model.phases.map((phase) => <button key={phase.key} type="button" className={`wf-phase-chip wf-chip-${phase.state}`} onClick={() => rootRef.current?.querySelector(`[data-wf-phase="${phase.key}"]`)?.scrollIntoView({ behavior: 'auto', block: 'start' })}><span className="wf-summary-top"><strong>{phase.number} {phase.title}</strong><WorkflowBadge state={phase.state}>{phase.label}</WorkflowBadge></span><span className="wf-summary-count">{phase.target ? `${phase.done} / ${phase.target} 項目完了` : '対象業務なし'}{phase.unknown > 0 ? `・うち要確認 ${phase.unknown}` : ''}</span><span className="wf-track"><span style={{ width: `${phase.target ? 100 * phase.done / phase.target : 100}%` }} /></span></button>)}</div>
-          <div className="wf-attention"><h3>次に確認すること</h3>{model.attention.length ? <div className="wf-attention-list">{model.attention.map((task) => <button type="button" key={task.key} onClick={() => scrollToTask(task.key)}>{task.text}<span aria-hidden="true"> ↗</span></button>)}</div> : <p className="wf-muted">現在の登録情報では、対応・確認待ちの項目はありません。</p>}<p className="wf-help">対象外は集計から除外。要否が未確認の項目は「要確認」として残します。期限超過の判定はしません。</p></div>
-        </section>
+        </div>}
+        <WorkflowSchedule student={s} model={model} selected={selectedTask} onSelect={scrollToTask} />
+        {selectedTask && <div className="gs-editor-title"><span>選択した業務の編集</span><button type="button" onClick={()=>setSelectedTask(null)}>編集を閉じる</button></div>}
         <div className="wf-board">
           {model.phases.map((phase, phaseIndex) => <section key={phase.key} data-wf-phase={phase.key} className={`wf-phase wf-phase-${phase.key}`} aria-label={`${phase.title}の業務`}>
             <div className="wf-phase-heading"><span className="wf-step-number">{phase.number}</span><div><h3>{phase.title}</h3><p>{phase.description}</p></div></div>
@@ -1013,7 +1223,7 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
             {phaseIndex === 2 && <div className="wf-stack">{phase.tasks.map(renderStandardTask)}<p className="wf-help">実施期間が終わるまでは、未送付を要対応として強調しません。送付済み・対象外の記録はそのまま表示します。</p></div>}
           </section>)}
         </div>
-        <section className="wf-extras" aria-label="特記事項と関連資料"><div><h3>特記事項・配慮事項</h3><button type="button" className="wf-notes" disabled={readOnly} onClick={() => editText('notes', '特記事項・配慮事項を編集', true)}>{s.notes || '特記事項を入力する'}</button></div><div><h3>関連資料</h3><p className="wf-muted">実施計画・評価票などの登録資料を確認できます。</p><button type="button" className="wf-secondary" onClick={onMaterials}>関連資料を開く（{(s.materials || []).length}件）</button></div></section>
+        <details className="gs-extra-disclosure"><summary className="gs-detail-toggle">メモ・関連資料</summary><section className="wf-extras" aria-label="特記事項と関連資料"><div><h3>特記事項・配慮事項</h3><button type="button" className="wf-notes" disabled={readOnly} onClick={() => editText('notes', '特記事項・配慮事項を編集', true)}>{s.notes || '特記事項を入力する'}</button></div><div><h3>関連資料</h3><p className="wf-muted">実施計画・評価票などの登録資料を確認できます。</p><button type="button" className="wf-secondary" onClick={onMaterials}>関連資料を開く（{(s.materials || []).length}件）</button></div></section></details>
       </div>
       <footer className="wf-footer"><p className="wf-muted" aria-live="polite">変更は通常の保存先へ反映します。状態は選択して変更でき、順番による操作制限はありません。</p><button type="button" className="wf-secondary" onClick={onClose}>閉じる</button></footer>
     </div>
@@ -1512,6 +1722,30 @@ const BulkImportModal = ({ onClose, onCommit, onAlert, defaultTeacher }) => {
 // メインコンポーネント
 // =============================================================================
 
+// v3.28.0: 検索・掲示板を必要なときだけ表示する補助ダイアログ。
+function AppUtilityDialog({ title, onClose, children, wide = false, suspended = false }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    (ref.current?.querySelector('input') || ref.current?.querySelector('button'))?.focus();
+    return () => { document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus?.(); };
+  }, []);
+  useEffect(() => {
+    const keydown = (event) => {
+      if (suspended) return;
+      if (event.key === 'Escape') { event.preventDefault(); onClose(); }
+      if (event.key !== 'Tab') return;
+      const nodes = [...(ref.current?.querySelectorAll('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"]') || [])].filter((node) => node.getClientRects().length);
+      if (event.shiftKey && document.activeElement === nodes[0]) { event.preventDefault(); nodes[nodes.length-1]?.focus(); }
+      else if (!event.shiftKey && document.activeElement === nodes[nodes.length-1]) { event.preventDefault(); nodes[0]?.focus(); }
+    };
+    document.addEventListener('keydown',keydown); return () => document.removeEventListener('keydown',keydown);
+  }, [suspended,onClose]);
+  return <div className="sb-utility-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`sb-utility-dialog ${wide ? 'sb-board-dialog' : ''}`}><header><h2>{title}</h2><button type="button" className="sb-icon-button" aria-label={`${title}を閉じる`} onClick={onClose}>×</button></header><div className="sb-utility-body">{children}</div></section></div>;
+}
+
 function App() {
   // v3.5: 外部 config.js が読み込まれていれば window.FIREBASE_CONFIG を優先利用。
   // 無ければ従来通り localStorage の手動入力値にフォールバック。
@@ -2005,6 +2239,12 @@ function App() {
   };
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1100);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchDraft, setSearchDraft] = useState('');
+  const [isBoardPanelOpen, setIsBoardPanelOpen] = useState(false);
+  const sidebarRef = useRef(null);
+  const menuButtonRef = useRef(null);
   const [filterProgress, setFilterProgress] = useState('all');
   const [filterGrade, setFilterGrade] = useState('all');
   const [filterClass, setFilterClass] = useState('all');
@@ -2948,12 +3188,12 @@ function App() {
           : 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200';
         const patrolsOnDay = (student.patrols || []).filter((p) => p.date === target);
         const patrolNames = patrolsOnDay.map((p) => p.teacher).filter(Boolean);
-        const tipLines = [`${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`];
+        const tipLines = [(isObs ? `${student.name}（${student.location || '見学先未設定'}）` : `${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`)];
         if (student.teacher) tipLines.push(`同行: ${student.teacher}`);
         if (patrolNames.length > 0) tipLines.push(`巡回: ${patrolNames.join('、')}`);
         events.push({
           type: 'period',
-          label: `${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`,
+          label: (isObs ? `${student.name}（${student.location || '見学先未設定'}）` : `${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`),
           title: tipLines.join('\n'),
           student,
           color,
@@ -3206,62 +3446,28 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    const query = window.matchMedia('(min-width:1100px)');
+    const change = () => setSidebarOpen(query.matches);
+    query.addEventListener('change', change); return () => query.removeEventListener('change', change);
+  }, []);
+  useEffect(() => {
+    if (!sidebarOpen || window.innerWidth >= 1100) return;
+    const overflow = document.body.style.overflow; document.body.style.overflow = 'hidden';
+    sidebarRef.current?.querySelector('button')?.focus();
+    const keydown = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); setSidebarOpen(false); }
+      if (e.key !== 'Tab') return;
+      const nodes = [...(sidebarRef.current?.querySelectorAll('button:not(:disabled):not([hidden]),select:not(:disabled),input:not(:disabled),a[href]') || [])].filter(n => n.getClientRects().length);
+      if (e.shiftKey && document.activeElement === nodes[0]) { e.preventDefault(); nodes.at(-1)?.focus(); }
+      else if (!e.shiftKey && document.activeElement === nodes.at(-1)) { e.preventDefault(); nodes[0]?.focus(); }
+    };
+    document.addEventListener('keydown', keydown);
+    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', keydown); menuButtonRef.current?.focus(); };
+  }, [sidebarOpen]);
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-
-      {/* v3.7: 画面上部の掲示板。ルーム単位で共有され、投稿者名と削除ボタン付き。 */}
-      <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-300 shadow-sm no-print">
-        <div className="w-full max-w-none px-3 sm:px-4 py-2">
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setIsBoardOpen((v) => !v)} className="flex items-center gap-2 text-xs font-bold text-amber-900 hover:text-amber-700 cursor-pointer">
-              <span className="text-base">📣</span>
-              <span>掲示板</span>
-              <span className="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full text-[10px] font-mono">{boardPosts.length}件</span>
-              <ChevronDown className={"w-3.5 h-3.5 transition-transform " + (isBoardOpen ? "rotate-180" : "")} />
-            </button>
-            <button type="button" onClick={(e) => { e.stopPropagation(); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }} title="掲示板の「削除された投稿」と「非表示にした投稿」の履歴を表示します" className="shrink-0 inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-indigo-50 active:bg-indigo-100 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-300 rounded-lg text-[10px] font-bold cursor-pointer shadow-sm transition-all">
-<span className="text-[11px] leading-none">📜</span>
-<span>履歴</span>
-{((boardDeletedHistory || []).length + (boardHiddenHistory || []).length) > 0 && (
-<span className="text-[9px] font-mono bg-slate-100 text-slate-600 border border-slate-200 rounded px-1 py-0.5">{(boardDeletedHistory || []).length + (boardHiddenHistory || []).length}</span>
-)}
-</button>
-{!isBoardOpen && boardPosts[0] && (
-              <div className="text-[11px] text-amber-900 truncate flex-1 min-w-0">
-                <span className="font-bold">{boardPosts[0].author || '匿名'}:</span> {boardPosts[0].message}
-              </div>
-            )}
-          </div>
-          {isBoardOpen && (
-            <div className="mt-2 space-y-2">
-              <form onSubmit={(e) => { e.preventDefault(); if (!boardInput.trim()) return; addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); }} className="flex items-start gap-2">
-                <div className="flex-shrink-0 bg-amber-100 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-amber-900 whitespace-nowrap" title="投稿者名。「編集者名」と同じ。">
-                  {myTeacherName || '匿名'}
-                </div>
-                <textarea value={boardInput} onChange={(e) => setBoardInput(e.target.value)} placeholder="連絡事項やお知らせを入力（CtrlまたはCmd + Enter で投稿）" rows={1} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (boardInput.trim()) { addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); } } }} className="flex-1 bg-white border border-amber-300 focus:border-amber-500 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300 text-slate-800 resize-y min-h-[34px]" />
-                <button type="submit" disabled={!boardInput.trim()} className={"px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 " + (boardInput.trim() ? "bg-amber-600 hover:bg-amber-700 text-white cursor-pointer shadow-sm" : "bg-slate-200 text-slate-400 cursor-not-allowed")}>投稿</button>
-              </form>
-              {boardPosts.length === 0 ? (
-                <p className="text-[11px] text-amber-700/70 italic text-center py-2">まだ投稿はありません。</p>
-              ) : (
-                <div className="space-y-1 max-h-56 overflow-y-auto scrollbar-thin pr-1">
-                  {boardPosts.map((p) => { const ts = p.createdAt; const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0); const timeStr = ms ? new Date(ms).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; const canDelete = !myTeacherName || !p.author || p.author === '匿名' || p.author === myTeacherName; return (
-                    <div key={p.id} className="flex items-start gap-2 bg-white/80 border border-amber-200 rounded-lg px-3 py-2 text-xs">
-                      <div className="shrink-0 min-w-[80px]">
-                        <div className="font-bold text-amber-900 text-[11px] truncate">{p.author || '匿名'}</div>
-                        <div className="text-[9px] text-slate-500 font-mono">{timeStr}</div>
-                      </div>
-                      <div className="flex-1 text-slate-800 whitespace-pre-wrap break-words leading-relaxed">{p.message}</div>
-                      <div className="shrink-0 flex flex-col gap-1">{myTeacherName && p.author === myTeacherName ? (<><button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button><button type="button" onClick={() => showConfirm('この投稿を全員の画面から削除しますか？この操作は取り消せません。', () => deleteBoardPost(p.id, myTeacherName || '匿名'))} title="自分の投稿を全員の画面から削除します" className="px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">全員削除</button></>) : (<button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button>)}</div>
-                    </div>
-                  ); })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
+    <div className={`sb-app min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans ${sidebarOpen ? 'sb-open' : ''}`}>
 
       {/* 隠しファイル入力: 「config.js を読み込む」ボタンから呼ばれる */}
       <input
@@ -3350,28 +3556,32 @@ function App() {
         </div>
       )}
 
-      <header className="bg-white border-b border-slate-200 shrink-0 shadow-sm no-print">
-        <div className="w-full max-w-none px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      {sidebarOpen && <button className="sb-backdrop no-print" aria-label="メニューを閉じる" tabIndex={-1} onClick={() => setSidebarOpen(false)} />}
+      <aside ref={sidebarRef} id="app-sidebar" className="sb-sidebar no-print" aria-label="操作メニュー" aria-hidden={!sidebarOpen} inert={!sidebarOpen ? '' : undefined}>
+        <div className="sb-sidebar-top"><strong>操作メニュー</strong><button type="button" className="sb-icon-button" aria-label="サイドバーを閉じる" onClick={() => setSidebarOpen(false)}>×</button></div>
+        <div className="sb-sidebar-scroll">
+      <header className="sb-header">
+        <div className="sb-header-inner">
+          <div className="sb-brand">
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.27.0 HTML</span>
+              <div className="sb-brand-title">
+                <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.29.0 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
-              <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
+              <p className="text-xs text-slate-500">進捗管理・情報共有</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="sb-header-controls">
             <div className="flex items-center gap-1.5 bg-violet-50 border border-violet-200 rounded-full px-2 py-1 shadow-sm" title="表示する実習期を切り替えます">
               <span className="text-xs">🗂️</span>
               <select value={activePeriodId} onChange={(e) => setActivePeriodId(e.target.value)} className="bg-transparent text-xs font-bold text-violet-900 outline-none cursor-pointer max-w-[170px]">
                 {periods.map((p) => <option key={p.id} value={p.id}>{p.locked ? '🔒 ' : ''}{p.name}</option>)}
               </select>
-              <button type="button" onClick={() => setIsPeriodManagerOpen(true)} className="w-6 h-6 rounded-full bg-white border border-violet-200 hover:bg-violet-100 text-violet-800 font-bold cursor-pointer" title="実習期を管理">＋</button>
+              <button type="button" onClick={() => { setSidebarOpen(false); setIsPeriodManagerOpen(true); }} className="w-6 h-6 rounded-full bg-white border border-violet-200 hover:bg-violet-100 text-violet-800 font-bold cursor-pointer" title="実習期を管理">＋</button>
             </div>
-            <ConnectionBadge status={connectionStatus} roomKey={roomKey} />
+            <div className="sb-connection"><ConnectionBadge status={connectionStatus} roomKey={roomKey} /></div>
             {/* v3.9: 管理者バッジ。管理者としてログイン中のときだけ表示。クリックでログアウト確認。 */}
             {isAdmin && (
               <button
@@ -3386,7 +3596,7 @@ function App() {
             )}
             {/* v3.6: 編集者名バッジ。未設定のときは赤くパルスして気づかせる。 */}
             <button
-              onClick={() => { setTempTeacherName(myTeacherName || ''); setIsNamePromptOpen(true); }}
+              onClick={() => { setTempTeacherName(myTeacherName || ''); setSidebarOpen(false); setIsNamePromptOpen(true); }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border ${myTeacherName ? 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-800' : 'bg-rose-50 hover:bg-rose-100 border-rose-300 text-rose-700 animate-pulse'}`}
               title="編集者名（あなたの名前）を設定・変更します。「接続中」一覧や記録に使われます。"
             >
@@ -3394,7 +3604,7 @@ function App() {
               <span className="max-w-[120px] truncate">{myTeacherName || '名前を入力'}</span>
             </button>
             {todayTargets.length > 0 && (
-              <button type="button" onClick={() => setIsTodayTargetsOpen(true)} title="今日の実習・見学対象者を表示します" className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-900 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer">
+              <button type="button" onClick={() => { setSidebarOpen(false); setIsTodayTargetsOpen(true); }} title="今日の実習・見学対象者を表示します" className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-900 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer">
                 <span className="text-sm leading-none">📅</span>
                 <span>本日の実習・見学 {todayTargets.length}名</span>
               </button>
@@ -3423,8 +3633,7 @@ function App() {
                 </button>
                 {isOnlineListOpen && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsOnlineListOpen(false)} />
-                    <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl p-2 min-w-[220px] z-50 animate-slideDown">
+                    <div className="sb-inline-panel">
                       <div className="text-[10px] font-bold text-slate-500 px-2 py-1 border-b border-slate-100 mb-1">
                         同期接続中 ({onlineCount}名)
                       </div>
@@ -3442,7 +3651,7 @@ function App() {
                         </div>
                       )}
                       <div className="text-[10px] text-slate-400 px-2 pt-2 pb-1 border-t border-slate-100 mt-1 leading-snug">
-                        ※ 同じルーム名({roomKey})の部屋を開いている端末を表示します。<br />25秒ごとに更新、最終更新から60秒以上経ったセッションは離脱として扱います。
+                        ※ 同じルーム名({roomKey})の部屋を開いている端末を表示します。<br />15秒ごとに更新、最終更新から35秒以上経ったセッションは離脱として扱います。
                       </div>
                     </div>
                   </>
@@ -3464,8 +3673,7 @@ function App() {
               </button>
               {isTodayVisitorsOpen && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsTodayVisitorsOpen(false)} />
-                  <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl p-2 min-w-[280px] z-50 animate-slideDown">
+                  <div className="sb-inline-panel">
                     <div className="text-[10px] font-bold text-slate-500 px-2 py-1 border-b border-slate-100 mb-1 flex items-center justify-between gap-2">
                       <span>今日の訪問者 ({Object.keys(todayVisitors).length}名)</span>
                       <span className="font-mono text-slate-400">{(() => { const d = new Date(); return `${d.getMonth()+1}/${d.getDate()}`; })()}</span>
@@ -3526,7 +3734,7 @@ function App() {
             </div>
             )}
             <button
-              onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
+              onClick={() => { setTempRoomKey(roomKey); setSidebarOpen(false); setIsConfigOpen(true); }}
               title="Firebase接続設定・ルーム名の切替・担当教員名の保存を行います"
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-sm"
             >
@@ -3536,25 +3744,183 @@ function App() {
           </div>
         </div>
       </header>
+          <section className="sb-sidebar-section"><h2>連絡・掲示板</h2><div className="sb-board-actions"><button type="button" onClick={() => { setSidebarOpen(false); setIsBoardOpen(true); setIsBoardPanelOpen(true); }}>📣 掲示板 {boardPosts.length}件</button><button type="button" onClick={() => { setSidebarOpen(false); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }}>履歴</button></div></section>
+          <section className="sb-sidebar-section"><h2>データ操作・絞り込み</h2>
+        <div className="sb-tools">
+          <div className="sb-operations">
 
-      {connectionStatus === 'local' && (
-        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs py-2.5 px-4 shadow-sm no-print">
-          <div className="w-full max-w-none flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
-            <span className="flex items-center gap-2 text-amber-800">
-              <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
-              現在はPC1台のみの「体験デモ」で稼働しています。右上の<strong className="font-bold">「環境設定」ボタン</strong>から、config の貼り付け または config.js ファイルの読み込みでクラウド接続できます。
-            </span>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
-                className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-[11px] transition-colors shadow-sm"
-              >
-                環境設定を開く
+
+            <div className="sb-operation-grid">
+              <button onClick={handleUndo} disabled={history.length === 0}
+                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${history.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
+                title="直前の操作を取り消して一つ前に戻します">
+                <RotateCcw className={`w-4 h-4 ${history.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
+                <span>戻る</span>
+              </button>
+
+              <button onClick={handleRedo} disabled={redo.length === 0}
+                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${redo.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
+                title="取り消した操作をやり直して一つ進めます">
+                <RotateCw className={`w-4 h-4 ${redo.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
+                <span>進む</span>
+              </button>
+
+              <button onClick={() => { setSidebarOpen(false); setIsBulkImportOpen(true); }}
+                className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-800 border border-indigo-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                title="CSV/TSVを使って複数の生徒を一括で登録します">
+                <Upload className="w-4 h-4 text-indigo-600" />
+                <span>一括登録</span>
+              </button>
+
+              <button onClick={handleExportExcel}
+                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 border border-emerald-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                title="表示中の一覧をExcel等で開けるCSVファイルとして保存します">
+                <Download className="w-4 h-4 text-emerald-600" />
+                <span>エクセル</span>
+              </button>
+
+              <button onClick={() => openAddModal()}
+                title="新しい生徒の進捗データを登録します" hidden aria-hidden="true"
+                className="px-4 py-2 bg-yellow-200 hover:bg-yellow-300 active:bg-yellow-400 text-yellow-900 border border-yellow-300 text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all transform active:scale-95 cursor-pointer">
+                <Plus className="w-4 h-4" />
+                <span>登録</span>
               </button>
             </div>
           </div>
+
+          <div className="sb-filter-list">
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を学年で絞り込みます">
+              <Filter className="w-3.5 h-3.5 text-slate-500" />
+              <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)} title="表示する学年を選んでください"
+                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
+                <option value="all">学年: すべて</option>
+                <option value="1">1年</option>
+                <option value="2">2年</option>
+                <option value="3">3年</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を組で絞り込みます">
+              <Filter className="w-3.5 h-3.5 text-slate-500" />
+              <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} title="表示する組を選んでください"
+                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
+                <option value="all">組: すべて</option>
+                {Array.from(new Set(activeStudents.map((st) => st.classVal).filter(Boolean))).sort().map((c) => (
+                  <option key={c} value={c}>{c}組</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を活動種別（実習/見学）で絞り込みます"><Filter className="w-3.5 h-3.5 text-slate-500" /><select value={filterInternshipType} onChange={(e) => setFilterInternshipType(e.target.value)} title="活動種別を選んでください" className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold"><option value="all">種別: すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></div>
+
+
+
+
+
+            {currentView === 'list' && (
+              <button type="button" onClick={() => { setSidebarOpen(false); setIsColumnSettingsOpen(true); }} title="一覧表に表示する項目を選びます" className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-violet-50 hover:border-violet-300 text-slate-700 rounded-xl text-xs font-bold cursor-pointer shadow-sm">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-violet-600" />
+                <span>表示項目</span>
+                <span className="text-[10px] bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded-full">{shownColumnDefs.length}</span>
+              </button>
+            )}
+
+            {hasActiveFilter && (
+              <button onClick={clearFilters} className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                <RotateCcw className="w-3 h-3" />
+                <span>解除</span>
+              </button>
+            )}
+          </div>
+
         </div>
-      )}
+
+        {currentView === 'list' && (
+          <section aria-label="用途別表示" className="sb-presets">
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="一覧の表示モード">
+              <span className="text-xs font-bold text-slate-600 mr-1">用途別表示</span>
+              {LIST_VIEW_PRESETS.map((preset) => (
+                <button key={preset.key} type="button" aria-pressed={listViewMode === preset.key}
+                  title={preset.description} onClick={() => applyListPreset(preset.key)}
+                  className={`px-3 py-2 rounded-lg border text-xs cursor-pointer transition-colors ${listViewMode === preset.key ? 'list-preset-active' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                  {preset.label}<span className="ml-1 text-slate-500">{preset.columns.length}</span>
+                </button>
+              ))}
+              <button type="button" aria-pressed={listViewMode === 'custom'} onClick={() => applyListPreset('custom')}
+                className={`px-3 py-2 rounded-lg border text-xs cursor-pointer ${listViewMode === 'custom' ? 'list-preset-active' : 'bg-white border-slate-200 hover:bg-slate-50'}`} title="保存済みの個別表示設定に切り替えます">カスタム</button>
+              <button type="button" onClick={() => { setSidebarOpen(false); setIsColumnSettingsOpen(true); }} className="px-3 py-2 rounded-lg border border-slate-200 text-xs cursor-pointer hover:bg-violet-50">項目を調整</button>
+            </div>
+            <p aria-live="polite" className="text-xs text-slate-500">{listViewMode === 'custom' ? '個別に選択した項目を表示しています' : LIST_VIEW_PRESETS.find((p) => p.key === listViewMode)?.description}。表示モードはこの端末・ルームごとに保存します。生徒の絞り込みは変わりません。</p>
+          </section>
+        )}
+
+
+          </section>
+        </div>
+      </aside>
+      <div className="sb-topbar no-print">
+        <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : 'リスト一覧'}</strong><span className="sb-topbar-subtitle">{activePeriod?.name || '実習期'}</span></div>
+        <div className="sb-filter-chips">{searchQuery && <span className="sb-keyword-chip"><Search className="w-4 h-4"/><span>検索：{searchQuery}</span><button type="button" aria-label="検索条件を解除" onClick={() => setSearchQuery('')}>×</button></span>}{hasActiveFilter && <button type="button" className="sb-icon-button" onClick={clearFilters}>絞り込み解除</button>}</div>
+      </div>
+      {connectionStatus === 'local' && <div className="sb-demo-note no-print"><span>体験デモ：この端末に保存中。共有には環境設定が必要です。</span><button type="button" onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}>環境設定を開く</button></div>}
+      {isSearchOpen && <AppUtilityDialog title="検索" onClose={() => setIsSearchOpen(false)}><form className="sb-search-form" onSubmit={(e) => { e.preventDefault(); setSearchQuery(searchDraft.trim()); setIsSearchOpen(false); }}><p>生徒名・実習先・期間などで絞り込みます。表示切替後も検索条件を維持します。</p><label htmlFor="app-search-input">キーワード</label><input id="app-search-input" type="search" value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="生徒名、実習先、期間など"/><div className="sb-dialog-actions"><button type="button" onClick={() => { setSearchQuery(''); setSearchDraft(''); setIsSearchOpen(false); }}>検索を解除</button><button type="button" onClick={() => setIsSearchOpen(false)}>キャンセル</button><button type="submit" className="sb-primary">検索する</button></div></form></AppUtilityDialog>}
+      {isBoardPanelOpen && <AppUtilityDialog title="掲示板" wide suspended={isBoardHistoryOpen || !!confirmState || !!alertState} onClose={() => setIsBoardPanelOpen(false)}><div className="sb-board-panel">
+      {/* v3.7: 画面上部の掲示板。ルーム単位で共有され、投稿者名と削除ボタン付き。 */}
+      <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-300 shadow-sm no-print">
+        <div className="w-full max-w-none px-3 sm:px-4 py-2">
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setIsBoardOpen((v) => !v)} className="flex items-center gap-2 text-xs font-bold text-amber-900 hover:text-amber-700 cursor-pointer">
+              <span className="text-base">📣</span>
+              <span>掲示板</span>
+              <span className="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full text-[10px] font-mono">{boardPosts.length}件</span>
+              <ChevronDown className={"w-3.5 h-3.5 transition-transform " + (isBoardOpen ? "rotate-180" : "")} />
+            </button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }} title="掲示板の「削除された投稿」と「非表示にした投稿」の履歴を表示します" className="shrink-0 inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-indigo-50 active:bg-indigo-100 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-300 rounded-lg text-[10px] font-bold cursor-pointer shadow-sm transition-all">
+<span className="text-[11px] leading-none">📜</span>
+<span>履歴</span>
+{((boardDeletedHistory || []).length + (boardHiddenHistory || []).length) > 0 && (
+<span className="text-[9px] font-mono bg-slate-100 text-slate-600 border border-slate-200 rounded px-1 py-0.5">{(boardDeletedHistory || []).length + (boardHiddenHistory || []).length}</span>
+)}
+</button>
+{!isBoardOpen && boardPosts[0] && (
+              <div className="text-[11px] text-amber-900 truncate flex-1 min-w-0">
+                <span className="font-bold">{boardPosts[0].author || '匿名'}:</span> {boardPosts[0].message}
+              </div>
+            )}
+          </div>
+          {isBoardOpen && (
+            <div className="mt-2 space-y-2">
+              <form onSubmit={(e) => { e.preventDefault(); if (!boardInput.trim()) return; addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); }} className="flex items-start gap-2">
+                <div className="flex-shrink-0 bg-amber-100 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-amber-900 whitespace-nowrap" title="投稿者名。「編集者名」と同じ。">
+                  {myTeacherName || '匿名'}
+                </div>
+                <textarea value={boardInput} onChange={(e) => setBoardInput(e.target.value)} placeholder="連絡事項やお知らせを入力（CtrlまたはCmd + Enter で投稿）" rows={1} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (boardInput.trim()) { addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); } } }} className="flex-1 bg-white border border-amber-300 focus:border-amber-500 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300 text-slate-800 resize-y min-h-[34px]" />
+                <button type="submit" disabled={!boardInput.trim()} className={"px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 " + (boardInput.trim() ? "bg-amber-600 hover:bg-amber-700 text-white cursor-pointer shadow-sm" : "bg-slate-200 text-slate-400 cursor-not-allowed")}>投稿</button>
+              </form>
+              {boardPosts.length === 0 ? (
+                <p className="text-[11px] text-amber-700/70 italic text-center py-2">まだ投稿はありません。</p>
+              ) : (
+                <div className="space-y-1 max-h-56 overflow-y-auto scrollbar-thin pr-1">
+                  {boardPosts.map((p) => { const ts = p.createdAt; const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0); const timeStr = ms ? new Date(ms).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; const canDelete = !myTeacherName || !p.author || p.author === '匿名' || p.author === myTeacherName; return (
+                    <div key={p.id} className="flex items-start gap-2 bg-white/80 border border-amber-200 rounded-lg px-3 py-2 text-xs">
+                      <div className="shrink-0 min-w-[80px]">
+                        <div className="font-bold text-amber-900 text-[11px] truncate">{p.author || '匿名'}</div>
+                        <div className="text-[9px] text-slate-500 font-mono">{timeStr}</div>
+                      </div>
+                      <div className="flex-1 text-slate-800 whitespace-pre-wrap break-words leading-relaxed">{p.message}</div>
+                      <div className="shrink-0 flex flex-col gap-1">{myTeacherName && p.author === myTeacherName ? (<><button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button><button type="button" onClick={() => showConfirm('この投稿を全員の画面から削除しますか？この操作は取り消せません。', () => deleteBoardPost(p.id, myTeacherName || '匿名'))} title="自分の投稿を全員の画面から削除します" className="px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">全員削除</button></>) : (<button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button>)}</div>
+                    </div>
+                  ); })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+
+
+      </div></AppUtilityDialog>}
 
       <main className="flex-1 w-full max-w-none mx-auto p-2 sm:p-3 lg:p-4 space-y-6" style={{ paddingBottom: '180px' }}>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 no-print">
@@ -3594,125 +3960,6 @@ function App() {
             title="クリックで「教師お礼状未送付」の生徒だけを絞り込みます"
             barColor="bg-cyan-500" iconColor="text-cyan-600" />
         </div>
-
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-4 shadow-sm no-print">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="relative flex-1 min-w-[180px]">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-              <input type="text" placeholder="生徒名、実習先、期間等で検索..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all" />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 self-end lg:self-auto">
-              <button onClick={handleUndo} disabled={history.length === 0}
-                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${history.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
-                title="直前の操作を取り消して一つ前に戻します">
-                <RotateCcw className={`w-4 h-4 ${history.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
-                <span>戻る</span>
-              </button>
-
-              <button onClick={handleRedo} disabled={redo.length === 0}
-                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${redo.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
-                title="取り消した操作をやり直して一つ進めます">
-                <RotateCw className={`w-4 h-4 ${redo.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
-                <span>進む</span>
-              </button>
-
-              <button onClick={() => setIsBulkImportOpen(true)}
-                className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-800 border border-indigo-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                title="CSV/TSVを使って複数の生徒を一括で登録します">
-                <Upload className="w-4 h-4 text-indigo-600" />
-                <span>一括登録</span>
-              </button>
-
-              <button onClick={handleExportExcel}
-                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 border border-emerald-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                title="表示中の一覧をExcel等で開けるCSVファイルとして保存します">
-                <Download className="w-4 h-4 text-emerald-600" />
-                <span>エクセル</span>
-              </button>
-
-              <button onClick={() => openAddModal()}
-                title="新しい生徒の進捗データを登録します" hidden aria-hidden="true"
-                className="px-4 py-2 bg-yellow-200 hover:bg-yellow-300 active:bg-yellow-400 text-yellow-900 border border-yellow-300 text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all transform active:scale-95 cursor-pointer">
-                <Plus className="w-4 h-4" />
-                <span>登録</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 no-print">
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を学年で絞り込みます">
-              <Filter className="w-3.5 h-3.5 text-slate-500" />
-              <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)} title="表示する学年を選んでください"
-                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
-                <option value="all">学年: すべて</option>
-                <option value="1">1年</option>
-                <option value="2">2年</option>
-                <option value="3">3年</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を組で絞り込みます">
-              <Filter className="w-3.5 h-3.5 text-slate-500" />
-              <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} title="表示する組を選んでください"
-                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
-                <option value="all">組: すべて</option>
-                {Array.from(new Set(activeStudents.map((st) => st.classVal).filter(Boolean))).sort().map((c) => (
-                  <option key={c} value={c}>{c}組</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を活動種別（実習/見学）で絞り込みます"><Filter className="w-3.5 h-3.5 text-slate-500" /><select value={filterInternshipType} onChange={(e) => setFilterInternshipType(e.target.value)} title="活動種別を選んでください" className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold"><option value="all">種別: すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></div>
-
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 px-2 py-1" aria-live="polite">
-              {currentView === 'calendar' ? <Calendar className="w-4 h-4" /> : <List className="w-4 h-4" />}
-              表示中：{currentView === 'calendar' ? 'カレンダー' : 'リスト一覧'}
-            </span>
-
-            {/* v3.8: 印刷ボタン（現在の画面をプリンタ/PDFに出力） */}
-            <button type="button" onClick={() => setIsPrintOpen(true)} title="現在の画面（リスト/カレンダー）を印刷またはPDF保存します" className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 rounded-xl text-xs font-bold cursor-pointer shadow-sm">
-              <Printer className="w-3.5 h-3.5 text-indigo-600" />
-              <span>印刷</span>
-            </button>
-
-            {currentView === 'list' && (
-              <button type="button" onClick={() => setIsColumnSettingsOpen(true)} title="一覧表に表示する項目を選びます" className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-violet-50 hover:border-violet-300 text-slate-700 rounded-xl text-xs font-bold cursor-pointer shadow-sm">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-violet-600" />
-                <span>表示項目</span>
-                <span className="text-[10px] bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded-full">{shownColumnDefs.length}</span>
-              </button>
-            )}
-
-            {hasActiveFilter && (
-              <button onClick={clearFilters} className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
-                <RotateCcw className="w-3 h-3" />
-                <span>解除</span>
-              </button>
-            )}
-          </div>
-
-        </div>
-
-        {currentView === 'list' && (
-          <section aria-label="用途別表示" className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 no-print">
-            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="一覧の表示モード">
-              <span className="text-xs font-bold text-slate-600 mr-1">用途別表示</span>
-              {LIST_VIEW_PRESETS.map((preset) => (
-                <button key={preset.key} type="button" aria-pressed={listViewMode === preset.key}
-                  title={preset.description} onClick={() => applyListPreset(preset.key)}
-                  className={`px-3 py-2 rounded-lg border text-xs cursor-pointer transition-colors ${listViewMode === preset.key ? 'list-preset-active' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
-                  {preset.label}<span className="ml-1 text-slate-500">{preset.columns.length}</span>
-                </button>
-              ))}
-              <button type="button" aria-pressed={listViewMode === 'custom'} onClick={() => applyListPreset('custom')}
-                className={`px-3 py-2 rounded-lg border text-xs cursor-pointer ${listViewMode === 'custom' ? 'list-preset-active' : 'bg-white border-slate-200 hover:bg-slate-50'}`} title="保存済みの個別表示設定に切り替えます">カスタム</button>
-              <button type="button" onClick={() => setIsColumnSettingsOpen(true)} className="px-3 py-2 rounded-lg border border-slate-200 text-xs cursor-pointer hover:bg-violet-50">項目を調整</button>
-            </div>
-            <p aria-live="polite" className="text-xs text-slate-500">{listViewMode === 'custom' ? '個別に選択した項目を表示しています' : LIST_VIEW_PRESETS.find((p) => p.key === listViewMode)?.description}。表示モードはこの端末・ルームごとに保存します。生徒の絞り込みは変わりません。</p>
-          </section>
-        )}
 
         {currentView === 'list' ? (
           <div key="view-list" className="list-text-scale-2 bg-white border border-slate-200 rounded-2xl shadow-sm animate-fadeIn">
@@ -4009,7 +4256,7 @@ function App() {
           </div>
         ) : (
           <div key="view-calendar" className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col animate-fadeIn">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 rounded-t-2xl sticky top-0 z-30 shadow-sm no-print">
+            <div className="sb-calendar-toolbar p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 rounded-t-2xl shadow-sm no-print">
               <div className="flex items-center gap-2">
                 <button onClick={handlePrevMonth} className="p-1.5 hover:bg-slate-200 bg-white border border-slate-200 rounded-lg text-slate-700 transition-all cursor-pointer">
                   <ChevronLeft className="w-4 h-4" />
@@ -4125,7 +4372,7 @@ function App() {
       </main>
 
       {/* v3.26.1: 表示切替と登録を右下に常駐。端末のセーフエリアを避ける。 */}
-      <div className="fixed z-40 flex flex-col items-end gap-3 no-print" style={{ right: 'max(16px, env(safe-area-inset-right))', bottom: 'max(16px, env(safe-area-inset-bottom))', maxWidth: 'calc(100vw - 32px)' }}>
+      <div className="sb-floating fixed z-40 flex flex-col items-end gap-3 no-print" style={{ right: 'max(16px, env(safe-area-inset-right))', bottom: 'max(16px, env(safe-area-inset-bottom))', maxWidth: 'calc(100vw - 32px)' }}>
         <div role="group" aria-label="表示切替" className="flex items-center gap-1 p-1.5 bg-white border border-slate-300 rounded-full shadow-2xl">
           {[
             { key: 'calendar', icon: Calendar, label: 'カレンダー' },
@@ -4139,10 +4386,11 @@ function App() {
             </button>
           ))}
         </div>
-        <button type="button" onClick={() => openAddModal()} title="新しい実習生を登録する" aria-label="新しい実習生を登録" className="flex items-center gap-2 px-5 py-3.5 min-h-[44px] bg-yellow-300 hover:bg-yellow-400 active:bg-yellow-500 text-yellow-900 border border-yellow-400 rounded-full shadow-2xl hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer font-extrabold text-sm">
-          <Plus className="w-5 h-5" aria-hidden="true" />
-          <span>登録</span>
-        </button>
+        <div className="sb-float-actions">
+          <button type="button" aria-label="検索を開く" className={searchQuery ? 'sb-search-active' : ''} onClick={() => { setSearchDraft(searchQuery); setIsSearchOpen(true); }}><Search className="w-4 h-4"/><span>検索</span></button>
+          <button type="button" aria-label="印刷オプションを開く" onClick={() => setIsPrintOpen(true)}><Printer className="w-4 h-4"/><span>印刷</span></button>
+          <button type="button" className="sb-register" aria-label="新しい実習生を登録" onClick={() => openAddModal()}><Plus className="w-4 h-4"/><span>登録</span></button>
+        </div>
       </div>
       <footer className="bg-white border-t border-slate-200 py-6 px-4 mt-12 shrink-0 no-print">
         <div className="w-full max-w-none mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
@@ -4650,7 +4898,7 @@ function App() {
                         </div>
                         <div className="mt-2 text-sm font-bold text-slate-800 flex items-start gap-1.5"><span>🏢</span><span>{s.location || '実習先未設定'}</span></div>
                       </div>
-                      {info && <span className="shrink-0 text-xs font-extrabold bg-indigo-50 border border-indigo-200 text-indigo-800 px-2.5 py-1 rounded-full">{info.dayNumber}日目／全{info.totalDays}日</span>}
+                      {info && s.internshipType !== 'observation' && <span className="shrink-0 text-xs font-extrabold bg-indigo-50 border border-indigo-200 text-indigo-800 px-2.5 py-1 rounded-full">{info.dayNumber}日目／全{info.totalDays}日</span>}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
                       {s.teacher && <span>👤 担当：<b>{s.teacher}</b></span>}
