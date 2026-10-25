@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.33.1</title>
+<title>現場実習進捗マネージャー v3.34.1</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -338,7 +338,7 @@
 @media(max-width:640px) { .gs-row-banner { text-align:left; padding-left:8px; } .gs-row-banner .gs-banner-text { position:sticky; left:140px; font-size:20px !important; letter-spacing:.08em; padding:2px 6px; } }
 
 
-/* v3.33.1: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
+/* v3.34.1: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
 .gs-table .gs-window-cell { padding:3px; background:#fff; }
 .gs-window-band { padding:0; width:100%; min-height:46px; border:1px solid #cc9b52; border-radius:4px; background:#fff0d8; color:#754610 !important; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e3cda9 calc(100% - 1px)); background-size:calc(100% / var(--gs-window-days)) 100%; }
 .gs-window-band>span { display:inline-block; max-width:100%; font-size:21px !important; line-height:1.2; font-weight:800; letter-spacing:.04em; padding:2px 3px; color:#754610 !important; }
@@ -350,7 +350,7 @@
 @media(max-width:640px) { .gs-window-band { text-align:left; padding-left:3px; } .gs-window-band>span { position:sticky; left:140px; background:inherit; font-size:19px !important; } .gs-window-short>span { font-size:14px !important; } }
 
 
-/* v3.33.1: 元の曜日色と罫線を保った透明な完了表示。 */
+/* v3.34.1: 元の曜日色と罫線を保った透明な完了表示。 */
 .gs-table tr.gs-row-done>td { background-color:#fff; }
 .gs-table tr.gs-row-done:nth-child(even)>td { background-color:#f3f6f8; }
 .gs-table tr.gs-row-done>td.gs-weekend { background-color:#fff0dd; }
@@ -375,7 +375,7 @@
 @media(max-width:640px){.gs-completed-banner .gs-banner-text{max-width:calc(100vw - 180px);white-space:normal;font-size:16px !important;letter-spacing:0;line-height:1.4;}.gs-doc-heading{align-items:flex-start;}.gs-related-documents{padding:10px;}.gs-document-buttons button{width:100%;}}
 
 
-/* v3.33.1: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
+/* v3.34.1: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
 .gs-related-documents { border:3px solid #5489bd; background:#edf6ff; box-shadow:0 2px 8px rgba(45,94,143,.12); }
 .gs-doc-heading strong { font-size:17px; color:#214d79 !important; }
 .gs-document-buttons button { border-color:#8eafd0; background:white; font-weight:600; }
@@ -387,7 +387,7 @@
 @media(max-width:540px){.sb-current-period{max-width:calc(100vw - 175px);}.gs-navigation strong{font-size:14px;}.gs-doc-heading strong{font-size:16px;}}
 
 
-/* v3.33.1: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
+/* v3.34.1: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
 .sb-view-switch { max-width:100%; flex-wrap:wrap; justify-content:flex-end; }
 .sb-view-switch .ow-launch { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border:1px solid #a8bfdb; border-radius:24px; background:#edf5ff; font-size:14px; font-weight:700; white-space:nowrap; }
 .sb-view-switch .ow-launch:hover { background:#dcecff; }
@@ -444,7 +444,7 @@
 @media(max-width:640px){.ow-filter-bar{flex:none;}.ow-table-scroll{flex:1 0 300px;}.ow-dialog .ow-help{margin:0;}}
 
 
-/* v3.33.1: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
+/* v3.34.1: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
 .wf-patrol-row { gap:10px; padding:14px; }
 .wf-patrol-info { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; }
 .wf-patrol-info strong { font-size:16px; }.wf-patrol-info .wf-muted { font-size:14px; }
@@ -454,6 +454,67 @@
 .wf-dialog .wf-patrol-complete.wf-patrol-completed:hover:not(:disabled) { background:#dce6ee; }
 .wf-patrol-completion-note { margin:0; }
 @media(max-width:540px){.wf-patrol-row{padding:12px;}.wf-dialog .wf-patrol-complete{font-size:16px;min-height:60px;padding:12px 8px;}}
+
+
+/* v3.34.1: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
+.ow-dialog .sb-utility-body { gap:8px; padding:12px 20px; }
+.ow-compact-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; flex-shrink:0; }
+.ow-period { margin-right:auto; min-width:0; overflow-wrap:anywhere; }
+.ow-period strong { font-size:17px; }
+.ow-compact-bar .ow-counts { gap:6px; }
+.ow-compact-bar .ow-counts>span { padding:4px 8px; border-radius:6px; }
+.ow-compact-bar .ow-filter-bar button { padding:6px 10px; }
+.ow-active-filters { margin:0; font-size:14px; color:#50647a !important; overflow-wrap:anywhere; flex-shrink:0; }
+.ow-dialog .ow-filters { padding:8px; gap:8px; flex-shrink:0; }
+.ow-dialog .ow-filters>label:not(.ow-check) { flex-direction:row; align-items:center; gap:6px; white-space:nowrap; }
+.ow-dialog .ow-filters>label:not(.ow-check) select { flex:1; }
+.ow-dialog .ow-filters .ow-check { min-width:196px; }
+.ow-legend-help { color:#50647a !important; }
+@media(max-width:1000px) { .ow-compact-bar { gap:6px 10px; }.ow-dialog .ow-filters>label:not(.ow-check){min-width:180px;} }
+@media(max-width:640px) {
+ .ow-dialog .sb-utility-body { padding:10px 12px; gap:8px; }
+ .ow-compact-bar { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 8px; }
+ .ow-period { grid-column:1; grid-row:1; margin-right:0; }
+ .ow-compact-bar .ow-filter-bar { grid-column:2; grid-row:1; }
+ .ow-compact-bar .ow-counts { grid-column:1 / -1; gap:4px; }
+ .ow-compact-bar .ow-counts>span { padding:3px 5px; }
+ .ow-dialog .ow-filters>label:not(.ow-check) { min-width:0; flex-direction:column; align-items:stretch; gap:4px; }
+ .ow-dialog .ow-filters .ow-check { min-width:0; }
+ .ow-dialog .ow-table-scroll { flex:1 1 250px; min-height:180px; }
+ .ow-legend-help { display:none; }
+}
+
+
+/* v3.34.1: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
+.gs-horizontal-control { padding:8px 16px; border-top:1px solid #dbe4ee; background:#f7fafe; }
+.gs-horizontal-caption { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px 12px; font-size:14px; }
+.gs-horizontal-caption label { font-weight:700; }
+.gs-horizontal-caption span { color:#52657a !important; }
+.gs-horizontal-track { display:flex; align-items:center; gap:10px; }
+.gs-dialog .gs-horizontal-track button { width:44px; min-height:44px; flex:none; border:1px solid #bbcede; border-radius:8px; background:#fff; font-size:22px; }
+.gs-dialog .gs-horizontal-track input[type=range] { width:100%; min-width:0; height:44px; margin:0; padding:0; cursor:pointer; accent-color:#2783de; touch-action:pan-y; }
+.gs-dialog .gs-horizontal-track input[type=range]:disabled { cursor:default; opacity:.5; }
+@media(max-width:640px) { .gs-horizontal-control { padding:8px 12px; }.gs-horizontal-track { gap:8px; } }
+
+
+/* v3.34.1: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
+.gs-slider-dates { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:#52657a !important; }
+.gs-slider-dates span { color:inherit !important; }
+@media(max-width:420px) { .gs-slider-dates { flex-wrap:wrap; }.gs-slider-dates span:nth-child(2) { order:3; width:100%; text-align:center; } }
+
+/* v3.34.1: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
+.ow-page { width:100%; min-width:0; display:flex; flex-direction:column; height:var(--ow-page-height,calc(100dvh - 150px)); min-height:320px; background:#fff; border:1px solid #d4dfeb; border-radius:12px; color:#233044 !important; font-size:15px; }
+.ow-page * { box-sizing:border-box; }
+.ow-page .sb-utility-body { min-height:0; overflow-y:auto; }
+.ow-page button,.ow-page input,.ow-page select { font:inherit; }
+.ow-page button { cursor:pointer; }
+.ow-page :focus-visible { outline:3px solid #2783de; outline-offset:3px; }
+.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; }
+.ow-page .ow-footer { flex-shrink:0; }
+.ow-page .ow-filters,.ow-page .ow-filter-bar { flex-shrink:0; }
+.ow-page .ow-filter-bar button,.ow-page .ow-reset,.ow-page .ow-filters select { font-size:14px; }
+@media(max-width:640px) { .ow-page { min-height:320px; }.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; } }
+@media print { .ow-page { height:auto; min-height:0; border:0; }.ow-page .sb-utility-body,.ow-page .ow-table-scroll { overflow:visible; display:block; }.ow-page .ow-table { min-width:0; font-size:11px; }.ow-page .ow-table .ow-person { width:150px; position:static; }.ow-page .ow-table th { position:static; }.ow-page .ow-filter-bar,.ow-page .ow-filters { display:none; } }
 
 </style>
 
@@ -646,6 +707,11 @@ const getNextListAction = (student, today) => {
 // =============================================================================
 // ユーティリティ / Utilities
 // =============================================================================
+
+// カレンダーの左20%だけを学年色にする。予定種別の背景色は残す。
+const CALENDAR_GRADE_COLORS={'1':'#bae6fd','2':'#a7f3d0','3':'#fecdd3'};
+const calendarGradeStyle=(grade)=>({backgroundImage:`linear-gradient(to right, ${CALENDAR_GRADE_COLORS[String(grade)]||'#e2e8f0'} 0%, ${CALENDAR_GRADE_COLORS[String(grade)]||'#e2e8f0'} 20%, transparent 20%, transparent 100%)`});
+const calendarGradeLabel=(grade)=>['1','2','3'].includes(String(grade))?grade+'年':grade==='other'?'他学年':'学年未設定';
 
 const getTodayString = () => {
   const d = new Date();
@@ -1222,7 +1288,7 @@ const getWorkflowDates = (student, task) => {
   const field = {phone:'phoneDate',doc:'docDate',greeting:'greetingDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'}[task.key];
   return field && workflowDayKey(student[field]) ? [student[field]] : [];
 };
-// v3.33.1: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
+// v3.34.1: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
 const getWorkflowPlan = (student, task) => {
   if (task.state === 'exempt') return null;
   const days = [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
@@ -1242,7 +1308,7 @@ const getWorkflowPlan = (student, task) => {
   return null;
 };
 
-// v3.33.1: 完了記録の表示と、日付マスからの直接追加。
+// v3.34.1: 完了記録の表示と、日付マスからの直接追加。
 const workflowCompletion = (student, task) => {
   if (task.state !== 'done' || task.key === 'dates') return null;
   const fields={phone:'phoneDate',doc:'docDate',greeting:'greetingCompletedDate',gift:'giftCompletedDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'};
@@ -1260,6 +1326,9 @@ function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, read
   const [center,setCenter]=useState(()=>getTodayString());
   const start=shiftWorkflowDay(center,-15);
   const scheduleScrollRef=useRef(null);
+  const [sliderAnchor,setSliderAnchor]=useState(getTodayString);
+  const sliderOffset=Math.round((Date.parse(center+'T12:00:00Z')-Date.parse(sliderAnchor+'T12:00:00Z'))/86400000);
+  useEffect(()=>{if(Math.abs(sliderOffset)>90)setSliderAnchor(center);},[center,sliderOffset]);
   useEffect(()=>{const region=scheduleScrollRef.current;if(!region)return;const heading=region.querySelectorAll('thead th')[16],label=region.querySelector('.gs-label');if(!heading||!label)return;const r=region.getBoundingClientRect(),h=heading.getBoundingClientRect(),left=label.getBoundingClientRect().width;region.scrollLeft=Math.max(0,region.scrollLeft+h.left-r.left-left-(region.clientWidth-left)/2+h.width/2);},[center]);
   const clickTimer=useRef(null);useEffect(()=>()=>clearTimeout(clickTimer.current),[]);
   const selectCell=(event,key)=>{clearTimeout(clickTimer.current);if(event.detail===0){onSelect(key);return;}if(event.detail===1)clickTimer.current=setTimeout(()=>onSelect(key),450);};
@@ -1276,7 +1345,7 @@ function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, read
   const tasks=model.phases.flatMap(phase=>phase.tasks.map(task=>({...task,phase:phase.title})));
   const stateText={done:'完了',todo:'未完了',unknown:'要確認',scheduled:'予定',exempt:'必要なし',deferred:'終了後'};
   return <section className="gs-schedule" aria-label="業務工程表">
-    <div className="gs-toolbar"><div><h3>業務工程表</h3><p>今日を中心に31日間表示・日付マスをダブルクリックして予定追加</p></div><div className="gs-navigation"><button type="button" aria-label="工程表を前月へ" onClick={()=>shiftMonth(-1)}>‹</button><strong aria-live="polite">{rangeLabel}</strong><button type="button" aria-label="工程表を翌月へ" onClick={()=>shiftMonth(1)}>›</button><button type="button" onClick={()=>setCenter(getTodayString())}>今日へ</button><button type="button" onClick={()=>setCenter(initial)}>実施日へ</button><button type="button" disabled={readOnly} onClick={()=>onQuickAdd(getTodayString(),'patrol')}>＋ 予定追加</button></div></div>
+    <div className="gs-toolbar"><div><h3>業務工程表</h3><p>31日間表示・下のスライダーで日付移動・ダブルクリックで予定追加</p></div><div className="gs-navigation"><button type="button" aria-label="工程表を前月へ" onClick={()=>shiftMonth(-1)}>‹</button><strong aria-live="polite">{rangeLabel}</strong><button type="button" aria-label="工程表を翌月へ" onClick={()=>shiftMonth(1)}>›</button><button type="button" onClick={()=>setCenter(getTodayString())}>今日へ</button><button type="button" onClick={()=>setCenter(initial)}>実施日へ</button><button type="button" disabled={readOnly} onClick={()=>onQuickAdd(getTodayString(),'patrol')}>＋ 予定追加</button></div></div>
     <div ref={scheduleScrollRef} className="gs-scroll" tabIndex={0} role="region" aria-label="工程表。狭い画面では左右にスクロールできます">
       <table className="gs-table" style={{minWidth:`${268+days.length*34}px`}} onDoubleClick={addFromCell}>
         <thead><tr><th scope="col" className="gs-label">業務</th>{days.map(day=>{const dow=new Date(day+'T12:00:00Z').getUTCDay();return <th key={day} data-gs-day={day} title={day} scope="col" className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}><span>{day===start||day.endsWith('-01')?Number(day.slice(5,7))+'/':''}{Number(day.slice(8))}</span><small>{'日月火水木金土'[dow]}</small></th>;})}<th scope="col" className="gs-status-heading">進捗</th></tr></thead>
@@ -1303,6 +1372,15 @@ function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, read
           return <tr key={task.key} data-gs-task={task.key} className={`gs-row-${task.state} ${selected===task.key?'gs-selected':''} ${index===4||index===6?'gs-phase-divider':''}`}><th scope="row" className="gs-label"><button type="button" aria-label={`${task.title}を編集`} aria-pressed={selected===task.key} onClick={()=>onSelect(task.key)}><span>{task.key==='greeting'?<>事前あいさつ<br/>・打合せ</>:shortTitle}</span><small className={`gs-row-state gs-${task.state!=='done'&&plan?.kind==='thanks'?'scheduled':task.state}`}>{badgeText}</small>{index===0||index===4||index===6?<small>{task.phase}</small>:null}</button></th>{cells}<td className="gs-status"><button type="button" onClick={()=>outside&&!completion?setCenter(dates[0]):onSelect(task.key)} aria-label={outside&&!completion?`${task.title}の日付がある月へ移動`:`${task.title}の詳細を開く`}><WorkflowBadge state={task.state!=='done'&&plan?.kind==='thanks'?'scheduled':task.state}>{badgeText}</WorkflowBadge><small>{completion?'':outside?'期間外 →':!dates.length&&task.state!=='exempt'?(task.state==='deferred'?'日付未設定':'日付なし'):task.key==='dates'?`${dates.length}日`:''}</small></button></td></tr>;
         })}</tbody>
       </table>
+    </div>
+    <div className="gs-horizontal-control" role="group" aria-label="カレンダーの日付移動">
+      <div className="gs-horizontal-caption"><label htmlFor="gs-horizontal-slider">表示する日付を移動</label><span>中心：{center.slice(0,4)}年{Number(center.slice(5,7))}月{Number(center.slice(8))}日</span></div>
+      <div className="gs-horizontal-track">
+        <button type="button" aria-label="カレンダーを1週間前へ" onClick={()=>setCenter(shiftWorkflowDay(center,-7))}>‹</button>
+        <input id="gs-horizontal-slider" type="range" min="-90" max="90" step="1" value={Math.max(-90,Math.min(90,sliderOffset))} aria-label="カレンダーの表示日付" aria-valuetext={center+'を中心に31日間表示'} onChange={event=>setCenter(shiftWorkflowDay(sliderAnchor,Number(event.target.value)))}/>
+        <button type="button" aria-label="カレンダーを1週間後へ" onClick={()=>setCenter(shiftWorkflowDay(center,7))}>›</button>
+      </div>
+      <div className="gs-slider-dates"><span>{formatShortDate(shiftWorkflowDay(sliderAnchor,-90))}</span><span>左右で日付移動・矢印は1週間</span><span>{formatShortDate(shiftWorkflowDay(sliderAnchor,90))}</span></div>
     </div>
     <div className="gs-legend"><span className="gs-legend-item"><i className="gs-done"/>完了（半透明）</span><span className="gs-legend-item"><i className="gs-scheduled"/>予定</span><span className="gs-legend-item"><i className="gs-todo"/>未完了・要確認</span><span className="gs-legend-note">お礼状：土日を除く10日間。事前連絡・保護者お知らせ：開始21日前〜7日前。</span></div>
   </section>;
@@ -1996,7 +2074,7 @@ function AppUtilityDialog({ title, onClose, children, wide = false, suspended = 
   return <div className="sb-utility-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`sb-utility-dialog ${wide ? 'sb-board-dialog' : ''} ${className}`}><header><h2>{title}</h2><button type="button" className="sb-icon-button" aria-label={`${title}を閉じる`} onClick={onClose}>×</button></header><div className="sb-utility-body">{children}</div></section></div>;
 }
 
-// v3.33.1: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
+// v3.34.1: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
 const WORKFLOW_OVERVIEW_COLUMNS=[
   {key:'phone',title:'事前電話連絡'}, {key:'doc',title:'保護者お知らせ'},
   {key:'greeting',title:'事前あいさつ・打合せ'}, {key:'gift',title:'菓子折'},
@@ -2009,9 +2087,23 @@ const getWorkflowOverviewRow=(student)=>{
   const unfinished=tasks.filter(t=>!['done','exempt','deferred'].includes(t.state)).length;
   return {student,model,tasks,unfinished,done:tasks.filter(t=>t.state==='done').length};
 };
-function WorkflowOverview({students,period,filters,onFilters,onOpenStudent,onClose,isAdmin}) {
+function WorkflowOverview({students,period,filters,onFilters,onOpenStudent,isAdmin,searchQuery=''}) {
+  const pageRef=useRef(null);
+  const [pageHeight,setPageHeight]=useState(null);
+  useEffect(()=>{
+    const page=pageRef.current;if(!page)return;
+    const measure=()=>{const top=page.getBoundingClientRect().top+window.scrollY;const next=Math.max(320,Math.floor(window.innerHeight-top-8));setPageHeight(old=>old===next?old:next);};
+    measure();
+    const observer=new ResizeObserver(measure);
+    [page.parentElement,document.querySelector('.sb-topbar'),document.querySelector('.sb-demo-note')].filter(Boolean).forEach(el=>observer.observe(el));
+    window.addEventListener('resize',measure);
+    window.visualViewport?.addEventListener('resize',measure);
+    return ()=>{observer.disconnect();window.removeEventListener('resize',measure);window.visualViewport?.removeEventListener('resize',measure);};
+  },[]);
   const options=(field)=>[...new Set(students.map(s=>String(s[field]||'')).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja',{numeric:true}));
+  const query=searchQuery.trim().toLowerCase();
   const rows=students.map(getWorkflowOverviewRow).filter(({student:s,unfinished})=>
+    (!query||[s.name,s.location,s.teacher,s.grade?String(s.grade)+'年':'',s.classVal?String(s.classVal)+'組':'',...(s.internshipDates||[])].some(value=>String(value||'').toLowerCase().includes(query)))&&
     (filters.grade==='all'||String(s.grade||'')===filters.grade)&&
     (filters.classVal==='all'||String(s.classVal||'')===filters.classVal)&&
     (filters.teacher==='all'||String(s.teacher||'')===filters.teacher)&&
@@ -2020,26 +2112,31 @@ function WorkflowOverview({students,period,filters,onFilters,onOpenStudent,onClo
   ).sort((a,b)=>String(a.student.grade||'').localeCompare(String(b.student.grade||''),'ja',{numeric:true})||String(a.student.classVal||'').localeCompare(String(b.student.classVal||''),'ja',{numeric:true})||String(a.student.name||'').localeCompare(String(b.student.name||''),'ja'));
   const change=(key,value)=>onFilters({...filters,[key]:value});
   const filterCount=Object.keys(EMPTY_WORKFLOW_OVERVIEW_FILTERS).filter(k=>k==='unfinished'?filters[k]:filters[k]!=='all').length;
-  const filtersOpen=filters.expanded ?? window.innerWidth>=641;
+  const filtersOpen=filters.expanded ?? false;
+  const activeFilterLabels=[filters.grade!=='all'?(filters.grade==='other'?'他学年':filters.grade+'年'):'',filters.classVal!=='all'?filters.classVal+'組':'',filters.teacher!=='all'?filters.teacher:'',filters.type!=='all'?(filters.type==='observation'?'見学':'実習'):'',filters.unfinished?'未完了あり':''].filter(Boolean);
   const totals=rows.reduce((sum,r)=>({unfinished:sum.unfinished+r.unfinished,done:sum.done+r.done}),{unfinished:0,done:0});
   const tableRef=useRef(null);
   const lastScroll=useRef({left:filters.scrollLeft||0,top:filters.scrollTop||0});
   useEffect(()=>{if(tableRef.current){tableRef.current.scrollLeft=filters.scrollLeft||0;tableRef.current.scrollTop=filters.scrollTop||0;}},[]);
-  const rememberScroll=()=>{const e=tableRef.current;if(e)lastScroll.current={left:e.scrollLeft,top:e.scrollTop};};
+  const rememberScroll=()=>{const e=tableRef.current;if(e){lastScroll.current={left:e.scrollLeft,top:e.scrollTop};if(filters.scrollLeft!==e.scrollLeft||filters.scrollTop!==e.scrollTop)onFilters({...filters,scrollLeft:e.scrollLeft,scrollTop:e.scrollTop});}};
   const open=(s,key)=>{onFilters({...filters,scrollLeft:lastScroll.current.left,scrollTop:lastScroll.current.top});onOpenStudent(s,key);};
-  return <AppUtilityDialog title="業務ワークフロー 一括進捗一覧" wide className="ow-dialog" onClose={onClose}>
-    <section className="ow-summary" aria-label="一覧の対象と集計"><div><strong>{period.name}</strong>{period.locked&&<span className="ow-period-lock">🔒 {isAdmin?'管理者として編集中':'終了済み・閲覧のみ'}</span>}<p>生徒1人につき1行。状態を押すと、その業務を確認・編集できます。</p></div><div className="ow-counts" role="status"><span>表示 <b>{rows.length}</b> / {students.length}名</span><span>未完了・予定・要確認 <b>{totals.unfinished}</b>件</span><span>完了 <b>{totals.done}</b>件</span></div></section>
-    <div className="ow-filter-bar"><button type="button" aria-expanded={filtersOpen} aria-controls="ow-filter-controls" onClick={()=>onFilters({...filters,expanded:!filtersOpen})}>絞り込み{filterCount?'（'+filterCount+'）':''} {filtersOpen?'⌃':'⌄'}</button></div>
+  return <section ref={pageRef} style={pageHeight?{'--ow-page-height':pageHeight+'px'}:undefined} className="ow-page ow-dialog" aria-label="業務ワークフロー 一括進捗一覧"><h2 className="ow-sr-only">業務ワークフロー 一括進捗一覧</h2><div className="sb-utility-body">
+    <section className="ow-compact-bar" aria-label="一覧の対象と集計">
+      <div className="ow-period"><strong>{period.name}</strong>{period.locked&&<span className="ow-period-lock">🔒 {isAdmin?'管理者として編集中':'終了済み・閲覧のみ'}</span>}</div>
+      <div className="ow-counts" role="status"><span>表示 <b>{rows.length}</b> / {students.length}名</span><span>未完了・予定・要確認 <b>{totals.unfinished}</b>件</span><span>完了 <b>{totals.done}</b>件</span></div>
+      <div className="ow-filter-bar"><button type="button" aria-expanded={filtersOpen} aria-controls="ow-filter-controls" onClick={()=>onFilters({...filters,expanded:!filtersOpen})}>絞り込み{filterCount?'（'+filterCount+'）':''} {filtersOpen?'⌃':'⌄'}</button></div>
+    </section>
     {filtersOpen&&<div id="ow-filter-controls" className="ow-filters" role="group" aria-label="業務一覧の絞り込み">
       <label>学年<select aria-label="業務一覧の学年" value={filters.grade} onChange={e=>change('grade',e.target.value)}><option value="all">すべて</option>{options('grade').map(v=><option key={v} value={v}>{v==='other'?'他':v+'年'}</option>)}</select></label>
       <label>組<select aria-label="業務一覧の組" value={filters.classVal} onChange={e=>change('classVal',e.target.value)}><option value="all">すべて</option>{options('classVal').map(v=><option key={v} value={v}>{v}組</option>)}</select></label>
       <label>担当教員<select aria-label="業務一覧の担当教員" value={filters.teacher} onChange={e=>change('teacher',e.target.value)}><option value="all">すべて</option>{options('teacher').map(v=><option key={v} value={v}>{v}</option>)}</select></label>
       <label>種別<select aria-label="業務一覧の種別" value={filters.type} onChange={e=>change('type',e.target.value)}><option value="all">すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></label>
       <label className="ow-check"><input type="checkbox" checked={filters.unfinished} onChange={e=>change('unfinished',e.target.checked)}/>未完了のある生徒のみ</label>
-      <button type="button" className="ow-reset" disabled={!filterCount} onClick={()=>onFilters({...EMPTY_WORKFLOW_OVERVIEW_FILTERS})}>絞り込み解除</button>
+      <button type="button" className="ow-reset" disabled={!filterCount} onClick={()=>onFilters({...EMPTY_WORKFLOW_OVERVIEW_FILTERS,expanded:true,scrollLeft:filters.scrollLeft,scrollTop:filters.scrollTop})}>絞り込み解除</button>
     </div>}
-    <p className="ow-help">{filtersOpen?'未完了には予定・要確認を含みます。終了後対応は除外。この実習期の全員から絞り込みます。':'左右にスクロールして全業務を確認できます。生徒名は固定表示です。'}</p>
-    <div ref={tableRef} onScroll={rememberScroll} className="ow-table-scroll" tabIndex={0} role="region" aria-label="生徒別の業務進捗。狭い画面は左右にスクロール">
+    <p className="ow-help ow-sr-only" id="ow-usage">{filtersOpen?'未完了には予定・要確認を含みます。終了後対応は除外。この実習期の全員から絞り込みます。':'左右にスクロールして全業務を確認できます。生徒名は固定表示です。'}</p>
+    {activeFilterLabels.length>0&&<p className="ow-active-filters" role="status">条件：{activeFilterLabels.join(' ／ ')}</p>}
+    <div ref={tableRef} onScroll={rememberScroll} aria-describedby="ow-usage" className="ow-table-scroll" tabIndex={0} role="region" aria-label="生徒別の業務進捗。狭い画面は左右にスクロール">
       <table className="ow-table"><caption className="ow-sr-only">{period.name}の生徒別業務進捗一覧</caption><thead><tr><th scope="col" className="ow-person">生徒・実習先<span>学級／担当教員</span></th>{WORKFLOW_OVERVIEW_COLUMNS.map(c=><th key={c.key} scope="col">{c.key==='greeting'?<>事前あいさつ<br/>・打合せ</>:c.title}</th>)}</tr></thead>
       <tbody>{rows.map(({student:s,model,tasks})=><tr key={s.id} data-ow-student={s.id}><th scope="row" className="ow-person"><button type="button" className="ow-person-button" aria-label={`${s.name||'氏名未設定'}のワークフローを開く`} onClick={()=>open(s,null)}><strong>{s.name||'氏名未設定'}（{s.location||'実習先未設定'}）</strong><span>{s.grade?(s.grade==='other'?'他':s.grade+'年'):'学年未設定'}{s.classVal?' '+s.classVal+'組':''} · {s.teacher||'担当未設定'}</span><small className={s.internshipType==='observation'?'ow-observation':'ow-internship'}>{s.internshipType==='observation'?'見学':'実習'}</small></button></th>{WORKFLOW_OVERVIEW_COLUMNS.map(c=>{
         const task=tasks.find(t=>t.key===c.key),plan=getWorkflowPlan(s,task),completion=workflowCompletion(s,task);
@@ -2051,8 +2148,8 @@ function WorkflowOverview({students,period,filters,onFilters,onOpenStudent,onClo
       })}</tr>)}</tbody></table>
       {!rows.length&&<div className="ow-empty" role="status">{students.length?'条件に一致する生徒はいません。絞り込みを解除してください。':'この実習期には生徒が登録されていません。'}</div>}
     </div>
-    <footer className="ow-footer"><div className="ow-legend"><span>✓ 完了</span><span>○ 未完了</span><span>◷ 予定</span><span>? 要確認</span><span>— 必要なし</span></div><button type="button" className="ow-close" onClick={onClose}>閉じる</button></footer>
-  </AppUtilityDialog>;
+    <footer className="ow-footer"><div className="ow-legend" title="状態を押して確認・編集。左右にスクロールして全業務を確認できます。未完了は予定・要確認を含み、終了後対応は除きます。"><span className="ow-legend-help">状態を押して編集</span><span>✓ 完了</span><span>○ 未完了</span><span>◷ 予定</span><span>? 要確認</span><span>— 必要なし</span></div></footer>
+  </div></section>;
 }
 
 const readPeriodSelection=(room)=>{try{return localStorage.getItem(`active_internship_period${ENV_SUFFIX}_${room}`)||'';}catch{return '';}};
@@ -2167,7 +2264,7 @@ function App() {
     setSelectedIds(new Set());
     clearHistory();
     setSelectedStudentDetail(null);
-    setIsWorkflowOverviewOpen(false);setWorkflowReturnToOverview(false);setWorkflowInitialTask(null);setWorkflowOverviewFilters({...EMPTY_WORKFLOW_OVERVIEW_FILTERS});
+    setWorkflowReturnToOverview(false);setWorkflowInitialTask(null);setWorkflowOverviewFilters({...EMPTY_WORKFLOW_OVERVIEW_FILTERS});
     setIsAddEditOpen(false);
     setSearchQuery('');
     setFilterProgress('all');
@@ -2245,13 +2342,12 @@ function App() {
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
-  const [isWorkflowOverviewOpen,setIsWorkflowOverviewOpen]=useState(false);
   const [workflowOverviewFilters,setWorkflowOverviewFilters]=useState({...EMPTY_WORKFLOW_OVERVIEW_FILTERS});
   const [workflowInitialTask,setWorkflowInitialTask]=useState(null);
   const [workflowReturnToOverview,setWorkflowReturnToOverview]=useState(false);
-  const openWorkflowOverview=()=>{setSidebarOpen(false);setWorkflowInitialTask(null);setWorkflowReturnToOverview(false);setIsWorkflowOverviewOpen(true);};
-  const openOverviewStudent=(student,task)=>{setWorkflowInitialTask(task);setWorkflowReturnToOverview(true);setIsWorkflowOverviewOpen(false);setSelectedStudentDetail(student);};
-  const closeWorkflowDetail=()=>{setSelectedStudentDetail(null);setWorkflowInitialTask(null);if(workflowReturnToOverview)setIsWorkflowOverviewOpen(true);setWorkflowReturnToOverview(false);};
+  const openWorkflowOverview=()=>{setSidebarOpen(false);setWorkflowInitialTask(null);setWorkflowReturnToOverview(false);setCurrentView('workflow');};
+  const openOverviewStudent=(student,task)=>{setWorkflowInitialTask(task);setWorkflowReturnToOverview(true);setSelectedStudentDetail(student);};
+  const closeWorkflowDetail=()=>{setSelectedStudentDetail(null);setWorkflowInitialTask(null);if(workflowReturnToOverview)setCurrentView('workflow');setWorkflowReturnToOverview(false);};
   const [draggingStudentId, setDraggingStudentId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
   const [dragHandleArmed, setDragHandleArmed] = useState(null);
@@ -3898,7 +3994,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.33.1 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.34.1 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
@@ -4120,7 +4216,7 @@ function App() {
             </div>
           </div>
 
-          <div className="sb-filter-list">
+          <div className="sb-filter-list" style={{display:currentView==='workflow'?'none':undefined}}>
             <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を学年で絞り込みます">
               <Filter className="w-3.5 h-3.5 text-slate-500" />
               <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)} title="表示する学年を選んでください"
@@ -4191,8 +4287,8 @@ function App() {
         </div>
       </aside>
       <div className="sb-topbar no-print">
-        <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : 'リスト一覧'}</strong><select className="sb-current-period" aria-label="表示中の実習期" value={activePeriodId} onChange={e=>setActivePeriodId(e.target.value)}>{periods.map(p=><option key={p.id} value={p.id}>{p.locked?'🔒 ':''}{p.name}</option>)}</select></div>
-        <div className="sb-filter-chips">{searchQuery && <span className="sb-keyword-chip"><Search className="w-4 h-4"/><span>検索：{searchQuery}</span><button type="button" aria-label="検索条件を解除" onClick={() => setSearchQuery('')}>×</button></span>}{hasActiveFilter && <button type="button" className="sb-icon-button" onClick={clearFilters}>絞り込み解除</button>}</div>
+        <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : currentView === 'workflow' ? '業務一覧' : 'リスト一覧'}</strong><select className="sb-current-period" aria-label="表示中の実習期" value={activePeriodId} onChange={e=>setActivePeriodId(e.target.value)}>{periods.map(p=><option key={p.id} value={p.id}>{p.locked?'🔒 ':''}{p.name}</option>)}</select></div>
+        <div className="sb-filter-chips">{searchQuery && <span className="sb-keyword-chip"><Search className="w-4 h-4"/><span>検索：{searchQuery}</span><button type="button" aria-label="検索条件を解除" onClick={() => setSearchQuery('')}>×</button></span>}{currentView !== 'workflow' && hasActiveFilter && <button type="button" className="sb-icon-button" onClick={clearFilters}>絞り込み解除</button>}</div>
       </div>
       {connectionStatus === 'local' && <div className="sb-demo-note no-print"><span>体験デモ：この端末に保存中。共有には環境設定が必要です。</span><button type="button" onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}>環境設定を開く</button></div>}
       {isSearchOpen && <AppUtilityDialog title="検索" onClose={() => setIsSearchOpen(false)}><form className="sb-search-form" onSubmit={(e) => { e.preventDefault(); setSearchQuery(searchDraft.trim()); setIsSearchOpen(false); }}><p>生徒名・実習先・期間などで絞り込みます。表示切替後も検索条件を維持します。</p><label htmlFor="app-search-input">キーワード</label><input id="app-search-input" type="search" value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="生徒名、実習先、期間など"/><div className="sb-dialog-actions"><button type="button" onClick={() => { setSearchQuery(''); setSearchDraft(''); setIsSearchOpen(false); }}>検索を解除</button><button type="button" onClick={() => setIsSearchOpen(false)}>キャンセル</button><button type="submit" className="sb-primary">検索する</button></div></form></AppUtilityDialog>}
@@ -4254,7 +4350,8 @@ function App() {
 
       </div></AppUtilityDialog>}
 
-      <main className="flex-1 w-full max-w-none mx-auto p-2 sm:p-3 lg:p-4 space-y-6" style={{ paddingBottom: '180px' }}>
+      <main className="flex-1 w-full max-w-none mx-auto p-2 sm:p-3 lg:p-4 space-y-6" style={{ paddingBottom: currentView === 'workflow' ? '8px' : '180px' }}>
+        {currentView !== 'workflow' && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 no-print">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
             <div>
@@ -4293,7 +4390,10 @@ function App() {
             barColor="bg-cyan-500" iconColor="text-cyan-600" />
         </div>
 
-        {currentView === 'list' ? (
+        )}
+        {currentView === 'workflow' ? (
+          <WorkflowOverview students={activeStudents} period={activePeriod} filters={workflowOverviewFilters} onFilters={setWorkflowOverviewFilters} onOpenStudent={openOverviewStudent} isAdmin={isAdmin} searchQuery={searchQuery}/>
+        ) : currentView === 'list' ? (
           <div key="view-list" className="list-text-scale-2 bg-white border border-slate-200 rounded-2xl shadow-sm animate-fadeIn">
             <div className="hidden print:block px-4 py-2 font-bold">表示: {LIST_VIEW_PRESETS.find((p) => p.key === listViewMode)?.label || 'カスタム'}</div>
             {selectedIds.size > 0 && (
@@ -4610,6 +4710,7 @@ function App() {
                   <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-pink-100 border border-pink-300 rounded-md block"></span><span>見学</span></span>
                   <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-green-200 border border-green-400 rounded-md block"></span><span>挨拶</span></span>
                   <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-blue-200 border border-blue-400 rounded-md block"></span><span>巡回</span></span>
+                  <span className="flex flex-wrap items-center gap-2" aria-label="予定の左20%は学年色"><span>左側：学年</span>{['1','2','3',''].map(g=><span key={g} className="flex items-center gap-1"><span style={{backgroundColor:CALENDAR_GRADE_COLORS[g]||'#e2e8f0',width:14,height:14,borderRadius:3,display:'inline-block'}}></span>{g?g+'年':'未設定・他'}</span>)}</span>
                 </div>
               </div>
             </div>
@@ -4644,7 +4745,7 @@ function App() {
                         const renderEvent = (ev, evIdx) => {
                           if (ev.type === 'period') {
                             return (
-                              <div key={evIdx} className={`text-[10px] px-1.5 py-0.5 rounded border font-bold select-none transition-colors shadow-sm flex items-center justify-between gap-1 ${ev.color}`} title={ev.title || ev.label}>
+                              <div key={evIdx} data-calendar-grade={ev.student.grade||'unset'} style={calendarGradeStyle(ev.student.grade)} className={`calendar-grade-event text-[10px] px-1.5 py-0.5 rounded border font-bold select-none transition-colors shadow-sm flex items-center justify-between gap-1 ${ev.color}`} title={calendarGradeLabel(ev.student.grade)+'\n'+(ev.title || ev.label)}>
                                 <button onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }} className="truncate text-left flex-1 cursor-pointer">{ev.label}</button>
                                 <button onClick={(e) => { e.stopPropagation(); handleRemoveInternshipDate(ev.student, ev.dateKey); }}
                                   title="この日を実習日から外す"
@@ -4653,8 +4754,8 @@ function App() {
                             );
                           }
                           return (
-                            <div key={evIdx} onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }}
-                              className={`text-[10px] px-1.5 py-0.5 rounded border font-bold truncate select-none transition-colors shadow-sm cursor-pointer ${ev.color}`} title={ev.label}>
+                            <div key={evIdx} data-calendar-grade={ev.student.grade||'unset'} style={calendarGradeStyle(ev.student.grade)} onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }}
+                              className={`text-[10px] px-1.5 py-0.5 rounded border font-bold truncate select-none transition-colors shadow-sm cursor-pointer calendar-grade-event ${ev.color}`} title={calendarGradeLabel(ev.student.grade)+'\n'+ev.label}>
                               {ev.label}
                             </div>
                           );
@@ -4708,16 +4809,16 @@ function App() {
         <div role="group" aria-label="表示切替" className="sb-view-switch flex items-center gap-1 p-1.5 bg-white border border-slate-300 rounded-full shadow-2xl">
           {[
             { key: 'calendar', icon: Calendar, label: 'カレンダー' },
-            { key: 'list', icon: List, label: 'リスト一覧' }
+            { key: 'list', icon: List, label: 'リスト一覧' },
+            { key: 'workflow', icon: FileText, label: '業務一覧' }
           ].map(({ key, icon: Icon, label }) => (
-            <button key={key} type="button" onClick={() => setCurrentView(key)} aria-pressed={currentView === key}
+            <button key={key} type="button" onClick={() => key === 'workflow' ? openWorkflowOverview() : setCurrentView(key)} aria-pressed={currentView === key}
               title={`${label}に切り替えます`}
               className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-full text-xs font-bold cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${currentView === key ? 'list-preset-active border border-indigo-300' : 'bg-white border border-transparent hover:bg-slate-100'}`}>
               <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
               <span className="whitespace-nowrap">{label}</span>
             </button>
           ))}
-          <button type="button" className="ow-launch" aria-label="業務一覧を開く" aria-haspopup="dialog" onClick={openWorkflowOverview}><FileText className="w-4 h-4" aria-hidden="true"/><span>業務一覧</span></button>
         </div>
         <div className="sb-float-actions">
           <button type="button" aria-label="検索を開く" className={searchQuery ? 'sb-search-active' : ''} onClick={() => { setSearchDraft(searchQuery); setIsSearchOpen(true); }}><Search className="w-4 h-4"/><span>検索</span></button>
@@ -4737,7 +4838,6 @@ function App() {
         </div>
       </footer>
 
-      {isWorkflowOverviewOpen && !selectedStudentDetail && <WorkflowOverview students={activeStudents} period={activePeriod} filters={workflowOverviewFilters} onFilters={setWorkflowOverviewFilters} onOpenStudent={openOverviewStudent} onClose={()=>setIsWorkflowOverviewOpen(false)} isAdmin={isAdmin}/>}
       {/* v3.27.0: 幅広の業務ワークフロー詳細画面 */}
       {selectedStudentDetail && (() => {
         const student = students.find((item) => item.id === selectedStudentDetail.id) || selectedStudentDetail;
@@ -5390,8 +5490,8 @@ function App() {
               <button type="button" onClick={() => setIsPrintOpen(false)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
             </div>
             <div className="p-5 space-y-3">
-              <p className="text-[11px] text-slate-600 leading-relaxed">現在表示中の<strong>{currentView === 'list' ? 'リスト一覧' : 'カレンダー'}</strong>を印刷します。下のオプションを選んで「印刷する」を押すと、ブラウザの印刷ダイアログが開きます。紙への印刷だけでなく<strong>PDFとして保存</strong>することもできます。</p>
-              {currentView === 'list' ? (
+              <p className="text-[11px] text-slate-600 leading-relaxed">現在表示中の<strong>{currentView === 'list' ? 'リスト一覧' : currentView === 'workflow' ? '業務一覧' : 'カレンダー'}</strong>を印刷します。下のオプションを選んで「印刷する」を押すと、ブラウザの印刷ダイアログが開きます。紙への印刷だけでなく<strong>PDFとして保存</strong>することもできます。</p>
+              {currentView === 'workflow' ? (<p>現在の検索・絞り込み条件に一致する生徒の業務進捗を印刷します。全業務の列が対象です。</p>) : currentView === 'list' ? (
                 <div className="space-y-2">
                   <label className={`flex items-start gap-2 text-xs p-2.5 rounded-xl border ${selectedIds.size === 0 ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed' : 'bg-white border-slate-200 hover:bg-indigo-50/30 hover:border-indigo-200 cursor-pointer'}`}>
                     <input type="checkbox" checked={printOptions.onlySelected && selectedIds.size > 0} onChange={(e) => setPrintOptions((o) => ({ ...o, onlySelected: e.target.checked }))} disabled={selectedIds.size === 0} className="mt-0.5 accent-indigo-600 w-4 h-4" />
