@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.26.1</title>
+<title>現場実習進捗マネージャー v3.27.0</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -70,6 +70,91 @@
     body.print-compact-columns .list-table [data-list-column="studentThankYou"],
     body.print-compact-columns .list-table [data-list-column="teacherThankYou"] { display: none !important; }
   }
+/* v3.27.0: 詳細画面専用のワークフロー表示。他の画面には影響させない。 */
+.wf-overlay { position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(15,23,42,.50); }
+.wf-dialog { width:min(1500px,96vw); height:94dvh; max-height:1100px; display:flex; flex-direction:column; overflow:hidden; border:1px solid #dce2e8; border-radius:16px; background:#fff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Meiryo,sans-serif; font-size:15px; line-height:1.5; color:#233044 !important; box-shadow:0 20px 70px rgba(15,23,42,.18); }
+.wf-dialog * { box-sizing:border-box; color:inherit !important; }
+.wf-dialog h2,.wf-dialog h3,.wf-dialog h4,.wf-dialog p { margin:0; }
+.wf-dialog button,.wf-dialog select,.wf-dialog input { font:inherit; }
+.wf-dialog button { cursor:pointer; }
+.wf-dialog button:disabled,.wf-dialog select:disabled,.wf-dialog input:disabled { cursor:not-allowed; opacity:.6; }
+.wf-dialog :focus-visible { outline:3px solid #2783de; outline-offset:3px; }
+.wf-header { flex-shrink:0; padding:16px 24px; border-bottom:1px solid #e2e7ed; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.wf-eyebrow { color:#64748b !important; font-size:14px; margin-bottom:2px !important; }
+.wf-header h2 { font-size:20px; font-weight:800; display:flex; align-items:baseline; flex-wrap:wrap; gap:12px; }
+.wf-header h2 span { font-size:15px; font-weight:600; color:#476581 !important; }
+.wf-close { border:1px solid #e2e7ed; background:#fff; border-radius:10px; width:44px; height:44px; flex-shrink:0; font-size:25px !important; }
+.wf-scroll { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:20px 24px 24px; background:#f7f9fb; scroll-behavior:auto; }
+.wf-basics { display:grid; grid-template-columns:1fr 1.5fr 1.4fr 1fr; gap:20px; padding:16px 20px; background:#fff; border:1px solid #e0e6ed; border-radius:12px; }
+.wf-basics>div,.wf-phase { min-width:0; }
+.wf-field-label { font-size:14px; font-weight:600; color:#617085 !important; margin-bottom:4px !important; }
+.wf-basic-value,.wf-basic-name { border:0; background:transparent; padding:4px 0; min-height:44px; text-align:left; font-weight:700 !important; overflow-wrap:anywhere; display:block; }
+.wf-basic-name { font-size:21px !important; }
+.wf-basic-value:hover,.wf-basic-name:hover { text-decoration:underline; }
+.wf-inline { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.wf-small-button { min-height:44px; min-width:44px; border:1px solid #dbe3ec; background:#fff; padding:6px 10px; border-radius:8px; font-size:14px !important; }
+.wf-muted { color:#5b6b7d !important; font-size:14px; line-height:1.5; overflow-wrap:anywhere; }
+.wf-help { color:#5b6b7d !important; font-size:14px; line-height:1.5; }
+.wf-overview { margin:16px 0 24px; }
+.wf-phase-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.wf-phase-chip { text-align:left; padding:12px 16px; border:1px solid #dce4ed; border-radius:12px; background:#fff; min-width:0; }
+.wf-summary-top { display:flex; align-items:center; flex-wrap:wrap; justify-content:space-between; gap:8px; }
+.wf-summary-top strong { font-size:15px; }
+.wf-summary-count { display:block; font-size:14px; margin-top:6px; color:#5b6b7d !important; }
+.wf-track { display:block; margin-top:8px; height:5px; border-radius:4px; background:#e9edf2; overflow:hidden; }
+.wf-track>span { display:block; height:100%; background:#2783de; }
+.wf-chip-done .wf-track>span { background:#348057; }
+.wf-chip-deferred { background:#f4f6f8; }
+.wf-chip-deferred .wf-track>span { background:#8190a0; }
+.wf-attention { margin-top:12px; padding:12px 16px; background:#eef5fc; border:1px solid #cbdff2; border-radius:12px; }
+.wf-attention h3 { font-size:15px; font-weight:800; margin-bottom:8px; }
+.wf-attention-list { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.wf-attention-list button { min-height:44px; background:#fff; border:1px solid #cbdff2; border-radius:8px; padding:8px 10px; font-size:14px; text-align:left; }
+.wf-board { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(0,1fr) minmax(0,1fr); gap:20px; align-items:start; }
+.wf-phase-heading { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.wf-step-number { width:38px; height:38px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#e5f2fc; border:1px solid #c9dff3; border-radius:10px; font-size:14px; font-weight:800; color:#245f96 !important; }
+.wf-phase-heading h3 { font-size:18px; font-weight:800; }
+.wf-phase-heading p { font-size:14px; color:#5b6b7d !important; }
+.wf-prep-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:start; }
+.wf-stack { display:flex; flex-direction:column; gap:12px; }
+.wf-task { background:#fff; border:1px solid #dce4ed; border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:12px; min-width:0; scroll-margin:16px; }
+.wf-task-top { display:flex; align-items:flex-start; flex-wrap:wrap; justify-content:space-between; gap:8px; }
+.wf-task h4 { font-size:16px; font-weight:800; }
+.wf-badge { display:inline-flex; align-items:center; gap:5px; border:1px solid; border-radius:6px; padding:3px 7px; font-size:14px; font-weight:700; line-height:1.4; white-space:normal; }
+.wf-dialog .wf-done { background:#e8f3ec; border-color:#acd0b9; color:#28603f !important; }
+.wf-dialog .wf-todo,.wf-dialog .wf-unknown { background:#fff3e2; border-color:#e6c99e; color:#7c4e13 !important; }
+.wf-dialog .wf-scheduled { background:#e8f2fc; border-color:#bad2eb; color:#245d91 !important; }
+.wf-dialog .wf-exempt,.wf-dialog .wf-deferred { background:#f1f3f5; border-color:#d9e0e6; color:#536273 !important; }
+.wf-date-button { min-height:44px; padding:8px 10px; width:100%; text-align:left; border:1px solid #e0e7ee; border-radius:8px; background:#f8fafc; font-size:14px !important; }
+.wf-task-details,.wf-task-actions { display:flex; flex-direction:column; gap:8px; }
+.wf-primary,.wf-secondary { min-height:44px; padding:8px 12px; border:1px solid #bad2eb; border-radius:8px; background:#e5f2fc; font-size:14px !important; font-weight:700 !important; text-align:center; }
+.wf-primary:hover,.wf-date-button:hover { background:#d7eafa; }
+.wf-secondary { background:#fff; border-color:#d2dce7; }
+.wf-secondary:hover,.wf-small-button:hover { background:#f1f5f9; }
+.wf-select-label { display:flex; flex-direction:column; gap:4px; color:#5b6b7d !important; font-size:14px; }
+.wf-select-label select,.wf-patrol-form input { width:100%; min-width:0; min-height:44px; padding:8px; border:1px solid #cfd9e3; border-radius:8px; background:#fff; color:#233044 !important; }
+.wf-date-list { max-height:168px; overflow:auto; border-top:1px solid #edf0f4; }
+.wf-date-row { display:flex; align-items:center; gap:8px; justify-content:space-between; border-bottom:1px solid #edf0f4; font-size:14px; }
+.wf-date-row button { min-height:44px; min-width:44px; border:0; background:transparent; text-decoration:underline; font-size:14px; }
+.wf-patrol-list { display:flex; flex-direction:column; gap:8px; }
+.wf-patrol-row { padding:10px; border:1px solid #e0e7ee; background:#f8fafc; border-radius:8px; display:flex; flex-direction:column; gap:4px; }
+.wf-patrol-row>label { display:flex; align-items:center; gap:10px; min-height:44px; cursor:pointer; }
+.wf-patrol-row input[type=checkbox] { width:20px; height:20px; flex-shrink:0; accent-color:#2783de; }
+.wf-patrol-row strong,.wf-patrol-row label span span { display:block; font-size:14px; }
+.wf-patrol-form { display:flex; flex-direction:column; gap:8px; border-top:1px solid #e0e7ee; padding-top:12px; }
+.wf-patrol-form label { display:flex; flex-direction:column; gap:4px; font-size:14px; }
+.wf-extras { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:20px; margin-top:24px; padding-top:20px; border-top:1px solid #dce4ed; }
+.wf-extras h3 { font-size:16px; font-weight:800; margin-bottom:8px; }
+.wf-extras .wf-secondary { margin-top:12px; }
+.wf-notes { display:block; width:100%; min-height:72px; padding:12px; text-align:left; border:1px solid #d5dfe9; border-radius:10px; background:#fff; white-space:pre-wrap; overflow-wrap:anywhere; }
+.wf-footer { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 24px; border-top:1px solid #e0e7ee; background:#fff; }
+.wf-footer .wf-secondary { min-width:90px; }
+.wf-readonly { margin-bottom:16px !important; padding:12px 16px; border:1px solid #e6c99e; background:#fff3e2; border-radius:10px; }
+@media (max-width:1199px) { .wf-board { grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; } .wf-prep-cards { grid-template-columns:1fr; } .wf-task { padding:12px; } }
+@media (max-width:899px) { .wf-board { grid-template-columns:1fr; gap:24px; } .wf-prep-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } .wf-basics { grid-template-columns:repeat(2,minmax(0,1fr)); } .wf-phase-summary { grid-template-columns:1fr; gap:8px; } .wf-extras { grid-template-columns:1fr; } }
+@media (max-width:540px) { .wf-overlay { padding:6px; } .wf-dialog { width:100%; height:calc(100dvh - 12px); max-height:none; border-radius:12px; } .wf-header { padding:12px 16px; gap:8px; } .wf-header h2 { font-size:18px; gap:2px; display:block; } .wf-header h2 span { display:block; font-size:14px; } .wf-scroll { padding:16px; } .wf-basics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:12px; } .wf-basics .wf-basic-edit-help { display:none; } .wf-phase-chip { padding:10px 12px; } .wf-basic-name { font-size:20px !important; } .wf-prep-cards { grid-template-columns:1fr; } .wf-phase-summary { gap:8px; } .wf-footer { padding:12px 16px; } .wf-footer p { display:none; } .wf-footer { justify-content:flex-end; } }
+@media (prefers-reduced-motion:reduce) { .wf-dialog * { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+
 </style>
 
 <!-- React 18 / lucide-react を ESM CDN 経由で読み込むための importmap -->
@@ -245,8 +330,8 @@ const getNextListAction = (student, today) => {
   if (!finished) {
     if (outstanding(student.phoneStatus)) return '事前電話を連絡';
     if (outstanding(student.docStatus)) return '連絡票・実施計画を配付';
-    if (student.greetingStatus === 'unadjusted') return '事前挨拶の日程を調整';
-    if (student.greetingStatus === 'scheduled') return student.greetingDate ? `事前挨拶 ${formatShortDate(student.greetingDate)}` : '事前挨拶の日程を設定';
+    if (!workflowExemptions(student).includes('greeting') && student.greetingStatus === 'unadjusted') return '事前挨拶の日程を調整';
+    if (!workflowExemptions(student).includes('greeting') && student.greetingStatus === 'scheduled') return student.greetingDate ? `事前挨拶 ${formatShortDate(student.greetingDate)}` : '事前挨拶の日程を設定';
     if (student.giftStatus === 'bring') return '菓子折を準備・持参';
     const patrol = [...(student.patrols || [])].filter((p) => !p.done).sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))[0];
     if (patrol) return patrol.date ? `${student.internshipType === 'observation' ? '同行' : '巡回'} ${formatShortDate(patrol.date)}${patrol.time ? ' ' + patrol.time : ''}` : '巡回・同行の日程を確認';
@@ -254,7 +339,7 @@ const getNextListAction = (student, today) => {
   }
   if (outstanding(student.studentThankYouStatus)) return '生徒お礼状を送付';
   if (outstanding(student.teacherThankYouStatus)) return '教師お礼状を送付';
-  if (outstanding(student.phoneStatus) || outstanding(student.docStatus) || ['unadjusted', 'scheduled'].includes(student.greetingStatus) || student.giftStatus === 'bring' || (student.patrols || []).some((p) => !p.done)) return '未完了の記録を確認';
+  if (outstanding(student.phoneStatus) || outstanding(student.docStatus) || (!workflowExemptions(student).includes('greeting') && ['unadjusted', 'scheduled'].includes(student.greetingStatus)) || student.giftStatus === 'bring' || (student.patrols || []).some((p) => !p.done)) return '未完了の記録を確認';
   return '対応完了';
 };
 
@@ -769,6 +854,172 @@ function useBoardSync(connectionStatus, roomKey) {
 
   return { posts: visiblePosts, addPost, deletePost, hidePost, deletedHistory, hiddenHistory, restoreHiddenPost, clearDeletedHistory, clearHiddenHistory };
 }
+
+// v3.27.0: 既存のステータスを移行せずにワークフローとして表示する。
+const WORKFLOW_LOCKABLE_FIELDS = ['phoneStatus', 'greetingStatus', 'giftStatus', 'studentThankYouStatus'];
+const workflowExemptions = (s) => Array.isArray(s.workflowExemptions) ? s.workflowExemptions : [];
+const getWorkflowModel = (s, today = getTodayString()) => {
+  const days = [...new Set(s.internshipDates || [])].sort();
+  const finished = days.length > 0 && days[days.length - 1] < today;
+  const started = days.length > 0 && days[0] <= today;
+  const exemptions = workflowExemptions(s);
+  const normal = (key, title, field, doneLabel, pendingLabel) => {
+    const value = s[field] || 'pending';
+    const state = value === 'completed' ? 'done' : value === 'none' ? 'exempt' : 'todo';
+    return { key, title, field, state, label: state === 'done' ? doneLabel : state === 'exempt' ? '対象外' : pendingLabel };
+  };
+  const prep = [
+    normal('phone', '事前電話連絡', 'phoneStatus', '連絡済み', '未連絡'),
+    normal('doc', '連絡票・実施計画配付', 'docStatus', '配付済み', '未配付'),
+    { key: 'greeting', title: '事前挨拶訪問', field: 'greetingStatus',
+      state: exemptions.includes('greeting') ? 'exempt' : s.greetingStatus === 'completed' ? 'done' : s.greetingStatus === 'scheduled' ? 'scheduled' : s.greetingStatus === 'unadjusted' ? 'todo' : 'unknown',
+      label: exemptions.includes('greeting') ? '対象外' : s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '予定あり' : s.greetingStatus === 'unadjusted' ? '未調整' : '要否を確認' },
+    { key: 'gift', title: '菓子折', field: 'giftStatus', state: s.giftStatus === 'brought' ? 'done' : s.giftStatus === 'bring' ? 'todo' : 'exempt', label: s.giftStatus === 'brought' ? '持参済み' : s.giftStatus === 'bring' ? '準備・持参待ち' : '持参予定なし' }
+  ];
+  const patrols = s.patrols || [];
+  const during = [
+    { key: 'dates', title: '実施日程', state: !days.length ? 'unknown' : finished ? 'done' : 'scheduled', label: !days.length ? '日程未設定' : finished ? '期間終了' : started ? '実施期間中' : '実施予定' },
+    { key: 'patrol', title: '巡回・同行', state: patrols.length ? (patrols.every((p) => p.done) ? 'done' : 'scheduled') : exemptions.includes('patrol') ? 'exempt' : 'unknown', label: patrols.length ? (patrols.every((p) => p.done) ? '巡回・同行完了' : '予定・未完了あり') : exemptions.includes('patrol') ? '対象外' : '予定・要否を確認' }
+  ];
+  const after = [normal('studentThankYou', '生徒お礼状', 'studentThankYouStatus', '送付済み', '未送付'), normal('teacherThankYou', '教師お礼状', 'teacherThankYouStatus', '送付済み', '未送付')].map((task) => (!finished && task.state === 'todo') ? { ...task, state: 'deferred', label: days.length ? '終了後に対応' : '日程確認後に対応' } : task);
+  const phases = [
+    { key: 'prep', title: '事前準備', number: '01', tasks: prep, description: '電話・書類・挨拶を並行して進めます' },
+    { key: 'during', title: '実習・見学中', number: '02', tasks: during, description: '実施日と巡回・同行を確認します' },
+    { key: 'after', title: '終了後', number: '03', tasks: after, description: '実施期間が終わってから対応します' }
+  ].map((phase) => {
+    const target = phase.tasks.filter((t) => t.state !== 'exempt');
+    const done = target.filter((t) => t.state === 'done').length;
+    const unknown = target.filter((t) => t.state === 'unknown').length;
+    const state = !target.length || done === target.length ? 'done' : phase.key === 'after' && !finished ? 'deferred' : unknown ? 'unknown' : 'todo';
+    const label = !target.length ? '対象業務なし' : done === target.length ? (phase.key === 'prep' ? '準備完了' : '対応完了') : phase.key === 'after' && !finished ? (days.length ? '終了後に対応' : '日程を確認') : unknown ? '要確認あり' : '対応が残っています';
+    return { ...phase, target: target.length, done, unknown, state, label };
+  });
+  const attention = [];
+  for (const task of [...prep, ...during, ...after]) {
+    if (['done', 'exempt', 'deferred'].includes(task.state)) continue;
+    const text = task.key === 'dates' ? (!days.length ? '実習・見学の日程を設定' : '')
+      : task.key === 'patrol' ? (!patrols.length ? '巡回・同行の予定／要否を確認' : (finished ? '巡回・同行の実施記録を確認' : '巡回・同行の予定を確認'))
+      : task.key === 'greeting' ? (task.state === 'unknown' ? '事前挨拶の要否を確認' : task.state === 'scheduled' ? (finished ? '事前挨拶の実施記録を確認' : '事前挨拶の予定を確認') : '事前挨拶の日程を調整')
+      : task.key === 'gift' ? '菓子折の準備・持参を確認'
+      : finished && ['phone', 'doc'].includes(task.key) ? `${task.title}の記録を確認` : `${task.title}：${task.label}`;
+    if (text) attention.push({ key: task.key, text });
+  }
+  return { days, started, finished, phases, attention };
+};
+const WorkflowBadge = ({ state, children }) => <span className={`wf-badge wf-${state}`}><span aria-hidden="true">{state === 'done' ? '✓' : state === 'scheduled' ? <Clock style={{width:14,height:14}} /> : state === 'exempt' ? '—' : state === 'deferred' ? '…' : state === 'unknown' ? '?' : '○'}</span>{children}</span>;
+
+function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onEditPatrol, onConfirm }) {
+  const rootRef = useRef(null);
+  const [addingPatrol, setAddingPatrol] = useState(false);
+  const [patrolDraft, setPatrolDraft] = useState({ date: '', time: '', teacher: s.teacher || '' });
+  const model = getWorkflowModel(s);
+  const exemptions = workflowExemptions(s);
+  const fieldLocked = (field) => readOnly || (!isAdmin && (s.lockedFields || []).includes(field) && (WORKFLOW_LOCKABLE_FIELDS.includes(field) || String(field).startsWith('patrol:')));
+  useEffect(() => {
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    rootRef.current?.querySelector('[data-wf-close]')?.focus();
+    return () => { document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus?.(); };
+  }, []);
+  useEffect(() => {
+    const keydown = (event) => {
+      if (suspended) return;
+      if (event.key === 'Escape') { event.preventDefault(); onClose(); return; }
+      if (event.key !== 'Tab') return;
+      const controls = [...(rootRef.current?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]') || [])].filter((el) => el.getClientRects().length);
+      if (!controls.length) return;
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', keydown);
+    return () => document.removeEventListener('keydown', keydown);
+  }, [suspended, onClose]);
+  const scrollToTask = (key) => rootRef.current?.querySelector(`[data-wf-task="${key}"]`)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  const editText = (field, title, multiline = false, extra = {}) => onText({ value: s[field] || '', title, label: title, multiline, onSave: (v) => onPatch(s, { [field]: v, ...extra }) });
+  const changeTask = (task, value) => {
+    if (fieldLocked(task.field)) return;
+    const patch = {};
+    if (task.key === 'greeting') {
+      patch.workflowExemptions = value === 'none' ? [...new Set([...exemptions, 'greeting'])] : exemptions.filter((v) => v !== 'greeting');
+      if (value !== 'none') patch.greetingStatus = value;
+    } else patch[task.field] = value;
+    const cfg = STEP_CONFIG[FIELD_TO_STEP[task.field]];
+    if (cfg?.dateField) patch[cfg.dateField] = value === 'completed' ? (s[cfg.dateField] || getTodayString()) : '';
+    onPatch(s, patch);
+  };
+  const statusOptions = (key) => key === 'greeting' ? [['pending', '要否を確認'], ['unadjusted', '未調整'], ['scheduled', '予定あり'], ['completed', '挨拶終了'], ['none', '対象外']]
+    : key === 'gift' ? [['none', '持参予定なし'], ['bring', '持参する'], ['brought', '持参済み']]
+    : [['pending', key === 'phone' ? '未連絡' : key === 'doc' ? '未配付' : '未送付'], ['completed', key === 'phone' ? '連絡済み' : key === 'doc' ? '配付済み' : '送付済み'], ['none', '対象外']];
+  const renderStandardTask = (task) => {
+    const locked = fieldLocked(task.field);
+    const cfg = STEP_CONFIG[FIELD_TO_STEP[task.field]];
+    const selected = task.key === 'greeting' && exemptions.includes('greeting') ? 'none' : s[task.field] || (task.key === 'gift' ? 'none' : 'pending');
+    const targetStatus = task.key === 'gift' ? 'brought' : 'completed';
+    const dateLabel = task.key === 'phone' ? '連絡日' : task.key === 'doc' ? '配付日' : '送付日';
+    return <article key={task.key} data-wf-task={task.key} className="wf-task" aria-label={task.title}>
+      <div className="wf-task-top"><h4>{task.title}</h4><WorkflowBadge state={task.state}>{task.label}</WorkflowBadge></div>
+      {locked && <p className="wf-muted">🔒 {readOnly ? '終了済み実習期・閲覧のみ' : '管理者ロック中'}</p>}
+      {task.state === 'deferred' && <p className="wf-muted">現在は対応時期ではありません。</p>}
+      {task.key === 'greeting' && task.state === 'unknown' && <p className="wf-muted">旧表示「―」は、不要と断定せず要確認にしています。</p>}
+      {cfg?.dateField && selected === 'completed' && <button className="wf-date-button" type="button" disabled={locked} onClick={() => onPickDate({ value: s[cfg.dateField] || '', title: `${task.title}：${dateLabel}`, onSelect: (value) => onPatch(s, { [cfg.dateField]: value }) })}>{dateLabel}：{s[cfg.dateField] ? formatShortDate(s[cfg.dateField]) : '未設定・日付を選択'}</button>}
+      {task.key === 'greeting' && !['pending', 'none'].includes(selected) && <div className="wf-task-details">
+        <button className="wf-date-button" type="button" disabled={locked} onClick={() => onPickDate({ value: s.greetingDate || '', title: '事前挨拶の予定日', onSelect: (value) => onPatch(s, { greetingDate: value }) })}>予定日：{s.greetingDate ? formatShortDate(s.greetingDate) : '未設定'}</button>
+        <button className="wf-date-button" type="button" disabled={locked} onClick={() => editText('greetingTime', '事前挨拶の時間')}>時間：{s.greetingTime || '未設定'}</button>
+        <button className="wf-date-button" type="button" disabled={locked} onClick={() => editText('greetingVisitor', '事前挨拶の引率教員')}>引率：{s.greetingVisitor || '未設定'}</button>
+      </div>}
+      <div className="wf-task-actions">
+        {!['done', 'exempt'].includes(task.state) && <button className="wf-primary" type="button" disabled={locked} onClick={() => changeTask(task, targetStatus)}>{task.key === 'phone' ? '連絡済みにする' : task.key === 'doc' ? '配付済みにする' : task.key === 'greeting' ? '挨拶終了にする' : task.key === 'gift' ? '持参済みにする' : '送付済みにする'}</button>}
+        <label className="wf-select-label">状況を変更<select aria-label={`${task.title}の状況`} disabled={locked} value={selected} onChange={(e) => changeTask(task, e.target.value)}>{statusOptions(task.key).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+      </div>
+    </article>;
+  };
+  const dateTask = model.phases[1].tasks[0], patrolTask = model.phases[1].tasks[1];
+  const patrolLocked = readOnly || (!isAdmin && (s.lockedFields || []).some((field) => field === 'patrolStatus'));
+  return <div className="wf-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <div ref={rootRef} role="dialog" aria-modal="true" aria-labelledby="wf-title" className="wf-dialog">
+      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・施設見学</p><h2 id="wf-title">実習生 詳細情報 <span>業務ワークフロー</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label="ワークフローを閉じる" onClick={onClose}>×</button></header>
+      <div className="wf-scroll">
+        {readOnly && <p className="wf-readonly" role="status">🔒 この実習期は終了済みのため閲覧のみです。管理者に確認してください。</p>}
+        <section className="wf-basics" aria-label="実習生の基本情報">
+          <div><p className="wf-field-label">生徒・学級</p><button type="button" disabled={readOnly} className="wf-basic-name" onClick={() => editText('name', '生徒氏名を編集')}>{s.name || '氏名未設定'}</button><div className="wf-inline"><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.grade || '3', title: '学年を選択', options: [['1','1年'],['2','2年'],['3','3年'],['other','他']], onSave: (v) => onPatch(s, { grade: v }) })}>{s.grade ? `${s.grade}年` : '学年未設定'}</button><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.classVal || '', title: '組を変更', options: [['','未設定'],['1','1組'],['2','2組'],['3','3組']], onSave: (v) => onPatch(s, { classVal: v }) })}>{s.classVal ? `${s.classVal}組` : '組未設定'}</button></div></div>
+          <div><p className="wf-field-label">実習先・活動種別</p><button type="button" className="wf-basic-value" disabled={readOnly} onClick={() => editText('location', '実習先を編集')}>{s.location || '実習先未設定'}</button><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.internshipType || 'internship', title: '活動種別を選択', options: [['internship','実習'],['observation','見学']], onSave: (v) => onPatch(s, { internshipType: v }) })}>{s.internshipType === 'observation' ? '見学' : '実習'}</button></div>
+          <div><p className="wf-field-label">実施期間</p><button type="button" className="wf-basic-value" onClick={() => scrollToTask('dates')}>{model.days.length ? formatShortDate(model.days[0]) + (model.days.length > 1 ? ' 〜 ' + formatShortDate(model.days[model.days.length - 1]) : '') : '日程未設定'}</button><p className="wf-muted">{model.days.length ? `実施 ${model.days.length}日・日程カードで確認` : '実施日を設定してください'}</p></div>
+          <div><p className="wf-field-label">担当教員</p><button type="button" className="wf-basic-value" disabled={readOnly} onClick={() => editText('teacher', '担当教員を編集')}>{s.teacher || '担当未設定'}</button><p className="wf-muted wf-basic-edit-help">基本情報は各項目から編集できます</p></div>
+        </section>
+        <section className="wf-overview" aria-label="進捗の概要">
+          <div className="wf-phase-summary">{model.phases.map((phase) => <button key={phase.key} type="button" className={`wf-phase-chip wf-chip-${phase.state}`} onClick={() => rootRef.current?.querySelector(`[data-wf-phase="${phase.key}"]`)?.scrollIntoView({ behavior: 'auto', block: 'start' })}><span className="wf-summary-top"><strong>{phase.number} {phase.title}</strong><WorkflowBadge state={phase.state}>{phase.label}</WorkflowBadge></span><span className="wf-summary-count">{phase.target ? `${phase.done} / ${phase.target} 項目完了` : '対象業務なし'}{phase.unknown > 0 ? `・うち要確認 ${phase.unknown}` : ''}</span><span className="wf-track"><span style={{ width: `${phase.target ? 100 * phase.done / phase.target : 100}%` }} /></span></button>)}</div>
+          <div className="wf-attention"><h3>次に確認すること</h3>{model.attention.length ? <div className="wf-attention-list">{model.attention.map((task) => <button type="button" key={task.key} onClick={() => scrollToTask(task.key)}>{task.text}<span aria-hidden="true"> ↗</span></button>)}</div> : <p className="wf-muted">現在の登録情報では、対応・確認待ちの項目はありません。</p>}<p className="wf-help">対象外は集計から除外。要否が未確認の項目は「要確認」として残します。期限超過の判定はしません。</p></div>
+        </section>
+        <div className="wf-board">
+          {model.phases.map((phase, phaseIndex) => <section key={phase.key} data-wf-phase={phase.key} className={`wf-phase wf-phase-${phase.key}`} aria-label={`${phase.title}の業務`}>
+            <div className="wf-phase-heading"><span className="wf-step-number">{phase.number}</span><div><h3>{phase.title}</h3><p>{phase.description}</p></div></div>
+            {phaseIndex === 0 && <div className="wf-prep-cards">{phase.tasks.map(renderStandardTask)}</div>}
+            {phaseIndex === 1 && <div className="wf-stack">
+              <article className="wf-task" data-wf-task="dates" aria-label="実施日程"><div className="wf-task-top"><h4>実施日程</h4><WorkflowBadge state={dateTask.state}>{dateTask.label}</WorkflowBadge></div><p className="wf-muted">登録された実施日のみが対象です。</p>
+                <div className="wf-date-list">{model.days.length ? model.days.map((day, index) => <div key={day} className="wf-date-row"><span>{index + 1}日目　{formatShortDate(day)}</span><button type="button" disabled={readOnly} aria-label={`${day}を実施日から外す`} onClick={() => onConfirm(`${formatShortDate(day)}を実施日から外しますか？`, () => onPatch(s, { internshipDates: model.days.filter((d) => d !== day) }))}>外す</button></div>) : <p className="wf-muted">実施日が未設定です。</p>}</div>
+                <button type="button" className="wf-secondary" disabled={readOnly} onClick={() => onPickDate({ value: '', title: '実施日を追加', onSelect: (day) => { if (day && !model.days.includes(day)) onPatch(s, { internshipDates: [...model.days, day].sort() }); } })}>＋ 実施日を追加</button>
+              </article>
+              <article className="wf-task" data-wf-task="patrol" aria-label="巡回・同行"><div className="wf-task-top"><h4>巡回・同行</h4><WorkflowBadge state={patrolTask.state}>{patrolTask.label}</WorkflowBadge></div>
+                {!(s.patrols || []).length && <p className="wf-muted">未設定だけでは不要と判断しません。予定を追加するか、要否を指定してください。</p>}
+                <div className="wf-patrol-list">{(s.patrols || []).map((p) => <div key={p.id} className="wf-patrol-row"><label><input type="checkbox" checked={!!p.done} disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onChange={() => onPatch(s, { patrols: (s.patrols || []).map((item) => item.id === p.id ? { ...item, done: !item.done } : item) })} /><span><strong>{p.date ? formatShortDate(p.date) : '日付未設定'} {p.time || ''}</strong><span className="wf-muted">{p.teacher || '担当未設定'}・{p.done ? '完了' : '未完了'}</span></span></label><div className="wf-inline"><button type="button" className="wf-small-button" disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onClick={() => onEditPatrol(s.id, p.id)}>編集</button><button type="button" className="wf-small-button" disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onClick={() => onConfirm('この巡回・同行予定を削除しますか？', () => onPatch(s, { patrols: (s.patrols || []).filter((item) => item.id !== p.id) }))}>削除</button></div></div>)}</div>
+                {!(s.patrols || []).length && <label className="wf-select-label">巡回・同行の要否<select aria-label="巡回・同行の要否" disabled={patrolLocked} value={exemptions.includes('patrol') ? 'none' : 'check'} onChange={(e) => onPatch(s, { workflowExemptions: e.target.value === 'none' ? [...new Set([...exemptions, 'patrol'])] : exemptions.filter((v) => v !== 'patrol') })}><option value="check">要否を確認</option><option value="none">対象外</option></select></label>}
+                {!addingPatrol ? <button type="button" className="wf-secondary" disabled={patrolLocked} onClick={() => setAddingPatrol(true)}>＋ 巡回・同行予定を追加</button> : <form className="wf-patrol-form" onSubmit={async (event) => { event.preventDefault(); if (!patrolDraft.date || patrolLocked) return; const next = [...(s.patrols || []), { id: 'p-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7), ...patrolDraft, done: false }].sort((a, b) => String(a.date + (a.time || '')).localeCompare(String(b.date + (b.time || '')))); await onPatch(s, { patrols: next, workflowExemptions: exemptions.filter((v) => v !== 'patrol') }); setAddingPatrol(false); setPatrolDraft({ date: '', time: '', teacher: s.teacher || '' }); }}>
+                  <label>日付<input type="date" required aria-label="追加する巡回日" value={patrolDraft.date} onChange={(e) => setPatrolDraft({ ...patrolDraft, date: e.target.value })} /></label><label>時間<input type="time" aria-label="追加する巡回時間" value={patrolDraft.time} onChange={(e) => setPatrolDraft({ ...patrolDraft, time: e.target.value })} /></label><label>担当<input type="text" aria-label="追加する巡回担当" value={patrolDraft.teacher} onChange={(e) => setPatrolDraft({ ...patrolDraft, teacher: e.target.value })} /></label><div className="wf-inline"><button type="submit" className="wf-primary" disabled={patrolLocked}>予定を保存</button><button type="button" className="wf-secondary" onClick={() => setAddingPatrol(false)}>キャンセル</button></div>
+                </form>}
+              </article>
+            </div>}
+            {phaseIndex === 2 && <div className="wf-stack">{phase.tasks.map(renderStandardTask)}<p className="wf-help">実施期間が終わるまでは、未送付を要対応として強調しません。送付済み・対象外の記録はそのまま表示します。</p></div>}
+          </section>)}
+        </div>
+        <section className="wf-extras" aria-label="特記事項と関連資料"><div><h3>特記事項・配慮事項</h3><button type="button" className="wf-notes" disabled={readOnly} onClick={() => editText('notes', '特記事項・配慮事項を編集', true)}>{s.notes || '特記事項を入力する'}</button></div><div><h3>関連資料</h3><p className="wf-muted">実施計画・評価票などの登録資料を確認できます。</p><button type="button" className="wf-secondary" onClick={onMaterials}>関連資料を開く（{(s.materials || []).length}件）</button></div></section>
+      </div>
+      <footer className="wf-footer"><p className="wf-muted" aria-live="polite">変更は通常の保存先へ反映します。状態は選択して変更でき、順番による操作制限はありません。</p><button type="button" className="wf-secondary" onClick={onClose}>閉じる</button></footer>
+    </div>
+  </div>;
+}
+
 
 // =============================================================================
 // 共通サブコンポーネント
@@ -1782,6 +2033,25 @@ function App() {
       setStudents(updated);
       localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
     }
+  };
+
+  const patchWorkflowStudent = async (student, partial) => {
+    const current = students.find((item) => item.id === student.id) || student;
+    const period = periods.find((item) => item.id === (current.periodId || DEFAULT_PERIOD_ID));
+    if (period?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return false; }
+    if (!isAdmin) {
+      const locked = current.lockedFields || [];
+      const mapped = Object.keys(partial).map((field) => ({ phoneDate: 'phoneStatus', greetingDate: 'greetingStatus', greetingTime: 'greetingStatus', greetingVisitor: 'greetingStatus', studentThankYouDate: 'studentThankYouStatus' }[field] || field));
+      if (mapped.some((field) => WORKFLOW_LOCKABLE_FIELDS.includes(field) && locked.includes(field))) { showAlert('この項目は管理者によりロックされています。'); return false; }
+      if (partial.workflowExemptions && locked.includes('greetingStatus') && workflowExemptions(current).includes('greeting') !== partial.workflowExemptions.includes('greeting')) { showAlert('事前挨拶は管理者によりロックされています。'); return false; }
+      if (partial.patrols) {
+        if (locked.includes('patrolStatus') || (current.patrols || []).some((patrol) => locked.includes('patrol:' + patrol.id) && JSON.stringify(patrol) !== JSON.stringify(partial.patrols.find((next) => next.id === patrol.id)))) { showAlert('巡回・同行は管理者によりロックされています。'); return false; }
+      }
+    }
+    const before = Object.fromEntries(Object.keys(partial).map((field) => [field, current[field] ?? (field === 'workflowExemptions' ? [] : '')]));
+    recordUpdate(current.id, before, partial);
+    await persistPartial(current.id, partial);
+    return true;
   };
 
   const writeStudentRaw = async (student) => {
@@ -3086,7 +3356,7 @@ function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.26.1 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.27.0 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
@@ -3886,106 +4156,18 @@ function App() {
         </div>
       </footer>
 
-      {/* 詳細・編集モーダル(各項目タップで編集ポップアップ) */}
-      {selectedStudentDetail && (() => { const sd = students.find((s) => s.id === selectedStudentDetail.id) || selectedStudentDetail; return (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden text-slate-800 animate-scaleIn max-h-[90vh] flex flex-col">
-            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <User className="w-5 h-5 text-indigo-600" />
-                <span>実習生 詳細情報</span>
-                <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-bold border border-indigo-100">タップで編集</span>
-              </h3>
-              <button onClick={() => setSelectedStudentDetail(null)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
-            </div>
-
-            <div className="p-6 space-y-4 overflow-y-auto">
-              <div>
-                <div className="text-xs text-slate-400 font-bold">生徒情報（学年・組）</div>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <button onClick={() => setTextEditState({ value: sd.name || '', title: '生徒氏名を編集', label: '氏名(イニシャル推奨)', onSave: (v) => persistPartial(sd.id, { name: v }) })} className="text-base font-extrabold text-slate-950 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-transparent hover:border-indigo-200">{sd.name || '(未設定)'}</button>
-                  <button onClick={() => setSelectEditState({ value: sd.grade || '3', title: '学年を選択', options: [['1','1年'],['2','2年'],['3','3年'],['other','他']], onSave: (v) => persistPartial(sd.id, { grade: v }) })} className="text-xs font-bold text-slate-700 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-slate-200 hover:border-indigo-200">{sd.grade ? `${sd.grade}年` : '学年'}</button>
-                  <button onClick={() => setSelectEditState({ value: sd.classVal || '', title: '組を変更', options: [['', '未設定'], ['1', '1組'], ['2', '2組'], ['3', '3組']], onSave: (v) => persistPartial(sd.id, { classVal: v }) })} className="text-xs font-bold text-slate-700 hover:bg-indigo-50 px-2 py-0.5 rounded-lg cursor-pointer border border-slate-200 hover:border-indigo-200">{sd.classVal ? `${sd.classVal}組` : '組'}</button>
-                </div>
-              </div>
-
-              <div>
-                <div className="text-xs text-slate-400 font-bold flex items-center justify-between gap-1">
-                  <span>実習先 / 活動種別</span>
-                  <button onClick={() => setSelectEditState({ value: sd.internshipType || 'internship', title: '活動種別を選択', options: [['internship','実習'],['observation','見学']], onSave: (v) => persistPartial(sd.id, { internshipType: v }) })} className={`text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer border ${sd.internshipType === 'observation' ? 'bg-pink-100 text-pink-900 border-pink-300 hover:bg-pink-200' : 'bg-yellow-100 text-yellow-900 border-yellow-300 hover:bg-yellow-200'}`}>{sd.internshipType === 'observation' ? '見学' : '実習'}</button>
-                </div>
-                <button onClick={() => setTextEditState({ value: sd.location || '', title: '実習先を編集', label: '企業・事業所名', onSave: (v) => persistPartial(sd.id, { location: v }) })} className="w-full text-left text-sm font-bold text-slate-900 mt-1 hover:bg-indigo-50 px-2 py-1 rounded-lg cursor-pointer border border-transparent hover:border-indigo-200">{sd.location || <span className="placeholder-empty">未設定(タップ)</span>}</button>
-              </div>
-
-              <div>
-                <div className="text-xs text-slate-400 font-bold">実習日({(sd.internshipDates || []).length}日)</div>
-                <div className="mt-1 flex flex-wrap items-center gap-1 text-[10px] font-medium">
-                  {(sd.internshipDates || []).length === 0 && <span className="placeholder-empty mr-1">実習日 未設定</span>}
-                  {(sd.internshipDates || []).map((d, idx, arr) => { const palette = sd.internshipType === 'observation' ? 'bg-pink-100 border-pink-300 text-pink-900 hover:bg-pink-200' : 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200'; return (<span key={d} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border font-bold ${palette}`}><span>{sd.internshipType === 'observation' ? '見学' : (idx + 1) + '／' + arr.length}　　{formatShortDate(d)}</span><button onClick={() => handleRemoveInternshipDate(sd, d)} title="この日を外す" className="hover:bg-white/60 rounded text-slate-500 hover:text-rose-700 leading-none cursor-pointer font-bold">×</button></span>); })}
-                  <button onClick={() => setDatePickerState({ value: '', title: `${sd.name} の実習日を追加`, onSelect: (v) => { if (v) handleAddInternshipDate(sd, v); } })} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer"><Plus className="w-3 h-3" /><span>追加</span></button>
-                </div>
-              </div>
-
-              <hr className="border-slate-100" />
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-500 flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-indigo-500" />事前電話連絡</span>
-                  <button onClick={() => handleInstantToggle(sd, 'phoneStatus', sd.phoneStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.phoneStatus === 'completed' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100' : sd.phoneStatus === 'none' ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200' : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'}`}>{sd.phoneStatus === 'completed' ? '連絡済み' : sd.phoneStatus === 'none' ? '必要なし' : '未連絡'}</button>
-                </div>
-                {sd.phoneStatus === 'completed' && (<button onClick={() => setDatePickerState({ value: sd.phoneDate || '', title: `${sd.name} の電話連絡日`, onSelect: (v) => persistPartial(sd.id, { phoneDate: v }) })} className="text-[11px] text-slate-600 hover:text-indigo-700 hover:underline cursor-pointer block text-left pl-5">📅 連絡日: {sd.phoneDate ? formatShortDate(sd.phoneDate) : <span className="placeholder-empty">未設定(タップ)</span>}</button>)}
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-500 flex items-center gap-1"><FileText className="w-3.5 h-3.5 text-emerald-500" />保護者お知らせ</span>
-                  <button onClick={() => handleInstantToggle(sd, 'docStatus', sd.docStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.docStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : sd.docStatus === 'none' ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200' : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'}`}>{sd.docStatus === 'completed' ? '配付済み' : sd.docStatus === 'none' ? '必要なし' : '未配付'}</button>
-                </div>
-                {sd.docStatus === 'completed' && (<button onClick={() => setDatePickerState({ value: sd.docDate || '', title: `${sd.name} の配付日`, onSelect: (v) => persistPartial(sd.id, { docDate: v }) })} className="text-[11px] text-slate-600 hover:text-indigo-700 hover:underline cursor-pointer block text-left pl-5">📅 配付日: {sd.docDate ? formatShortDate(sd.docDate) : <span className="placeholder-empty">未設定(タップ)</span>}</button>)}
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-500 flex items-center gap-1"><Handshake className="w-3.5 h-3.5 text-teal-600" />事前挨拶訪問</span>
-                  <button onClick={() => handleInstantToggle(sd, 'greetingStatus', sd.greetingStatus)} className={`px-2 py-0.5 rounded-md font-bold cursor-pointer ${sd.greetingStatus === 'completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : sd.greetingStatus === 'scheduled' ? 'bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100' : sd.greetingStatus === 'unadjusted' ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'}`}>{sd.greetingStatus === 'completed' ? '挨拶終了' : sd.greetingStatus === 'scheduled' ? '挨拶日決定' : sd.greetingStatus === 'unadjusted' ? '未調整' : 'ー'}</button>
-                </div>
-                {sd.greetingStatus !== 'pending' && (<div className="p-2 bg-emerald-50/40 border border-emerald-100 text-emerald-900 rounded-lg text-xs font-semibold space-y-1">
-                  <button onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: `${sd.name} の挨拶予定日`, onSelect: (v) => { const upd = { greetingDate: v }; if (v && (!sd.greetingStatus || sd.greetingStatus === 'pending')) upd.greetingStatus = 'scheduled'; persistPartial(sd.id, upd); } })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">📅 挨拶予定: <span className={sd.greetingDate ? '' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : '未設定(タップ)'}</span></button>
-                  <button onClick={() => setTextEditState({ value: sd.greetingTime || '', title: '挨拶予定時間を編集', label: '時間(例: 13:30)', onSave: (v) => persistPartial(sd.id, { greetingTime: v }) })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">⏰ 時間: <span className={sd.greetingTime ? '' : 'text-slate-400 italic'}>{sd.greetingTime || '未設定(タップ)'}</span></button>
-                  <button onClick={() => setTextEditState({ value: sd.greetingVisitor || '', title: '引率教員を編集', label: '引率教員', onSave: (v) => persistPartial(sd.id, { greetingVisitor: v }) })} className="hover:bg-white/60 rounded px-1 cursor-pointer block text-left w-full">👤 引率教員: <span className={sd.greetingVisitor ? '' : 'text-slate-400 italic'}>{sd.greetingVisitor || '未設定(タップ)'}</span></button>
-                </div>)}
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="text-xs text-slate-400 font-bold flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-violet-500" />指導巡回</div>
-                <div className="flex flex-wrap items-center gap-1 text-[11px] font-medium">
-                  {(sd.patrols || []).length === 0 && <span className="placeholder-empty mr-1">巡回 未設定</span>}
-                  {(sd.patrols || []).map((p) => (<label key={p.id} {...patrolCellHandlers(sd.id, p.id)} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer" title="長押し（0.5秒）で編集"><input type="checkbox" checked={!!p.done} onChange={() => handleTogglePatrol(sd, p.id)} className="cursor-pointer accent-violet-600" /><span className={`font-bold ${p.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>{p.teacher ? p.teacher + '　' : ''}{sd.internshipType === 'observation' ? (p.time || '') : formatShortDate(p.date) + (p.time ? '　' + p.time : '')}</span><button onClick={(e) => { e.preventDefault(); handleRemovePatrol(sd, p.id); }} title="削除" className="text-slate-400 hover:text-rose-600 leading-none cursor-pointer font-bold">×</button></label>))}
-                  <button onClick={() => setDatePickerState({ value: '', title: `${sd.name} の巡回日を追加`, onSelect: (v) => { if (!v) return; setTextEditState({ value: '', title: '巡回時間を入力', label: '時間 (例: 10:00 ※空欄可)', onSave: (t) => handleAddPatrol(sd, v, t) }); } })} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-indigo-400 bg-white hover:bg-indigo-50 text-indigo-700 font-bold cursor-pointer"><Plus className="w-3 h-3" /><span>追加</span></button>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="text-xs text-slate-400 font-bold">特記事項・配慮事項</div>
-                <button onClick={() => setTextEditState({ value: sd.notes || '', title: '特記事項・配慮事項を編集', label: '備考', multiline: true, onSave: (v) => persistPartial(sd.id, { notes: v }) })} className="w-full text-left text-xs text-slate-700 leading-relaxed bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 p-2.5 rounded-xl cursor-pointer min-h-[44px]">{sd.notes || <span className="text-slate-400 italic">タップして入力</span>}</button>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100">
-                <button onClick={() => setMaterialModalStudentId(sd.id)} className="w-full px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer">
-                  <Paperclip className="w-4 h-4" />
-                  <span>関連資料を開く</span>
-                  {(sd.materials?.length || 0) > 0 && (<span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{sd.materials.length}件</span>)}
-                </button>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end shrink-0">
-              <button onClick={() => setSelectedStudentDetail(null)}
-                className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">閉じる</button>
-            </div>
-          </div>
-        </div>
-      ); })()}
+      {/* v3.27.0: 幅広の業務ワークフロー詳細画面 */}
+      {selectedStudentDetail && (() => {
+        const student = students.find((item) => item.id === selectedStudentDetail.id) || selectedStudentDetail;
+        const period = periods.find((item) => item.id === (student.periodId || DEFAULT_PERIOD_ID));
+        return <StudentWorkflowDialog key={student.id} student={student} readOnly={!!period?.locked && !isAdmin} isAdmin={isAdmin}
+          suspended={!!(textEditState || selectEditState || datePickerState || materialModalStudentId || patrolEditState || alertState || confirmState)}
+          onClose={() => setSelectedStudentDetail(null)} onPatch={patchWorkflowStudent}
+          onText={setTextEditState} onSelect={setSelectEditState} onPickDate={setDatePickerState}
+          onMaterials={() => setMaterialModalStudentId(student.id)}
+          onEditPatrol={(studentId, patrolId) => setPatrolEditState({ studentId, patrolId })}
+          onConfirm={showConfirm} />;
+      })()}
 
       <TextEditModal state={textEditState} onClose={() => setTextEditState(null)} />
       <SelectEditModal state={selectEditState} onClose={() => setSelectEditState(null)} />
