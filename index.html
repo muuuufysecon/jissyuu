@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.34.3</title>
+<title>現場実習進捗マネージャー v3.36.0</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -339,7 +339,7 @@
 @media(max-width:640px) { .gs-row-banner { text-align:left; padding-left:8px; } .gs-row-banner .gs-banner-text { position:sticky; left:140px; font-size:20px !important; letter-spacing:.08em; padding:2px 6px; } }
 
 
-/* v3.34.3: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
+/* v3.36.0: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
 .gs-table .gs-window-cell { padding:3px; background:#fff; }
 .gs-window-band { padding:0; width:100%; min-height:46px; border:1px solid #cc9b52; border-radius:4px; background:#fff0d8; color:#754610 !important; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e3cda9 calc(100% - 1px)); background-size:calc(100% / var(--gs-window-days)) 100%; }
 .gs-window-band>span { display:inline-block; max-width:100%; font-size:21px !important; line-height:1.2; font-weight:800; letter-spacing:.04em; padding:2px 3px; color:#754610 !important; }
@@ -351,7 +351,7 @@
 @media(max-width:640px) { .gs-window-band { text-align:left; padding-left:3px; } .gs-window-band>span { position:sticky; left:140px; background:inherit; font-size:19px !important; } .gs-window-short>span { font-size:14px !important; } }
 
 
-/* v3.34.3: 元の曜日色と罫線を保った透明な完了表示。 */
+/* v3.36.0: 元の曜日色と罫線を保った透明な完了表示。 */
 .gs-table tr.gs-row-done>td { background-color:#fff; }
 .gs-table tr.gs-row-done:nth-child(even)>td { background-color:#f3f6f8; }
 .gs-table tr.gs-row-done>td.gs-weekend { background-color:#fff0dd; }
@@ -376,7 +376,7 @@
 @media(max-width:640px){.gs-completed-banner .gs-banner-text{max-width:calc(100vw - 180px);white-space:normal;font-size:16px !important;letter-spacing:0;line-height:1.4;}.gs-doc-heading{align-items:flex-start;}.gs-related-documents{padding:10px;}.gs-document-buttons button{width:100%;}}
 
 
-/* v3.34.3: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
+/* v3.36.0: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
 .gs-related-documents { border:3px solid #5489bd; background:#edf6ff; box-shadow:0 2px 8px rgba(45,94,143,.12); }
 .gs-doc-heading strong { font-size:17px; color:#214d79 !important; }
 .gs-document-buttons button { border-color:#8eafd0; background:white; font-weight:600; }
@@ -388,7 +388,7 @@
 @media(max-width:540px){.sb-current-period{max-width:calc(100vw - 175px);}.gs-navigation strong{font-size:14px;}.gs-doc-heading strong{font-size:16px;}}
 
 
-/* v3.34.3: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
+/* v3.36.0: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
 .sb-view-switch { max-width:100%; flex-wrap:wrap; justify-content:flex-end; }
 .sb-view-switch .ow-launch { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border:1px solid #a8bfdb; border-radius:24px; background:#edf5ff; font-size:14px; font-weight:700; white-space:nowrap; }
 .sb-view-switch .ow-launch:hover { background:#dcecff; }
@@ -445,7 +445,7 @@
 @media(max-width:640px){.ow-filter-bar{flex:none;}.ow-table-scroll{flex:1 0 300px;}.ow-dialog .ow-help{margin:0;}}
 
 
-/* v3.34.3: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
+/* v3.36.0: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
 .wf-patrol-row { gap:10px; padding:14px; }
 .wf-patrol-info { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; }
 .wf-patrol-info strong { font-size:16px; }.wf-patrol-info .wf-muted { font-size:14px; }
@@ -457,7 +457,7 @@
 @media(max-width:540px){.wf-patrol-row{padding:12px;}.wf-dialog .wf-patrol-complete{font-size:16px;min-height:60px;padding:12px 8px;}}
 
 
-/* v3.34.3: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
+/* v3.36.0: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
 .ow-dialog .sb-utility-body { gap:8px; padding:12px 20px; }
 .ow-compact-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; flex-shrink:0; }
 .ow-period { margin-right:auto; min-width:0; overflow-wrap:anywhere; }
@@ -486,7 +486,7 @@
 }
 
 
-/* v3.34.3: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
+/* v3.36.0: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
 .gs-horizontal-control { padding:8px 16px; border-top:1px solid #dbe4ee; background:#f7fafe; }
 .gs-horizontal-caption { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px 12px; font-size:14px; }
 .gs-horizontal-caption label { font-weight:700; }
@@ -498,12 +498,12 @@
 @media(max-width:640px) { .gs-horizontal-control { padding:8px 12px; }.gs-horizontal-track { gap:8px; } }
 
 
-/* v3.34.3: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
+/* v3.36.0: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
 .gs-slider-dates { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:#52657a !important; }
 .gs-slider-dates span { color:inherit !important; }
 @media(max-width:420px) { .gs-slider-dates { flex-wrap:wrap; }.gs-slider-dates span:nth-child(2) { order:3; width:100%; text-align:center; } }
 
-/* v3.34.3: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
+/* v3.36.0: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
 .ow-page { width:100%; min-width:0; display:flex; flex-direction:column; height:var(--ow-page-height,calc(100dvh - 150px)); min-height:320px; background:#fff; border:1px solid #d4dfeb; border-radius:12px; color:#233044 !important; font-size:15px; }
 .ow-page * { box-sizing:border-box; }
 .ow-page .sb-utility-body { min-height:0; overflow-y:auto; }
@@ -516,6 +516,19 @@
 .ow-page .ow-filter-bar button,.ow-page .ow-reset,.ow-page .ow-filters select { font-size:14px; }
 @media(max-width:640px) { .ow-page { min-height:320px; }.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; } }
 @media print { .ow-page { height:auto; min-height:0; border:0; }.ow-page .sb-utility-body,.ow-page .ow-table-scroll { overflow:visible; display:block; }.ow-page .ow-table { min-width:0; font-size:11px; }.ow-page .ow-table .ow-person { width:150px; position:static; }.ow-page .ow-table th { position:static; }.ow-page .ow-filter-bar,.ow-page .ow-filters { display:none; } }
+
+/* v3.36.0: read-only cache notice */
+.cache-status{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:10px 16px;padding:12px 16px;border:1px solid #cbdff2;background:#eef5fc;border-radius:10px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.cache-status-readonly{border-color:#e6c99e;background:#fff3e2}.cache-status p{margin:3px 0}.cache-status-note{font-size:13px}.cache-status-actions{display:flex;flex-wrap:wrap;gap:8px;flex-shrink:0}.cache-status button{min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;background:white;border-radius:8px;cursor:pointer}.cache-status button:disabled{opacity:.5;cursor:not-allowed}.cache-status button:focus-visible{outline:3px solid #2783de;outline-offset:2px} @media(max-width:700px){.cache-status{align-items:stretch;flex-direction:column;margin:8px;padding:12px;gap:8px}.cache-status-actions{flex-shrink:1}.cache-status button{flex:1}} @media print{.cache-status{display:none!important}}
+
+/* v3.36.0: document-scrolling workflow page; existing popup stays unchanged for list screens. */
+.workflow-page-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 20px;background:white;border-bottom:1px solid #dce4ed;font-size:14px;line-height:1.5}
+.workflow-page-nav>div{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}.workflow-page-nav>div:first-child{align-items:flex-start;flex-direction:column;gap:2px}.workflow-page-nav span{font-size:13px}
+.workflow-page-nav a,.workflow-page-nav button,.workflow-page-message button,.workflow-page-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:white;cursor:pointer;text-decoration:none}
+.workflow-page-nav :focus-visible,.workflow-page-empty a:focus-visible{outline:3px solid #2783de;outline-offset:2px}.workflow-page-message{margin:12px 16px;padding:12px 16px;border:1px solid #cbdff2;border-radius:10px;background:#eef5fc;font-size:14px}.workflow-page-empty{margin:24px auto;padding:24px;width:calc(100% - 32px);max-width:760px;border:1px solid #dce4ed;border-radius:12px;background:white;line-height:1.7}.workflow-page-empty h1{font-size:22px;font-weight:800}.workflow-page-empty p{margin:12px 0 20px}
+.wf-page-surface{position:static;padding:0 16px 24px;width:100%;min-width:0}.wf-dialog.gs-dialog.wf-page-dialog{width:100%;height:auto;max-height:none;overflow:visible;box-shadow:none;border-radius:12px;margin:0 auto;max-width:1800px}.wf-page-dialog .wf-scroll{flex:none;min-height:0;overflow:visible}.wf-page-dialog .wf-header{border-radius:12px 12px 0 0}.wf-page-dialog .wf-footer{border-radius:0 0 12px 12px}.wf-page-dialog #wf-title:focus{outline:none}a[data-calendar-workflow-link]:focus-visible{outline:3px solid #2783de;outline-offset:1px}
+@media(max-width:640px){.workflow-page-nav{padding:12px;align-items:flex-start;flex-direction:column;gap:10px}.workflow-page-nav>div:last-child{width:100%;gap:8px}.workflow-page-nav>div:last-child>*{flex:1;text-align:center}.wf-page-surface{padding:0 8px 16px}.wf-dialog.gs-dialog.wf-page-dialog{height:auto;max-height:none}.workflow-page-empty{padding:16px}}
+@media print{.wf-page-surface{padding:0}.wf-page-dialog .wf-close,.wf-page-dialog .wf-footer{display:none!important}.wf-dialog.gs-dialog.wf-page-dialog{border:0}}
 
 </style>
 
@@ -841,109 +854,209 @@ const showDesktopNotification = (title, body, tag) => {
 // カスタムフック / Hooks
 // =============================================================================
 
-function useFirestoreSync(firebaseConfigStr, roomKey) {
-  const [students, setStudents] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState('local');
-  const [connectionError, setConnectionError] = useState('');
-  const unsubscribeRef = useRef(null);
-  const studentsNotifyReadyRef = useRef(false); // v3.24: 初回スナップショットでは通知しないための判定用
-
-  useEffect(() => {
-    let active = true;
-
-    const loadLocal = () => {
-      const stored = localStorage.getItem(`local_students_${roomKey}`);
-      try {
-        if (stored) {
-          setStudents(JSON.parse(stored));
-        } else {
-          setStudents(MOCK_STUDENTS);
-          localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(MOCK_STUDENTS));
+// v3.36.0: Display-only, expiring cache. NEVER replay it into Firestore.
+const EMPTY_CACHE_LIST = Object.freeze([]);
+const VIEW_CACHE_TTL = 24 * 60 * 60 * 1000;
+const VIEW_CACHE_DB = `jissyuu_view_cache${ENV_SUFFIX}`;
+const VIEW_CACHE_APP = `${location.origin}${location.pathname}`;
+const cloudWriteGate = { scope: '', room: '', configured: false, ready: false, epoch: 0, pending: 0 };
+const guardedRaw = new WeakMap();
+const cloudScope = (configStr, room) => {
+  try { const c = JSON.parse(configStr); return JSON.stringify([VIEW_CACHE_APP, ENV_SUFFIX, c.projectId || '', c.appId || '', c.authDomain || '', c.databaseURL || '', String(room)]); }
+  catch { return JSON.stringify([VIEW_CACHE_APP, ENV_SUFFIX, 'invalid-config', String(room)]); }
+};
+const cloudGateContext = (configStr, room) => {
+  const scope = cloudScope(configStr, room);
+  const configured = !!String(configStr || '').trim();
+  if (cloudWriteGate.scope !== scope || cloudWriteGate.configured !== configured) {
+    Object.assign(cloudWriteGate, { scope, room: String(room), configured, ready: false, epoch: cloudWriteGate.epoch + 1 });
+  }
+  return scope;
+};
+const notifyCloudGate = () => window.dispatchEvent(new Event('jissyuu-cloud-gate'));
+const canWriteCloud = (scope, path = '') => cloudWriteGate.configured && cloudWriteGate.ready &&
+  cloudWriteGate.scope === scope && navigator.onLine !== false &&
+  (!path || path === `rooms/${cloudWriteGate.room}` || path.startsWith(`rooms/${cloudWriteGate.room}/`));
+const requireCloudWrite = (scope, path = '') => {
+  if (!canWriteCloud(scope, path)) throw new Error('クラウドの最新データを確認できていません。閲覧のみです。接続を確認してから操作してください。');
+};
+// One extra gate at every SDK write, including callbacks opened before a disconnect.
+const guardedFirestore = (rawDb, room) => {
+  const scope = cloudWriteGate.scope;
+  const memo = new WeakMap();
+  const unwrap = (v) => guardedRaw.get(v) || v;
+  const wrap = (obj) => {
+    if (!obj || typeof obj !== 'object' || typeof obj.then === 'function') return obj;
+    if (memo.has(obj)) return memo.get(obj);
+    const p = new Proxy(obj, { get(target, prop) {
+      const value = Reflect.get(target, prop, target);
+      if (typeof value !== 'function') return value;
+      return (...args) => {
+        const writing = ['set','update','delete','add','commit','runTransaction'].includes(String(prop));
+        if (writing) {
+          try { requireCloudWrite(scope, target.path || `rooms/${room}`); }
+          catch (e) { if (typeof target.commit === 'function' && prop !== 'commit') throw e; return Promise.reject(e); }
         }
-      } catch {
-        setStudents(MOCK_STUDENTS);
-      }
-    };
+        const result = value.apply(target, args.map(unwrap));
+        if (writing && result && typeof result.then === 'function') {
+          cloudWriteGate.pending++; notifyCloudGate();
+          return result.finally(() => { cloudWriteGate.pending--; notifyCloudGate(); });
+        }
+        if (result && typeof result === 'object' && !result.then &&
+            (typeof result.get === 'function' || typeof result.doc === 'function' || typeof result.commit === 'function')) return wrap(result);
+        return result;
+      };
+    }});
+    memo.set(obj, p); guardedRaw.set(p, obj); return p;
+  };
+  return wrap(rawDb);
+};
+const openViewCache = () => new Promise((resolve, reject) => {
+  const request = indexedDB.open(VIEW_CACHE_DB, 1);
+  request.onupgradeneeded = () => { if (!request.result.objectStoreNames.contains('snapshots')) request.result.createObjectStore('snapshots'); };
+  request.onerror = () => reject(request.error || new Error('一時保存を利用できません'));
+  request.onblocked = () => reject(new Error('一時保存の開始がブロックされました'));
+  request.onsuccess = () => { request.result.onversionchange = () => request.result.close(); resolve(request.result); };
+});
+// Resolve only when the transaction commits; failed quota/storage never changes cloud data.
+const viewCacheOperation = async (mode, work) => {
+  const db = await openViewCache();
+  try { return await new Promise((resolve, reject) => {
+    const tx = db.transaction('snapshots', mode); let result;
+    const store = tx.objectStore('snapshots');
+    work(store, (v) => { result = v; });
+    tx.oncomplete = () => resolve(result);
+    tx.onerror = tx.onabort = () => reject(tx.error || new Error('一時保存に失敗しました'));
+  }); } finally { db.close(); }
+};
+const validViewCache = (x, scope) => !!x && x.version === 1 && x.scope === scope && x.app === VIEW_CACHE_APP &&
+  Number.isFinite(x.savedAt) && Number.isFinite(x.expiresAt) && x.savedAt <= Date.now() + 60000 &&
+  x.expiresAt > Date.now() && x.expiresAt - x.savedAt <= VIEW_CACHE_TTL &&
+  Array.isArray(x.students) && x.students.every((s) => s && typeof s.id === 'string' && !s.id.includes('/')) &&
+  Array.isArray(x.periods);
+const readViewCache = (scope) => viewCacheOperation('readwrite', (store, done) => {
+  const request = store.get(scope);
+  request.onsuccess = () => { const x = request.result; if (validViewCache(x, scope)) done(x); else { if (x) store.delete(scope); done(null); } };
+  const cursor = store.openCursor(); cursor.onsuccess = () => { const c = cursor.result; if (c) { if (!c.value?.expiresAt || c.value.expiresAt <= Date.now()) c.delete(); c.continue(); } };
+});
+const writeViewCache = (scope, students, periods) => {
+  const savedAt = Date.now();
+  return viewCacheOperation('readwrite', (store) => store.put({ version: 1, app: VIEW_CACHE_APP, scope, savedAt, expiresAt: savedAt + VIEW_CACHE_TTL, students, periods }, scope));
+};
+const deleteViewCache = (scope) => viewCacheOperation('readwrite', (store) => store.delete(scope));
 
+function useFirestoreSync(firebaseConfigStr, roomKey) {
+  const scope = cloudGateContext(firebaseConfigStr, roomKey);
+  const cloudConfigured = !!firebaseConfigStr.trim();
+  const [state, setState] = useState({ scope: '', students: [], periods: [], savedAt: null });
+  const [isLoading, setIsLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState(cloudConfigured ? 'connecting' : 'local');
+  const [connectionError, setConnectionError] = useState('');
+  const [cacheNotice, setCacheNotice] = useState('');
+  const [cacheEnabled, setCacheEnabled] = useState(true);
+  const [pendingWrites, setPendingWrites] = useState(0);
+  const [retry, setRetry] = useState(0);
+  const scopeRef = useRef(scope); scopeRef.current = scope;
+  const studentsNotifyReadyRef = useRef(false);
+  const cacheEnabledRef = useRef(true);
+  const cacheQueueRef = useRef(Promise.resolve());
+  // Serialize cache writes/deletion so an old asynchronous write cannot resurrect a cleared copy.
+  const queueCache = (work) => { const p = cacheQueueRef.current.catch(() => {}).then(work); cacheQueueRef.current = p; return p; };
+  const students = state.scope === scope ? state.students : [];
+  const cachedPeriods = state.scope === scope ? state.periods : EMPTY_CACHE_LIST;
+  const cacheSavedAt = state.scope === scope ? state.savedAt : null;
+  const setStudents = (value) => setState((prev) => ({ ...prev, scope, students: typeof value === 'function' ? value(prev.scope === scope ? prev.students : []) : value }));
+  const retryConnection = () => setRetry((x) => x + 1);
+  const clearTemporaryCache = async () => {
+    const clearingScope = scope;
+    cacheEnabledRef.current = false; setCacheEnabled(false);
+    try {
+      await queueCache(() => deleteViewCache(clearingScope));
+      if (scopeRef.current !== clearingScope) return;
+      setState((s) => ({ ...s, savedAt: null, ...(cloudWriteGate.ready ? {} : { students: [], periods: [] }) }));
+      setCacheNotice('端末の一時データを削除しました。この画面では再保存しません。クラウドは変更していません。');
+    } catch { setCacheNotice('一時データを削除できませんでした。ブラウザーのサイトデータ設定をご確認ください。'); }
+  };
+  useEffect(() => {
+    let active = true, unsubscribe = null, authoritative = false, expiryTimer = null;
+    const epoch = ++cloudWriteGate.epoch;
+    cloudWriteGate.ready = false;
+    cacheEnabledRef.current = true; setCacheEnabled(true); setCacheNotice('');
+    setState({ scope, students: [], periods: [], savedAt: null });
+    setConnectionError(''); setIsLoading(true);
+    const current = () => active && scopeRef.current === scope && cloudWriteGate.scope === scope && cloudWriteGate.epoch === epoch;
+    const gateStatus = (status) => { if (!current()) return; cloudWriteGate.ready = status === 'connected'; setConnectionStatus(status); notifyCloudGate(); };
+    const armExpiry = (expiresAt) => {
+      clearTimeout(expiryTimer);
+      expiryTimer = setTimeout(() => {
+        if (!current()) return;
+        queueCache(() => deleteViewCache(scope)).catch(() => {});
+        if (!cloudWriteGate.ready) setState({ scope, students: [], periods: [], savedAt: null });
+        setCacheNotice('一時データの保存期限（24時間）を過ぎました。最新データの受信をお待ちください。');
+      }, Math.max(1, expiresAt - Date.now()));
+    };
+    const offline = () => { if (current()) { gateStatus('connecting'); setConnectionError('通信が切れています。表示は参考情報です。編集はできません。'); } };
+    // The metadata listener must receive a new server snapshot before unlocking after reconnection.
+    const online = () => { if (current()) { setConnectionError('再接続して最新データを確認しています。'); } };
+    const pending = () => { if (current()) setPendingWrites(cloudWriteGate.pending); };
+    window.addEventListener('offline', offline); window.addEventListener('online', online); window.addEventListener('jissyuu-cloud-gate', pending);
     const init = async () => {
-      setIsLoading(true);
-      setConnectionError('');
-
-      if (!firebaseConfigStr.trim()) {
-        if (!active) return;
-        loadLocal();
-        setConnectionStatus('local');
-        setIsLoading(false);
-        return;
+      if (!cloudConfigured) {
+        if (!current()) return;
+        let local = MOCK_STUDENTS;
+        try { const x = JSON.parse(localStorage.getItem(`local_students_${roomKey}`) || 'null'); if (Array.isArray(x)) local = x; } catch {}
+        setState({ scope, students: local, periods: [], savedAt: null }); setConnectionStatus('local'); setIsLoading(false); return;
       }
-
+      gateStatus('connecting');
+      // Do not await cache I/O before networking. A late cache read never replaces server data (including a real empty result).
+      queueCache(() => readViewCache(scope)).then((cached) => {
+        if (!current() || authoritative || !cacheEnabledRef.current || !cached) return;
+        setState({ scope, students: cached.students, periods: cached.periods, savedAt: cached.savedAt }); setIsLoading(false); armExpiry(cached.expiresAt);
+      }).catch(() => { if (current()) setCacheNotice('この端末では一時保存を利用できません。クラウドから通常どおり読み込みます。'); });
       try {
-        setConnectionStatus('connecting');
-        let configObj;
-        try { configObj = JSON.parse(firebaseConfigStr); }
-        catch { throw new Error('Configの形式(JSON)が正しくありません。'); }
-
-        const fb = await loadFirebaseSDK();
+        let configObj; try { configObj = JSON.parse(firebaseConfigStr); } catch { throw new Error('Configの形式(JSON)が正しくありません。'); }
+        const fb = await loadFirebaseSDK(); if (!current()) return;
         const app = fb.apps.length ? fb.app() : fb.initializeApp(configObj);
-        const db = app.firestore();
-        await app.auth().signInAnonymously();
-
-        if (unsubscribeRef.current) unsubscribeRef.current();
-
-        const queryRef = db.collection('rooms').doc(roomKey).collection('students');
-        studentsNotifyReadyRef.current = false; // v3.24: 購読(再)開始時にリセット
-        unsubscribeRef.current = queryRef.onSnapshot(
-          (snap) => {
-            if (!active) return;
-            const list = [];
-            snap.forEach((doc) => { const data = doc.data() || {}; if (data.recordType !== 'period') list.push({ id: doc.id, ...data }); });
-            setStudents(list);
-            setConnectionStatus('connected');
-            setIsLoading(false);
-            setConnectionError('');
-            // v3.24: 初回以降の「他の端末による追加・更新」をデスクトップ通知する。
-            //   自分の編集（hasPendingWrites）とキャッシュ由来のスナップショット（fromCache）は通知しない。
-            if (!studentsNotifyReadyRef.current) {
-              studentsNotifyReadyRef.current = true;
-            } else if (!snap.metadata.hasPendingWrites && !snap.metadata.fromCache) {
-              const changes = snap.docChanges().filter((ch) => (ch.type === 'added' || ch.type === 'modified') && (ch.doc.data() || {}).recordType !== 'period');
-              if (changes.length === 1) {
-                const s = changes[0].doc.data() || {};
-                showDesktopNotification(
-                  changes[0].type === 'added' ? '👤 生徒が追加されました' : '✏️ 進捗が更新されました',
-                  (s.name || '生徒') + (s.location ? '（' + s.location + '）' : ''),
-                  'students-' + changes[0].doc.id
-                );
-              } else if (changes.length > 1) {
-                showDesktopNotification('✏️ 生徒データが更新されました', changes.length + '件の変更がありました', 'students-bulk');
-              }
-            }
-          },
-          (error) => {
-            if (!active) return;
-            setConnectionStatus('error');
-            setConnectionError(`Firestoreへのアクセスに失敗しました。ルール等を確認してください。(詳細: ${error.message})`);
-            setIsLoading(false);
+        if (String(app.options?.projectId || '') !== String(configObj.projectId || '') || String(app.options?.appId || '') !== String(configObj.appId || '')) throw new Error('接続先が変更されています。画面を再読み込みしてから接続してください。');
+        const db = guardedFirestore(app.firestore(), roomKey);
+        await app.auth().signInAnonymously(); if (!current()) return;
+        studentsNotifyReadyRef.current = false;
+        unsubscribe = db.collection('rooms').doc(roomKey).collection('students').onSnapshot({ includeMetadataChanges: true }, (snap) => {
+          if (!current()) return;
+          const meta = snap.metadata || {};
+          if (meta.fromCache || navigator.onLine === false) { gateStatus('connecting'); setIsLoading(false); return; }
+          // Never cache local pending writes as confirmed server data.
+          if (meta.hasPendingWrites) return;
+          authoritative = true;
+          const list = [], periodList = [];
+          snap.forEach((doc) => { const data = doc.data() || {}; if (data.recordType === 'period') periodList.push({ ...data, id: data.periodId || doc.id.replace(PERIOD_META_PREFIX, '') }); else list.push({ ...data, id: doc.id }); });
+          const now = Date.now();
+          setState({ scope, students: list, periods: periodList, savedAt: cacheEnabledRef.current ? now : null });
+          gateStatus('connected'); setIsLoading(false); setConnectionError('');
+          if (cacheEnabledRef.current) {
+            armExpiry(now + VIEW_CACHE_TTL);
+            queueCache(() => writeViewCache(scope, list, periodList)).catch(() => { if (current()) setCacheNotice('端末への一時保存に失敗しました。クラウドのデータは変更していません。'); });
           }
-        );
-      } catch (err) {
-        if (!active) return;
-        setConnectionStatus('error');
-        setConnectionError(err.message || 'Firebaseの接続に失敗しました。');
-        setIsLoading(false);
-        loadLocal();
+          if (studentsNotifyReadyRef.current) {
+            const changes = snap.docChanges().filter((ch) => ['added','modified'].includes(ch.type) && (ch.doc.data() || {}).recordType !== 'period');
+            if (changes.length === 1) { const s = changes[0].doc.data() || {}; showDesktopNotification(changes[0].type === 'added' ? '👤 生徒が追加されました' : '✏️ 進捗が更新されました', (s.name || '生徒') + (s.location ? '（' + s.location + '）' : ''), 'students-' + changes[0].doc.id); }
+            else if (changes.length > 1) showDesktopNotification('✏️ 生徒データが更新されました', changes.length + '件の変更がありました', 'students-bulk');
+          }
+          studentsNotifyReadyRef.current = true;
+        }, (error) => { if (current()) { gateStatus('error'); setConnectionError(`クラウドの読み込みに失敗しました。前回分は閲覧のみです。(${error.message})`); setIsLoading(false); } });
+      } catch (err) { if (current()) { gateStatus('error'); setConnectionError(err.message || 'Firebaseの接続に失敗しました。'); setIsLoading(false); } }
+    };
+    const localChange = (event) => {
+      if (!cloudConfigured && current() && event.key === `local_students_${roomKey}` && event.storageArea === localStorage) {
+        try { const rows = JSON.parse(event.newValue || '[]'); if (Array.isArray(rows)) setState({ scope, students: rows, periods: [], savedAt: null }); } catch {}
       }
     };
-
+    window.addEventListener('storage', localChange);
     init();
-    return () => {
-      active = false;
-      if (unsubscribeRef.current) unsubscribeRef.current();
-    };
-  }, [firebaseConfigStr, roomKey]);
-
-  return { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError };
+    return () => { window.removeEventListener('storage', localChange); active = false; clearTimeout(expiryTimer); if (unsubscribe) unsubscribe(); window.removeEventListener('offline', offline); window.removeEventListener('online', online); window.removeEventListener('jissyuu-cloud-gate', pending); if (cloudWriteGate.epoch === epoch) cloudWriteGate.ready = false; };
+  }, [firebaseConfigStr, roomKey, retry]);
+  const cloudReadOnly = cloudConfigured && !canWriteCloud(scope);
+  return { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError, cloudReadOnly, cloudConfigured, cachedPeriods, cacheSavedAt, cacheNotice, cacheEnabled, pendingWrites, clearTemporaryCache, retryConnection, cloudScopeKey: scope };
 }
 
 function useHistory(limit = 30) {
@@ -1024,7 +1137,7 @@ function usePresence(connectionStatus, roomKey, teacherName) {
       sessionIdRef.current = (typeof localStorage !== 'undefined' && localStorage.getItem('presence_session_id')) || ('sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10)); try { localStorage.setItem('presence_session_id', sessionIdRef.current); } catch (e) {}
     }
     const sessionId = sessionIdRef.current;
-    const db = window.firebase.app().firestore();
+    const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
     const presenceRef = db.collection('rooms').doc(roomKey).collection('presence').doc(sessionId);
     const collectionRef = db.collection('rooms').doc(roomKey).collection('presence');
 
@@ -1114,7 +1227,7 @@ function usePresence(connectionStatus, roomKey, teacherName) {
 // useBoardSync: 画面上部の掲示板。rooms/{roomKey}/board コレクションを
 // 購読、接続中はリアルタイム同期、ローカル時は localStorage を使う。
 // =============================================================================
-function useBoardSync(connectionStatus, roomKey) {
+function useBoardSync(connectionStatus, roomKey, cloudConfigured, operationScope) {
   const [posts, setPosts] = useState([]);
   const unsubRef = useRef(null);
   const boardNotifyReadyRef = useRef(false); // v3.24: 初回スナップショットでは通知しないための判定用
@@ -1130,7 +1243,7 @@ function useBoardSync(connectionStatus, roomKey) {
     } catch (e) { setPosts([]); }
 
     if (connectionStatus === 'connected' && window.firebase) {
-      const db = window.firebase.app().firestore();
+      const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
       const ref = db.collection('rooms').doc(roomKey).collection('board').orderBy('createdAt', 'desc').limit(50);
       if (unsubRef.current) unsubRef.current();
       boardNotifyReadyRef.current = false; // v3.24: 購読(再)開始時にリセット
@@ -1159,12 +1272,13 @@ function useBoardSync(connectionStatus, roomKey) {
   }, [connectionStatus, roomKey]);
 
   const addPost = async (author, message) => {
+    if ((cloudConfigured || cloudWriteGate.configured) && (!cloudConfigured || !canWriteCloud(operationScope))) { window.alert('クラウドの最新データ確認前は、掲示板の投稿・削除はできません。'); return false; }
     if (connectionStatus === 'connected' && window.firebase) {
       try {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).collection('board').add({ author: author || '匿名', message, createdAt: window.firebase.firestore.FieldValue.serverTimestamp() });
         return;
-      } catch (e) { console.warn('board add failed:', e.message); }
+      } catch (e) { window.alert('投稿を保存できませんでした: ' + e.message); return false; }
     }
     setPosts((prev) => {
       const next = [{ id: 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6), author: author || '匿名', message, createdAt: Date.now() }, ...prev];
@@ -1175,6 +1289,7 @@ function useBoardSync(connectionStatus, roomKey) {
 
   // v3.16: 削除前に投稿スナップショットを履歴へ保存し、誰がいつ削除したかも記録する。
   const deletePost = async (postId, deletedBy) => {
+    if ((cloudConfigured || cloudWriteGate.configured) && (!cloudConfigured || !canWriteCloud(operationScope))) { window.alert('クラウドの最新データ確認前は、掲示板の投稿・削除はできません。'); return false; }
     const snap = posts.find((p) => p.id === postId);
     if (snap) {
       const ts = snap.createdAt;
@@ -1184,10 +1299,10 @@ function useBoardSync(connectionStatus, roomKey) {
     }
     if (connectionStatus === 'connected' && window.firebase && !String(postId).startsWith('local-')) {
       try {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).collection('board').doc(postId).delete();
         return;
-      } catch (e) { console.warn('board delete failed:', e.message); }
+      } catch (e) { window.alert('投稿を削除できませんでした: ' + e.message); return false; }
     }
     setPosts((prev) => {
       const next = prev.filter((p) => p.id !== postId);
@@ -1290,7 +1405,7 @@ const getWorkflowDates = (student, task) => {
   const field = {phone:'phoneDate',doc:'docDate',greeting:'greetingDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'}[task.key];
   return field && workflowDayKey(student[field]) ? [student[field]] : [];
 };
-// v3.34.3: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
+// v3.36.0: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
 const getWorkflowPlan = (student, task) => {
   if (task.state === 'exempt') return null;
   const days = [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
@@ -1310,7 +1425,7 @@ const getWorkflowPlan = (student, task) => {
   return null;
 };
 
-// v3.34.3: 完了記録の表示と、日付マスからの直接追加。
+// v3.36.0: 完了記録の表示と、日付マスからの直接追加。
 const workflowCompletion = (student, task) => {
   if (task.state !== 'done' || task.key === 'dates') return null;
   const fields={phone:'phoneDate',doc:'docDate',greeting:'greetingCompletedDate',gift:'giftCompletedDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'};
@@ -1388,7 +1503,7 @@ function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, read
   </section>;
 }
 
-function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, initialTask = null, returnToOverview = false, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onOpenMaterial, onEditPatrol, onConfirm }) {
+function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdmin, suspended, initialTask = null, returnToOverview = false, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onOpenMaterial, onEditPatrol, onConfirm }) {
   const rootRef = useRef(null);
   const [quickAdd,setQuickAdd]=useState(null);
   const [quickError,setQuickError]=useState('');
@@ -1403,13 +1518,13 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, initi
   useEffect(() => {
     const previous = document.activeElement;
     const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    rootRef.current?.querySelector('[data-wf-close]')?.focus();
+    if (!standalone) document.body.style.overflow = 'hidden';
+    rootRef.current?.querySelector(standalone ? '#wf-title' : '[data-wf-close]')?.focus();
     return () => { document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus?.(); };
   }, []);
   useEffect(() => {
     const keydown = (event) => {
-      if (suspended || quickAdd) return;
+      if (standalone || suspended || quickAdd) return;
       if (event.key === 'Escape') { event.preventDefault(); onClose(); return; }
       if (event.key !== 'Tab') return;
       const controls = [...(rootRef.current?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]') || [])].filter((el) => el.getClientRects().length);
@@ -1420,7 +1535,7 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, initi
     };
     document.addEventListener('keydown', keydown);
     return () => document.removeEventListener('keydown', keydown);
-  }, [suspended, quickAdd, onClose]);
+  }, [standalone, suspended, quickAdd, onClose]);
   const scrollToTask = (key) => setSelectedTask(key);
   useEffect(() => {
     const cards = rootRef.current?.querySelectorAll('[data-wf-task]') || [];
@@ -1452,7 +1567,7 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, initi
     const dateLabel = task.key === 'phone' ? '連絡日' : task.key === 'doc' ? '配付日' : '送付日';
     return <article key={task.key} data-wf-task={task.key} className="wf-task" aria-label={task.title}>
       <div className="wf-task-top"><h4>{task.title}</h4><WorkflowBadge state={task.state}>{task.label}</WorkflowBadge></div>
-      {locked && <p className="wf-muted">🔒 {readOnly ? '終了済み実習期・閲覧のみ' : '管理者ロック中'}</p>}
+      {locked && <p className="wf-muted">🔒 {readOnly ? '閲覧のみ（接続確認中・または終了済み実習期）' : '管理者ロック中'}</p>}
       {task.state === 'deferred' && <p className="wf-muted">現在は対応時期ではありません。</p>}
       {task.key === 'greeting' && task.state === 'unknown' && <p className="wf-muted">旧表示「―」は、不要と断定せず要確認にしています。</p>}
       {cfg?.dateField && selected === 'completed' && <button className="wf-date-button" type="button" disabled={locked} onClick={() => onPickDate({ value: s[cfg.dateField] || '', title: `${task.title}：${dateLabel}`, onSelect: (value) => onPatch(s, { [cfg.dateField]: value }) })}>{dateLabel}：{s[cfg.dateField] ? formatShortDate(s[cfg.dateField]) : '未設定・日付を選択'}</button>}
@@ -1500,11 +1615,11 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, initi
     await apply();
   };
 
-  return <><div className="wf-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <div ref={rootRef} role="dialog" aria-modal="true" aria-labelledby="wf-title" className="wf-dialog gs-dialog">
-      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・見学</p><h2 id="wf-title">業務ワークフロー <span>工程表</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label="ワークフローを閉じる" onClick={onClose}>×</button></header>
+  return <><div className={standalone ? "wf-page-surface" : "wf-overlay no-print"} onMouseDown={(event) => { if (!standalone && event.target === event.currentTarget) onClose(); }}>
+    <div ref={rootRef} role={standalone ? "region" : "dialog"} aria-modal={standalone ? undefined : true} aria-labelledby="wf-title" className={`wf-dialog gs-dialog ${standalone ? "wf-page-dialog" : ""}`}>
+      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・見学</p><h2 id="wf-title" tabIndex={standalone ? -1 : undefined}>業務ワークフロー <span>工程表</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label={standalone ? "業務フローのタブを閉じる" : "ワークフローを閉じる"} onClick={onClose}>×</button></header>
       <div className="wf-scroll">
-        {readOnly && <p className="wf-readonly" role="status">🔒 この実習期は終了済みのため閲覧のみです。管理者に確認してください。</p>}
+        {readOnly && <p className="wf-readonly" role="status">🔒 閲覧のみです。クラウド接続確認中、または終了済み実習期のため編集できません。</p>}
         <div className="gs-person-summary student-identity-color" style={studentIdentityStyle(s)} data-identity-grade={s.grade||'unset'} data-identity-type={s.internshipType==='observation'?'observation':'internship'}><strong>{s.name || '氏名未設定'}（{s.location || '実習先未設定'}）</strong><span>{s.grade ? `${s.grade}年${s.classVal || '―'}組` : ''} {s.teacher || '担当未設定'}</span><span className="gs-identity-kind">{s.internshipType==='observation'?'見学':'実習'}</span><button type="button" className="gs-detail-toggle" aria-expanded={showBasics} onClick={()=>setShowBasics(v=>!v)}>基本情報 {showBasics?'を閉じる':'を編集'}</button></div>
         <section className="gs-related-documents" aria-label="関連文書"><div className="gs-doc-heading"><strong>関連文書</strong><button type="button" onClick={onMaterials}>資料を登録・管理</button></div><div className="gs-document-buttons">{(s.materials||[]).map((m,i)=><button type="button" key={m.id||i} onClick={()=>onOpenMaterial(m)}><span aria-hidden="true">📎 </span>{m.name||'名称未設定'}</button>)}{!(s.materials||[]).length&&<span className="wf-muted">関連文書なし</span>}</div></section>
         {showBasics && <div className="gs-compact-basics">
@@ -1546,7 +1661,7 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, initi
         </div>
         <details className="gs-extra-disclosure"><summary className="gs-detail-toggle">メモ・関連資料</summary><section className="wf-extras" aria-label="特記事項と関連資料"><div><h3>特記事項・配慮事項</h3><button type="button" className="wf-notes" disabled={readOnly} onClick={() => editText('notes', '特記事項・配慮事項を編集', true)}>{s.notes || '特記事項を入力する'}</button></div><div><h3>関連資料</h3><p className="wf-muted">実施計画・評価票などの登録資料を確認できます。</p><button type="button" className="wf-secondary" onClick={onMaterials}>関連資料を開く（{(s.materials || []).length}件）</button></div></section></details>
       </div>
-      <footer className="wf-footer"><p className="wf-muted" aria-live="polite">変更は通常の保存先へ反映します。状態は選択して変更でき、順番による操作制限はありません。</p><button type="button" className="wf-secondary" onClick={onClose}>{returnToOverview?'業務一覧へ戻る':'閉じる'}</button></footer>
+      <footer className="wf-footer"><p className="wf-muted" aria-live="polite">変更は通常の保存先へ反映します。状態は選択して変更でき、順番による操作制限はありません。</p><button type="button" className="wf-secondary" onClick={onClose}>{standalone?'このタブを閉じる':returnToOverview?'業務一覧へ戻る':'閉じる'}</button></footer>
     </div>
   </div>
       {quickAdd && <AppUtilityDialog title="日付から予定を追加" suspended={suspended} onClose={()=>{if(!quickSaving)setQuickAdd(null);}}><form className="gs-quick-form" onSubmit={saveQuickAdd}>
@@ -2076,7 +2191,7 @@ function AppUtilityDialog({ title, onClose, children, wide = false, suspended = 
   return <div className="sb-utility-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`sb-utility-dialog ${wide ? 'sb-board-dialog' : ''} ${className}`}><header><h2>{title}</h2><button type="button" className="sb-icon-button" aria-label={`${title}を閉じる`} onClick={onClose}>×</button></header><div className="sb-utility-body">{children}</div></section></div>;
 }
 
-// v3.34.3: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
+// v3.36.0: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
 const WORKFLOW_OVERVIEW_COLUMNS=[
   {key:'phone',title:'事前電話連絡'}, {key:'doc',title:'保護者お知らせ'},
   {key:'greeting',title:'事前あいさつ・打合せ'}, {key:'gift',title:'菓子折'},
@@ -2161,7 +2276,16 @@ const chooseActivePeriod=(list,preferred)=>{
   return list.reduce((latest,p)=>!latest||Number(p.createdAtClient||0)>=Number(latest.createdAtClient||0)?p:latest,null)?.id||DEFAULT_PERIOD_ID;
 };
 
+// v3.36.0: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
+const readWorkflowPage = () => {
+  if (!location.hash.startsWith('#workflow?')) return null;
+  const q = new URLSearchParams(location.hash.slice('#workflow?'.length));
+  const student = q.get('student') || '', room = q.get('room') || '', period = q.get('period') || '';
+  const valid = [student, room, period].every(v => v.length > 0 && v.length <= 512 && !v.includes('/') && !/[\x00-\x1f]/.test(v));
+  return { student, room, period, project: q.get('project') || '', invalid: !valid };
+};
 function App() {
+  const [workflowPage] = useState(readWorkflowPage);
   // v3.5: 外部 config.js が読み込まれていれば window.FIREBASE_CONFIG を優先利用。
   // 無ければ従来通り localStorage の手動入力値にフォールバック。
   const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => {
@@ -2177,7 +2301,7 @@ function App() {
   const [isConfigModalDragOver, setIsConfigModalDragOver] = useState(false);
   const [configDropMessage, setConfigDropMessage] = useState('');
   const configFileInputRef = useRef(null);
-  const [roomKey, setRoomKey] = useState(() => localStorage.getItem('school_room_key') || '3-1');
+  const [roomKey, setRoomKey] = useState(() => (workflowPage && !workflowPage.invalid ? workflowPage.room : '') || localStorage.getItem('school_room_key') || '3-1');
   const [tempRoomKey, setTempRoomKey] = useState(roomKey);
   const [showConfigText, setShowConfigText] = useState(false);
   const [availableRooms, setAvailableRooms] = useState([]);
@@ -2187,19 +2311,29 @@ function App() {
   const [roomSwitchError, setRoomSwitchError] = useState('');
   const [myTeacherName, setMyTeacherName] = useState(() => localStorage.getItem('my_teacher_name') || '');
 
-  const { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError } =
-    useFirestoreSync(firebaseConfigStr, roomKey);
+  const configuredProject = (() => { try { return JSON.parse(firebaseConfigStr || '{}').projectId || ''; } catch { return ''; } })();
+  const workflowConfigMismatch = !!(workflowPage?.project && workflowPage.project !== configuredProject);
+  const { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError, cloudReadOnly, cloudConfigured, cachedPeriods, cacheSavedAt, cacheNotice, cacheEnabled, pendingWrites, clearTemporaryCache, retryConnection, cloudScopeKey } =
+    useFirestoreSync(workflowConfigMismatch || workflowPage?.invalid ? '' : firebaseConfigStr, roomKey);
   const { history, redo, push: pushHistory, popUndo, popRedo, clear: clearHistory } = useHistory(10);
   const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
+  const requireWriteAccess = () => {
+    if (workflowPage?.invalid || workflowConfigMismatch || (workflowPage && roomKey !== workflowPage.room)) { showAlert('リンクと接続設定が一致しません。元のカレンダーから開き直してください。'); return false; }
+    if (!cloudConfigured) return !cloudWriteGate.configured;
+    if (canWriteCloud(cloudScopeKey)) return true;
+    showAlert('クラウドの最新データを確認するまでは閲覧のみです。端末の一時データはクラウドに書き戻しません。接続を確認してから操作してください。');
+    return false;
+  };
+
 
   // v3.25: 実習期（前期・後期・年度別など）をルーム内で共有する。
   const [periods, setPeriods] = useState(()=>readLocalPeriods(roomKey));
-  const [activePeriodId, setActivePeriodIdState] = useState(()=>chooseActivePeriod(readLocalPeriods(roomKey),readPeriodSelection(roomKey)));
-  const periodChoiceRef=useRef({room:roomKey,id:readPeriodSelection(roomKey)});
+  const [activePeriodId, setActivePeriodIdState] = useState(()=>chooseActivePeriod(readLocalPeriods(roomKey),workflowPage?.period || readPeriodSelection(roomKey)));
+  const periodChoiceRef=useRef({room:roomKey,id:workflowPage?.period || readPeriodSelection(roomKey)});
   const setActivePeriodId=useCallback((id)=>{
     periodChoiceRef.current={room:roomKey,id};
     setActivePeriodIdState(id);
-    try{localStorage.setItem(`active_internship_period${ENV_SUFFIX}_${roomKey}`,id);}catch{}
+    if (!workflowPage) { try{localStorage.setItem(`active_internship_period${ENV_SUFFIX}_${roomKey}`,id);}catch{} }
   },[roomKey]);
   const [isPeriodManagerOpen, setIsPeriodManagerOpen] = useState(false);
   const [newPeriodName, setNewPeriodName] = useState('2026年度 後期');
@@ -2208,59 +2342,28 @@ function App() {
   const periodBackupInputRef = useRef(null);
 
   useEffect(() => {
-    const storageKey = `internship_periods${ENV_SUFFIX}_${roomKey}`;
-    const activeKey = `active_internship_period${ENV_SUFFIX}_${roomKey}`;
-    let unsubscribe = null;
-    let periodEffectActive=true;
-    if(periodChoiceRef.current.room!==roomKey)periodChoiceRef.current={room:roomKey,id:readPeriodSelection(roomKey)};
-    const applyPeriodList=(source)=>{
-      if(!periodEffectActive)return;
-      const list=source.length?source:[DEFAULT_PERIOD];setPeriods(list);
-      const chosen=chooseActivePeriod(list,periodChoiceRef.current.id);
-      setActivePeriodIdState(chosen);
-      try{localStorage.setItem(activeKey,chosen);}catch{}
+    let active = true;
+    if (periodChoiceRef.current.room !== roomKey) periodChoiceRef.current = { room: roomKey, id: workflowPage?.period || readPeriodSelection(roomKey) };
+    const apply = (source) => {
+      if (!active) return;
+      const map = new Map([[DEFAULT_PERIOD_ID, { ...DEFAULT_PERIOD }]]);
+      source.forEach((p) => map.set(p.id, { ...p }));
+      const list = Array.from(map.values()).sort((a,b) => (a.createdAtClient || 0) - (b.createdAtClient || 0));
+      setPeriods(list); setActivePeriodIdState(chooseActivePeriod(list, periodChoiceRef.current.id));
     };
-
-    if (connectionStatus === 'connected' && window.firebase) {
-      const db = window.firebase.app().firestore();
-      // v3.25.3: 既存の students コレクション内にメタデータを保存する。
-      // 新しい periods コレクションを許可していない既存のFirestoreルールでも動作する。
-      const studentsRef = db.collection('rooms').doc(roomKey).collection('students');
-      let metaPeriods = [];
-      let legacyPeriods = [];
-      const publishPeriods = () => {
-        const map = new Map([[DEFAULT_PERIOD_ID, { ...DEFAULT_PERIOD }]]);
-        [...legacyPeriods, ...metaPeriods].forEach((p) => map.set(p.id, { ...map.get(p.id), ...p }));
-        const list = Array.from(map.values()).sort((a, b) => (a.createdAtClient || 0) - (b.createdAtClient || 0));
-        applyPeriodList(list);
-      };
-      unsubscribe = studentsRef.onSnapshot((snap) => {
-        metaPeriods = [];
-        snap.forEach((d) => {
-          const data = d.data() || {};
-          if (data.recordType === 'period') metaPeriods.push({ id: data.periodId || d.id.replace(PERIOD_META_PREFIX, ''), ...data });
-        });
-        publishPeriods();
-      }, (err) => console.warn('period metadata snapshot:', err.message));
-      // v3.25〜v3.25.2で作成済みの periods コレクションがあれば一度だけ読み込み、
-      // students 内のメタデータ文書へ移行する。権限が無い場合は静かに無視する。
-      db.collection('rooms').doc(roomKey).collection('periods').get().then((snap) => {
-        legacyPeriods = [];
-        snap.forEach((d) => legacyPeriods.push({ id: d.id, ...d.data() }));
-        publishPeriods();
-        legacyPeriods.forEach((p) => {
-          const { id, ...body } = p;
-          studentsRef.doc(periodMetaDocId(id)).set({ ...body, recordType: 'period', periodId: id }, { merge: true }).catch(() => {});
-        });
-      }).catch(() => {});
-    } else {
-      try {
-        const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        applyPeriodList(Array.isArray(stored)?stored:[]);
-      } catch (e) { applyPeriodList([DEFAULT_PERIOD]); }
+    if (!cloudConfigured) apply(readLocalPeriods(roomKey));
+    else {
+      apply(cachedPeriods);
+      if (connectionStatus === 'connected' && window.firebase) {
+        // Legacy metadata is read-only. Never auto-upload old/local metadata.
+        guardedFirestore(window.firebase.app().firestore(), roomKey).collection('rooms').doc(roomKey).collection('periods').get({ source: 'server' }).then((snap) => {
+          const legacy = []; snap.forEach(d => legacy.push({ ...d.data(), id: d.id }));
+          apply([...legacy, ...cachedPeriods]);
+        }).catch(() => {});
+      }
     }
-    return () => { periodEffectActive=false; if (unsubscribe) unsubscribe(); };
-  }, [connectionStatus, roomKey]);
+    return () => { active = false; };
+  }, [roomKey, cloudConfigured, cachedPeriods, connectionStatus, cloudScopeKey]);
 
   useEffect(() => {
     setSelectedIds(new Set());
@@ -2276,7 +2379,7 @@ function App() {
   // GitHub Pages / 端末保存時の自動削除リスクを下げる。
   useEffect(() => { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); }, []);
   const { onlineCount, onlineMembers } = usePresence(connectionStatus, roomKey, myTeacherName);
-  const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost, hidePost: hideBoardPost, deletedHistory: boardDeletedHistory, hiddenHistory: boardHiddenHistory, restoreHiddenPost: restoreHiddenBoardPost, clearDeletedHistory: clearBoardDeletedHistory, clearHiddenHistory: clearBoardHiddenHistory } = useBoardSync(connectionStatus, roomKey);
+  const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost, hidePost: hideBoardPost, deletedHistory: boardDeletedHistory, hiddenHistory: boardHiddenHistory, restoreHiddenPost: restoreHiddenBoardPost, clearDeletedHistory: clearBoardDeletedHistory, clearHiddenHistory: clearBoardHiddenHistory } = useBoardSync(connectionStatus, roomKey, cloudConfigured, cloudScopeKey);
   // v3.16: 掲示板の履歴モーダル開閉と表示タブ（'deleted' | 'hidden'）
   const [isBoardHistoryOpen, setIsBoardHistoryOpen] = useState(false);
   const [boardHistoryTab, setBoardHistoryTab] = useState('deleted');
@@ -2325,7 +2428,7 @@ function App() {
     [students, todayTargetDate]);
 
   useEffect(() => {
-    if (isLoading || isNamePromptOpen || todayTargetsShownRef.current || todayTargets.length === 0) return;
+    if (workflowPage || isLoading || isNamePromptOpen || todayTargetsShownRef.current || todayTargets.length === 0) return;
     // クラウド接続直後の編集者名入力モーダルを優先し、閉じた後に表示する。
     const timer = setTimeout(() => {
       if (todayTargetsShownRef.current) return;
@@ -2349,6 +2452,23 @@ function App() {
   const [workflowReturnToOverview,setWorkflowReturnToOverview]=useState(false);
   const openWorkflowOverview=()=>{setSidebarOpen(false);setWorkflowInitialTask(null);setWorkflowReturnToOverview(false);setCurrentView('workflow');};
   const openOverviewStudent=(student,task)=>{setWorkflowInitialTask(task);setWorkflowReturnToOverview(true);setSelectedStudentDetail(student);};
+  const workflowHref = (student) => {
+    const url = new URL(location.href); url.search = '';
+    const q = new URLSearchParams({ student: student.id, room: roomKey, period: student.periodId || DEFAULT_PERIOD_ID });
+    if (configuredProject) q.set('project', configuredProject);
+    url.hash = 'workflow?' + q.toString(); return url.href;
+  };
+  const calendarHref = (() => { const u = new URL(location.href); u.hash = ''; return u.href; })();
+  const workflowPageStudent = workflowPage && !workflowPage.invalid && !workflowConfigMismatch
+    ? students.find(s => s.id === workflowPage.student && (s.periodId || DEFAULT_PERIOD_ID) === workflowPage.period) : null;
+  const closeWorkflowPage = () => {
+    if (cloudWriteGate.pending > 0) { showAlert('保存確認待ちの変更があります。保存完了を確認してから閉じてください。'); return; }
+    // Script-opened tabs can close; a directly opened/bookmarked page gets an in-page fallback link.
+    window.close();
+    setTimeout(() => setWorkflowCloseNotice(true), 100);
+  };
+  const [workflowCloseNotice, setWorkflowCloseNotice] = useState(false);
+  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.36.0'; }, [workflowPage]);
   const closeWorkflowDetail=()=>{setSelectedStudentDetail(null);setWorkflowInitialTask(null);if(workflowReturnToOverview)setCurrentView('workflow');setWorkflowReturnToOverview(false);};
   const [draggingStudentId, setDraggingStudentId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
@@ -2456,8 +2576,8 @@ function App() {
   //   ・端末ごとに「管理者としてログイン」した状態を localStorage に保持。
   //   ・各生徒の lockedFields[] に含まれるフィールド名（例: 'phoneStatus' / 'docStatus' / 'patrol:p-xxx'）は
   //     一般利用者にはクリック不可＋グレーアウト。
-  const [adminPasswordHash, setAdminPasswordHash] = useState(() => { try { return localStorage.getItem(`admin_password_hash_${localStorage.getItem('school_room_key') || '3-1'}`) || ''; } catch (e) { return ''; } });
-  const [isAdmin, setIsAdmin] = useState(() => { try { return localStorage.getItem(`is_admin_${localStorage.getItem('school_room_key') || '3-1'}`) === '1'; } catch (e) { return false; } });
+  const [adminPasswordHash, setAdminPasswordHash] = useState(() => { try { return localStorage.getItem(`admin_password_hash_${roomKey}`) || ''; } catch (e) { return ''; } });
+  const [isAdmin, setIsAdmin] = useState(() => { try { return localStorage.getItem(`is_admin_${roomKey}`) === '1'; } catch (e) { return false; } });
   const [adminLoginOpen, setAdminLoginOpen] = useState(false);
   const [adminLoginInput, setAdminLoginInput] = useState('');
   const [adminSetupOpen, setAdminSetupOpen] = useState(false);
@@ -2487,7 +2607,7 @@ function App() {
       if (!myTeacherName) return;
       try {
         if (fbConnected) {
-          const db = window.firebase.firestore();
+          const db = guardedFirestore(window.firebase.firestore(), roomKey);
           await db.collection('rooms').doc(rk).collection('visitors').doc(`${todayKey}_${myTeacherName}`).set({ teacherName: myTeacherName, dateKey: todayKey, editCount: window.firebase.firestore.FieldValue.increment(n), lastSeenAt: Date.now() }, { merge: true });
         } else {
           const cur = JSON.parse(localStorage.getItem(lsKey) || '{}');
@@ -2503,7 +2623,7 @@ function App() {
     let unsubscribe = null;
     let hbTimer = null;
     if (fbConnected) {
-      const visitorsRef = window.firebase.firestore().collection('rooms').doc(rk).collection('visitors');
+      const visitorsRef = guardedFirestore(window.firebase.firestore(), roomKey).collection('rooms').doc(rk).collection('visitors');
       unsubscribe = visitorsRef.where('dateKey', '==', todayKey).onSnapshot((snap) => {
         const next = {};
         snap.forEach((d) => { const v = d.data(); if (v && v.teacherName) next[v.teacherName] = { firstSeenAt: v.firstSeenAt || 0, lastSeenAt: v.lastSeenAt || 0, editCount: v.editCount || 0 }; });
@@ -2589,7 +2709,7 @@ function App() {
       });
     };
     if (fbConnected) {
-      const db = window.firebase.firestore();
+      const db = guardedFirestore(window.firebase.firestore(), roomKey);
       const visitorsRef = db.collection('rooms').doc(rk).collection('visitors');
       const presenceRef = db.collection('rooms').doc(rk).collection('presence');
       let visitorsSnap = null;
@@ -2646,6 +2766,7 @@ function App() {
   // 今後は AddEditModal を開くだけにして、モーダル内の保存ボタンを
   // 押した時にだけ handleSaveStudent 経由で実際の登録が行われる。
   const openAddModal = (initialInternshipDates = []) => {
+    if (!requireWriteAccess()) return false;
     if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。管理者にロック解除を依頼してください。'); return; }
     setEditingStudent(null);
     setFormDates({
@@ -2656,6 +2777,7 @@ function App() {
   };
 
   const openEditModal = (student) => {
+    if (!requireWriteAccess()) return false;
     if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。管理者にロック解除を依頼してください。'); return; }
     setEditingStudent(student);
     setFormDates({
@@ -2687,25 +2809,29 @@ function App() {
   const [filterTeacherThankYouStatus, setFilterTeacherThankYouStatus] = useState('all');
 
   const persistPartial = async (studentId, partial) => {
+    if (!requireWriteAccess()) return false;
     const targetStudent = students.find((s) => s.id === studentId);
     const targetPeriodId = targetStudent?.periodId || DEFAULT_PERIOD_ID;
     const targetPeriod = periods.find((p) => p.id === targetPeriodId);
     if (targetPeriod?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return; }
     if (connectionStatus === 'connected' && window.firebase) {
       try {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).collection('students').doc(studentId).update(partial);
       } catch (e) {
         showAlert(`リアルタイム更新に失敗しました: ${e.message}`);
+        return false;
       }
     } else {
       const updated = students.map((s) => s.id === studentId ? { ...s, ...partial } : s);
       setStudents(updated);
       localStorage.setItem(`local_students_${roomKey}`, JSON.stringify(updated));
     }
+    return true;
   };
 
   const patchWorkflowStudent = async (student, partial) => {
+    if (!requireWriteAccess()) return false;
     const current = students.find((item) => item.id === student.id) || student;
     const period = periods.find((item) => item.id === (current.periodId || DEFAULT_PERIOD_ID));
     if (period?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return false; }
@@ -2720,15 +2846,15 @@ function App() {
     }
     const before = Object.fromEntries(Object.keys(partial).map((field) => [field, current[field] ?? (field === 'workflowExemptions' ? [] : '')]));
     recordUpdate(current.id, before, partial);
-    await persistPartial(current.id, partial);
-    return true;
+    return await persistPartial(current.id, partial);
   };
 
   const writeStudentRaw = async (student) => {
+    if (!requireWriteAccess()) return false;
     const { id, ...data } = student;
     if (connectionStatus === 'connected' && window.firebase) {
       try {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).collection('students').doc(id).set(data);
       } catch (e) {
         showAlert(`データの復元に失敗しました: ${e.message}`);
@@ -2744,9 +2870,10 @@ function App() {
   };
 
   const removeStudentRaw = async (studentId) => {
+    if (!requireWriteAccess()) return false;
     if (connectionStatus === 'connected' && window.firebase) {
       try {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).collection('students').doc(studentId).delete();
       } catch (e) {
         showAlert(`削除の取消に失敗しました: ${e.message}`);
@@ -2759,6 +2886,7 @@ function App() {
   };
 
   const applyHistoryEntry = async (entry, direction) => {
+    if (!requireWriteAccess()) return false;
     if (!entry || !entry.kind) return;
     if (entry.kind === 'update') {
       const target = direction === 'undo' ? entry.before : entry.after;
@@ -2773,21 +2901,24 @@ function App() {
   };
 
   const handleUndo = async () => {
+    if (!requireWriteAccess()) return false;
     const entry = popUndo();
     if (entry) await applyHistoryEntry(entry, 'undo');
   };
 
   const handleRedo = async () => {
+    if (!requireWriteAccess()) return false;
     const entry = popRedo();
     if (entry) await applyHistoryEntry(entry, 'redo');
   };
 
   // v3.9: 編集アクションと同時に「今日の訪問者」の編集件数を +1 する。undo/redo からは呼ばれないので重複カウントしない。
-  const recordUpdate = (studentId, before, after) => { const s = students.find((x) => x.id === studentId); const p = periods.find((x) => x.id === (s?.periodId || DEFAULT_PERIOD_ID)); if (p?.locked && !isAdmin) return false; pushHistory({ kind: 'update', studentId, before, after }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} return true; };
-  const recordCreate = (student) => { pushHistory({ kind: 'create', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
-  const recordDelete = (student) => { pushHistory({ kind: 'delete', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
+  const recordUpdate = (studentId, before, after) => { if (!requireWriteAccess()) return false; const s = students.find((x) => x.id === studentId); const p = periods.find((x) => x.id === (s?.periodId || DEFAULT_PERIOD_ID)); if (p?.locked && !isAdmin) return false; pushHistory({ kind: 'update', studentId, before, after }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} return true; };
+  const recordCreate = (student) => { if (!requireWriteAccess()) return false; pushHistory({ kind: 'create', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
+  const recordDelete = (student) => { if (!requireWriteAccess()) return false; pushHistory({ kind: 'delete', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
 
   const handleSaveStudent = async (studentData) => {
+    if (!requireWriteAccess()) return false;
     if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため登録・編集できません。'); return; }
     setIsLoading(true);
     const today = getTodayString();
@@ -2802,7 +2933,7 @@ function App() {
 
     if (connectionStatus === 'connected' && window.firebase) {
       try {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         const ref = db.collection('rooms').doc(roomKey).collection('students');
         if (editingStudent) {
           await ref.doc(editingStudent.id).update(prepared);
@@ -2832,6 +2963,7 @@ function App() {
   };
 
   const handleInstantToggle = async (student, field, currentStatus) => {
+    if (!requireWriteAccess()) return false;
     const studentPeriod = periods.find((p) => p.id === (student.periodId || DEFAULT_PERIOD_ID));
     if (studentPeriod?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return; }
     const stepKey = FIELD_TO_STEP[field];
@@ -2853,6 +2985,7 @@ function App() {
   };
 
   const handleAddInternshipDate = async (student, dateKey) => {
+    if (!requireWriteAccess()) return false;
     const current = student.internshipDates || [];
     if (current.includes(dateKey)) return;
     const next = [...current, dateKey].sort();
@@ -2861,6 +2994,7 @@ function App() {
   };
 
   const handleRemoveInternshipDate = async (student, dateKey) => {
+    if (!requireWriteAccess()) return false;
     const current = student.internshipDates || [];
     if (!current.includes(dateKey)) return;
     const next = current.filter((d) => d !== dateKey);
@@ -2869,6 +3003,7 @@ function App() {
   };
 
   const handleAddPatrol = async (student, date, time, teacher) => {
+    if (!requireWriteAccess()) return false;
     const current = student.patrols || [];
     const next = [...current, { id: 'p-' + Date.now(), date, time: time || '', teacher: teacher || '', done: false }].sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
     recordUpdate(student.id, { patrols: current }, { patrols: next });
@@ -2876,6 +3011,7 @@ function App() {
   };
 
   const handleRemovePatrol = async (student, patrolId) => {
+    if (!requireWriteAccess()) return false;
     const current = student.patrols || [];
     const next = current.filter((p) => p.id !== patrolId);
     recordUpdate(student.id, { patrols: current }, { patrols: next });
@@ -2906,6 +3042,7 @@ function App() {
   });
 
   const handleAddMaterial = async (material) => {
+    if (!requireWriteAccess()) return false;
     const target = students.find((s) => s.id === materialModalStudentId);
     if (!target) return;
     const matId = 'mat-' + Date.now();
@@ -2934,6 +3071,7 @@ function App() {
   };
 
   const handleDeleteMaterial = async (materialId) => {
+    if (!requireWriteAccess()) return false;
     const target = students.find((s) => s.id === materialModalStudentId);
     if (!target) return;
     const current = target.materials || [];
@@ -2949,6 +3087,7 @@ function App() {
   };
 
   const handleRenameMaterial = async (materialId, newName) => {
+    if (!requireWriteAccess()) return false;
     const target = students.find((s) => s.id === materialModalStudentId);
     if (!target) return;
     const trimmed = String(newName || '').trim();
@@ -3000,14 +3139,16 @@ function App() {
   };
 
   const handleDeleteStudent = (studentId) => {
+    if (!requireWriteAccess()) return false;
     if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため削除できません。'); return; }
     showConfirm('この生徒の実習進捗データを削除してもよろしいですか？', async () => {
+      if (!requireWriteAccess()) return false;
       const target = students.find((s) => s.id === studentId);
       if (target) recordDelete(target);
       setIsLoading(true);
       if (connectionStatus === 'connected' && window.firebase) {
         try {
-          const db = window.firebase.app().firestore();
+          const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
           await db.collection('rooms').doc(roomKey).collection('students').doc(studentId).delete();
         } catch (e) {
           showAlert(`削除に失敗しました: ${e.message}`);
@@ -3065,7 +3206,7 @@ function App() {
   // 初期化時にクラウド側にないがローカルにある場合はクラウドへ上げる。
   useEffect(() => {
     if (connectionStatus !== 'connected' || !window.firebase) return;
-    const db = window.firebase.app().firestore();
+    const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
     const ref = db.collection('rooms').doc(roomKey);
     const unsub = ref.onSnapshot((snap) => {
       const data = snap.data() || {};
@@ -3077,8 +3218,7 @@ function App() {
         try { localStorage.setItem(`admin_password_hash_${roomKey}`, cloudHash); } catch (e) {}
         // クラウドと一致しない “以前設定した管理者状態” を強制クリアしない（他端末で変更しただけの可能性もあるため）
       } else if (localHash) {
-        // クラウド未設定だがローカルにはある → クラウドへ同期
-        ref.set({ adminPasswordHash: localHash }, { merge: true }).catch(() => {});
+        // v3.36.0: local credentials must never be uploaded automatically.
       }
     }, (err) => { console.warn('admin hash snapshot:', err.message); });
     return () => { try { unsub(); } catch (e) {} };
@@ -3090,6 +3230,7 @@ function App() {
   //            ローカルだけは必ず反映する（Firestore ルールで rooms/{rk} ドキュメント自体
   //            への書き込みが許可されていない場合でも管理者登録は完了する）。
   const setAdminPasswordTo = async (newPassword, oldPassword, newPassword2) => {
+    if (!requireWriteAccess()) return false;
     if (adminPasswordHash) {
       if (computeAdminHash(oldPassword) !== adminPasswordHash) {
         showAlert('現在の管理者パスワードが違います。');
@@ -3118,7 +3259,7 @@ function App() {
     // 失敗しても無視。useEffect の snapshot listener が後で自動で再同期するため、ユーザーへエラーは出さない。
     if (connectionStatus === 'connected' && window.firebase) {
       try {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).set({ adminPasswordHash: newHash }, { merge: true });
       } catch (e) { /* ignore: ローカル保存だけで管理者として登録は完了している */ }
     }
@@ -3186,7 +3327,7 @@ function App() {
     // 2) クラウド接続中なら複数シグナルを並列でチェック
     if (connectionStatus === 'connected' && window.firebase) {
       try {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         const roomRef = db.collection('rooms').doc(target);
         const checks = await Promise.all([
           roomRef.get().then((s) => !!s.exists).catch(() => false),
@@ -3248,7 +3389,7 @@ function App() {
       } catch (e) {}
       if (connectionStatus === 'connected' && window.firebase) {
         try {
-          const db = window.firebase.app().firestore();
+          const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
           const snap = await db.collection('rooms').get();
           snap.forEach((doc) => rooms.add(doc.id));
         } catch (e) { console.warn('rooms list error:', e.message); }
@@ -3303,7 +3444,7 @@ function App() {
   useEffect(() => {
     if (connectionStatus !== 'connected' || !window.firebase) return;
     try {
-      const db = window.firebase.app().firestore();
+      const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
       db.collection('rooms').doc(roomKey).set({
         lastSeen: window.firebase.firestore.FieldValue.serverTimestamp(),
         name: roomKey
@@ -3319,15 +3460,17 @@ function App() {
   // v3.6: 環境設定モーダルから「過去データを一括削除」する。パスワード「@kirari」必須。
   //        クラウド接続中なら Firestore のドキュメントをバッチ削除、ローカルなら localStorage を消去。
   const handleWipeAllData = (password) => {
+    if (!requireWriteAccess()) return false;
     if (String(password || '').trim() !== '@kirari') {
       showAlert('パスワードが違います。正しいパスワードを入力してください。');
       return;
     }
     showConfirm(`本当にこのルーム「${roomKey}」の過去データをすべて削除しますか？この操作は取り消せません（Undo不可）。`, async () => {
+      if (!requireWriteAccess()) return false;
       setIsLoading(true);
       try {
         if (connectionStatus === 'connected' && window.firebase) {
-          const db = window.firebase.app().firestore();
+          const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
           const snap = await db.collection('rooms').doc(roomKey).collection('students').get();
           const docs = snap.docs;
           const batchSize = 400;
@@ -3714,12 +3857,13 @@ function App() {
   };
 
   const handleBulkImport = async (rows) => {
+    if (!requireWriteAccess()) return false;
     if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため一括登録できません。'); return; }
     rows = rows.map((r) => ({ ...r, periodId: activePeriodId }));
     setIsLoading(true);
     try {
       if (connectionStatus === 'connected' && window.firebase) {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         const ref = db.collection('rooms').doc(roomKey).collection('students');
         const created = [];
         for (const r of rows) {
@@ -3753,6 +3897,7 @@ function App() {
   });
 
   const handleCreatePeriod = async () => {
+    if (!requireWriteAccess()) return false;
     if (!isAdmin) { showAlert('新しい実習期の作成は管理者のみ行えます。'); return; }
     const name = newPeriodName.trim();
     if (!name) { showAlert('実習期の名前を入力してください。'); return; }
@@ -3763,7 +3908,7 @@ function App() {
     setIsLoading(true);
     try {
       if (connectionStatus === 'connected' && window.firebase) {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(newId)).set({ recordType: 'period', periodId: newId, name, locked: false, createdAtClient: meta.createdAtClient, createdAt: window.firebase.firestore.FieldValue.serverTimestamp() });
         if (lockPreviousPeriod) await db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(activePeriodId)).set({ recordType: 'period', periodId: activePeriodId, name: activePeriod.name || DEFAULT_PERIOD.name, locked: true, createdAtClient: activePeriod.createdAtClient || 0 }, { merge: true });
         const ref = db.collection('rooms').doc(roomKey).collection('students');
@@ -3782,11 +3927,12 @@ function App() {
   };
 
   const handleTogglePeriodLock = async (period) => {
+    if (!requireWriteAccess()) return false;
     if (!isAdmin) { showAlert('実習期のロック変更は管理者のみ行えます。'); return; }
     const locked = !period.locked;
     try {
       if (connectionStatus === 'connected' && window.firebase) {
-        const db = window.firebase.app().firestore();
+        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(period.id)).set({ recordType: 'period', periodId: period.id, name: period.name, locked, createdAtClient: period.createdAtClient || 0 }, { merge: true });
       } else {
         const next = periods.map((p) => p.id === period.id ? { ...p, locked } : p);
@@ -3803,6 +3949,7 @@ function App() {
   };
 
   const handleImportAllData = (file) => {
+    if (!requireWriteAccess()) return false;
     if (!isAdmin) { showAlert('バックアップの読み込みは管理者のみ行えます。'); return; }
     if (!file) return;
     const reader = new FileReader();
@@ -3811,10 +3958,11 @@ function App() {
         const data = JSON.parse(String(reader.result));
         if (data.app !== 'internship-manager' || !Array.isArray(data.periods) || !Array.isArray(data.students)) throw new Error('対応するバックアップ形式ではありません。');
         showConfirm(`バックアップから実習期${data.periods.length}件・生徒記録${data.students.length}件を復元します。既存の同じIDは上書きされます。`, async () => {
+          if (!requireWriteAccess()) return false;
           setIsLoading(true);
           try {
             if (connectionStatus === 'connected' && window.firebase) {
-              const db = window.firebase.app().firestore();
+              const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
               for (const p of data.periods) { const { id, ...body } = p; await db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(id)).set({ ...body, recordType: 'period', periodId: id }, { merge: true }); }
               for (const s of data.students) { const { id, ...body } = s; await db.collection('rooms').doc(roomKey).collection('students').doc(id).set(body, { merge: true }); }
             } else {
@@ -3848,14 +3996,16 @@ function App() {
   };
 
   const handleBulkDelete = () => {
+    if (!requireWriteAccess()) return false;
     if (isActivePeriodLocked && !isAdmin) { showAlert('この実習期は終了済みのため削除できません。'); return; }
     if (selectedIds.size === 0) return;
     showConfirm(`選択中の${selectedIds.size}名の進捗データを削除してもよろしいですか？「戻る」ボタンで取り消せます。`, async () => {
+      if (!requireWriteAccess()) return false;
       const targets = activeStudents.filter((s) => selectedIds.has(s.id));
       setIsLoading(true);
       try {
         if (connectionStatus === 'connected' && window.firebase) {
-          const db = window.firebase.app().firestore();
+          const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
           for (const t of targets) {
             await db.collection('rooms').doc(roomKey).collection('students').doc(t.id).delete();
             recordDelete(t);
@@ -3895,6 +4045,20 @@ function App() {
     document.addEventListener('keydown', keydown);
     return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', keydown); menuButtonRef.current?.focus(); };
   }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (!cloudReadOnly) return;
+    setIsAddEditOpen(false); setEditingStudent(null); setDatePickerState(null); setTextEditState(null); setSelectEditState(null); setPatrolEditState(null); setIsBulkImportOpen(false);
+    clearHistory();
+  }, [cloudReadOnly, cloudScopeKey]);
+  useEffect(() => {
+    const warn = (event) => { if (cloudWriteGate.pending > 0) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn);
+  }, []);
+  const renderCacheStatus = () => (cloudConfigured && <section className={`cache-status no-print ${cloudReadOnly ? 'cache-status-readonly' : ''}`} aria-label="クラウド同期と端末一時保存">
+        <div role="status"><strong>{cloudReadOnly ? '🔒 閲覧のみ・クラウド確認中' : '✓ 最新データを受信済み'}</strong><p>{cloudReadOnly ? (cacheSavedAt ? `前回保存分（${new Date(cacheSavedAt).toLocaleString('ja-JP')}）を表示しています。最新情報ではありません。` : '最新データの受信を待っています。受信前の追加・編集・削除・復元はできません。') : '端末の一時データをクラウドへ自動で書き戻すことはありません。'} {pendingWrites > 0 && `保存確認待ち：${pendingWrites}件。保存完了前に画面を閉じないでください。`}</p>{connectionError && <p>{connectionError}</p>}{cacheNotice && <p>{cacheNotice}</p>}<p className="cache-status-note">一時保存は最長24時間。期限後の再表示を停止し、利用中・次回起動時に削除します。共有端末では利用後に削除してください。</p></div>
+        <div className="cache-status-actions">{cloudReadOnly && <button type="button" disabled={pendingWrites > 0} onClick={retryConnection}>接続を再試行</button>}<button type="button" disabled={!cacheEnabled} onClick={() => showConfirm('このルームの端末一時データだけを削除します。クラウドの情報は削除しません。この画面では一時保存を停止します。', clearTemporaryCache)}>端末の一時データを削除</button></div>
+      </section>);
 
   return (
     <div className={`sb-app min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans ${sidebarOpen ? 'sb-open' : ''}`}>
@@ -3986,6 +4150,7 @@ function App() {
         </div>
       )}
 
+      {!workflowPage && <>
       {sidebarOpen && <button className="sb-backdrop no-print" aria-label="メニューを閉じる" tabIndex={-1} onClick={() => setSidebarOpen(false)} />}
       <aside ref={sidebarRef} id="app-sidebar" className="sb-sidebar no-print" aria-label="操作メニュー" aria-hidden={!sidebarOpen} inert={!sidebarOpen ? '' : undefined}>
         <div className="sb-sidebar-top"><strong>操作メニュー</strong><button type="button" className="sb-icon-button" aria-label="サイドバーを閉じる" onClick={() => setSidebarOpen(false)}>×</button></div>
@@ -3996,7 +4161,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.34.3 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.36.0 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
@@ -4195,7 +4360,7 @@ function App() {
                 <span>進む</span>
               </button>
 
-              <button onClick={() => { setSidebarOpen(false); setIsBulkImportOpen(true); }}
+              <button disabled={cloudReadOnly} onClick={() => { setSidebarOpen(false); setIsBulkImportOpen(true); }}
                 className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-800 border border-indigo-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                 title="CSV/TSVを使って複数の生徒を一括で登録します">
                 <Upload className="w-4 h-4 text-indigo-600" />
@@ -4292,6 +4457,7 @@ function App() {
         <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : currentView === 'workflow' ? '業務一覧' : 'リスト一覧'}</strong><select className="sb-current-period" aria-label="表示中の実習期" value={activePeriodId} onChange={e=>setActivePeriodId(e.target.value)}>{periods.map(p=><option key={p.id} value={p.id}>{p.locked?'🔒 ':''}{p.name}</option>)}</select></div>
         <div className="sb-filter-chips">{searchQuery && <span className="sb-keyword-chip"><Search className="w-4 h-4"/><span>検索：{searchQuery}</span><button type="button" aria-label="検索条件を解除" onClick={() => setSearchQuery('')}>×</button></span>}{currentView !== 'workflow' && hasActiveFilter && <button type="button" className="sb-icon-button" onClick={clearFilters}>絞り込み解除</button>}</div>
       </div>
+      {renderCacheStatus()}
       {connectionStatus === 'local' && <div className="sb-demo-note no-print"><span>体験デモ：この端末に保存中。共有には環境設定が必要です。</span><button type="button" onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}>環境設定を開く</button></div>}
       {isSearchOpen && <AppUtilityDialog title="検索" onClose={() => setIsSearchOpen(false)}><form className="sb-search-form" onSubmit={(e) => { e.preventDefault(); setSearchQuery(searchDraft.trim()); setIsSearchOpen(false); }}><p>生徒名・実習先・期間などで絞り込みます。表示切替後も検索条件を維持します。</p><label htmlFor="app-search-input">キーワード</label><input id="app-search-input" type="search" value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="生徒名、実習先、期間など"/><div className="sb-dialog-actions"><button type="button" onClick={() => { setSearchQuery(''); setSearchDraft(''); setIsSearchOpen(false); }}>検索を解除</button><button type="button" onClick={() => setIsSearchOpen(false)}>キャンセル</button><button type="submit" className="sb-primary">検索する</button></div></form></AppUtilityDialog>}
       {isBoardPanelOpen && <AppUtilityDialog title="掲示板" wide suspended={isBoardHistoryOpen || !!confirmState || !!alertState} onClose={() => setIsBoardPanelOpen(false)}><div className="sb-board-panel">
@@ -4748,7 +4914,7 @@ function App() {
                           if (ev.type === 'period') {
                             return (
                               <div key={evIdx} data-calendar-grade={ev.student.grade||'unset'} style={calendarGradeStyle(ev.student.grade)} className={`calendar-grade-event text-[10px] px-1.5 py-0.5 rounded border font-bold select-none transition-colors shadow-sm flex items-center justify-between gap-1 ${ev.color}`} title={calendarGradeLabel(ev.student.grade)+'\n'+(ev.title || ev.label)}>
-                                <button onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }} className="truncate text-left flex-1 cursor-pointer">{ev.label}</button>
+                                <a href={workflowHref(ev.student)} target="_blank" rel="noopener noreferrer" data-calendar-workflow-link onClick={e=>e.stopPropagation()} className="truncate text-left flex-1 cursor-pointer" aria-label={`${ev.label}の業務フローを新しいタブで開く`}>{ev.label}<span className="sr-only">（新しいタブ）</span></a>
                                 <button onClick={(e) => { e.stopPropagation(); handleRemoveInternshipDate(ev.student, ev.dateKey); }}
                                   title="この日を実習日から外す"
                                   className="hover:bg-white/60 rounded px-1 shrink-0 text-[10px] font-bold cursor-pointer leading-none">×</button>
@@ -4756,10 +4922,10 @@ function App() {
                             );
                           }
                           return (
-                            <div key={evIdx} data-calendar-grade={ev.student.grade||'unset'} style={calendarGradeStyle(ev.student.grade)} onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }}
-                              className={`text-[10px] px-1.5 py-0.5 rounded border font-bold truncate select-none transition-colors shadow-sm cursor-pointer calendar-grade-event ${ev.color}`} title={calendarGradeLabel(ev.student.grade)+'\n'+ev.label}>
-                              {ev.label}
-                            </div>
+                            <a key={evIdx} href={workflowHref(ev.student)} target="_blank" rel="noopener noreferrer" data-calendar-workflow-link data-calendar-grade={ev.student.grade||'unset'} style={calendarGradeStyle(ev.student.grade)} onClick={e=>e.stopPropagation()}
+                              className={`block text-[10px] px-1.5 py-0.5 rounded border font-bold truncate select-none transition-colors shadow-sm cursor-pointer calendar-grade-event ${ev.color}`} title={calendarGradeLabel(ev.student.grade)+'\n'+ev.label+'（業務フローを新しいタブで開く）'}>
+                              {ev.label}<span className="sr-only">（新しいタブ）</span>
+                            </a>
                           );
                         };
                         const isObservation = (ev) => ev.type === 'period' && ev.student && ev.student.internshipType === 'observation';
@@ -4825,7 +4991,7 @@ function App() {
         <div className="sb-float-actions">
           <button type="button" aria-label="検索を開く" className={searchQuery ? 'sb-search-active' : ''} onClick={() => { setSearchDraft(searchQuery); setIsSearchOpen(true); }}><Search className="w-4 h-4"/><span>検索</span></button>
           <button type="button" aria-label="印刷オプションを開く" onClick={() => setIsPrintOpen(true)}><Printer className="w-4 h-4"/><span>印刷</span></button>
-          <button type="button" className="sb-register" aria-label="新しい実習生を登録" onClick={() => openAddModal()}><Plus className="w-4 h-4"/><span>登録</span></button>
+          <button type="button" className="sb-register" disabled={cloudReadOnly} aria-label="新しい実習生を登録" onClick={() => openAddModal()}><Plus className="w-4 h-4"/><span>登録</span></button>
         </div>
       </div>
       <footer className="bg-white border-t border-slate-200 py-6 px-4 mt-12 shrink-0 no-print">
@@ -4840,13 +5006,22 @@ function App() {
         </div>
       </footer>
 
+      </>}
+      {workflowPage && <>
+        <nav className="workflow-page-nav no-print" aria-label="業務フローページの操作"><div><strong>業務フロー専用ページ</strong><span>元のカレンダーは別タブに残っています</span></div><div><a href={calendarHref}>このタブでカレンダーを開く</a><button type="button" onClick={closeWorkflowPage}>このタブを閉じる</button></div></nav>
+        {renderCacheStatus()}
+        {workflowCloseNotice && <p className="workflow-page-message" role="status">このタブを自動で閉じられませんでした。ブラウザーのタブを閉じるか、上のカレンダーのリンクをご利用ください。</p>}
+        {(!cloudConfigured && !workflowConfigMismatch && !workflowPage.invalid) && <div className="workflow-page-message"><p>端末保存モードです。クラウドの内容を確認する場合は接続設定を読み込んでください。</p><button type="button" onClick={()=>{setTempRoomKey(roomKey);setIsConfigOpen(true);}}>環境設定を開く</button></div>}
+        {!workflowPageStudent && <section className="workflow-page-empty" aria-live="polite"><h1>業務ワークフロー</h1><p>{workflowPage.invalid ? 'リンクの形式が正しくありません。元のカレンダーから開き直してください。' : workflowConfigMismatch ? '接続先がリンクと一致しません。元のカレンダーで接続設定を確認し、開き直してください。' : cloudConfigured && cloudReadOnly ? '対象のデータを確認しています。接続できない場合は再試行してください。' : isLoading ? '対象のデータを読み込んでいます。' : '対象の記録が見つかりません。削除や実習期の変更がないか、元のカレンダーで確認してください。'}</p><a href={calendarHref}>カレンダーを開く</a></section>}
+      </>}
       {/* v3.27.0: 幅広の業務ワークフロー詳細画面 */}
-      {selectedStudentDetail && (() => {
-        const student = students.find((item) => item.id === selectedStudentDetail.id) || selectedStudentDetail;
+      {(workflowPage ? workflowPageStudent : selectedStudentDetail) && (() => {
+        const student = workflowPage ? workflowPageStudent : students.find((item) => item.id === selectedStudentDetail.id);
+        if (!student) return null;
         const period = periods.find((item) => item.id === (student.periodId || DEFAULT_PERIOD_ID));
-        return <StudentWorkflowDialog key={student.id} student={student} initialTask={workflowInitialTask} returnToOverview={workflowReturnToOverview} readOnly={!!period?.locked && !isAdmin} isAdmin={isAdmin}
+        return <StudentWorkflowDialog key={student.id} standalone={!!workflowPage} student={student} initialTask={workflowInitialTask} returnToOverview={workflowReturnToOverview} readOnly={cloudReadOnly || (!!period?.locked && !isAdmin)} isAdmin={isAdmin}
           suspended={!!(textEditState || selectEditState || datePickerState || materialModalStudentId || materialPreview || patrolEditState || alertState || confirmState)}
-          onClose={closeWorkflowDetail} onPatch={patchWorkflowStudent}
+          onClose={workflowPage ? closeWorkflowPage : closeWorkflowDetail} onPatch={patchWorkflowStudent}
           onText={setTextEditState} onSelect={setSelectEditState} onPickDate={setDatePickerState}
           onMaterials={() => setMaterialModalStudentId(student.id)}
           onOpenMaterial={(m)=>{if(m.kind==='url'){if(!/^https?:\/\//i.test(String(m.url||''))){showAlert('http または https のリンクを登録してください。');return;}window.open(m.url,'_blank','noopener,noreferrer');}else if(isPdfMaterial(m)){if(!openPdfInNewTab(m))showAlert('PDFを開けませんでした。ポップアップの許可をご確認ください。');}else if(m.mimeType?.startsWith('image/'))setMaterialPreview(m);else downloadMaterialFile(m);}}
