@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.36.4</title>
+<title>現場実習進捗マネージャー v3.37.0</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -338,7 +338,7 @@
 @media(max-width:640px) { .gs-row-banner { text-align:left; padding-left:8px; } .gs-row-banner .gs-banner-text { position:sticky; left:140px; font-size:20px !important; letter-spacing:.08em; padding:2px 6px; } }
 
 
-/* v3.36.4: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
+/* v3.37.0: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
 .gs-table .gs-window-cell { padding:3px; background:#fff; }
 .gs-window-band { padding:0; width:100%; min-height:46px; border:1px solid #cc9b52; border-radius:4px; background:#fff0d8; color:#754610 !important; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e3cda9 calc(100% - 1px)); background-size:calc(100% / var(--gs-window-days)) 100%; }
 .gs-window-band>span { display:inline-block; max-width:100%; font-size:21px !important; line-height:1.2; font-weight:800; letter-spacing:.04em; padding:2px 3px; color:#754610 !important; }
@@ -350,7 +350,7 @@
 @media(max-width:640px) { .gs-window-band { text-align:left; padding-left:3px; } .gs-window-band>span { position:sticky; left:140px; background:inherit; font-size:19px !important; } .gs-window-short>span { font-size:14px !important; } }
 
 
-/* v3.36.4: 元の曜日色と罫線を保った透明な完了表示。 */
+/* v3.37.0: 元の曜日色と罫線を保った透明な完了表示。 */
 .gs-table tr.gs-row-done>td { background-color:#fff; }
 .gs-table tr.gs-row-done:nth-child(even)>td { background-color:#f3f6f8; }
 .gs-table tr.gs-row-done>td.gs-weekend { background-color:#fff0dd; }
@@ -375,7 +375,7 @@
 @media(max-width:640px){.gs-completed-banner .gs-banner-text{max-width:calc(100vw - 180px);white-space:normal;font-size:16px !important;letter-spacing:0;line-height:1.4;}.gs-doc-heading{align-items:flex-start;}.gs-related-documents{padding:10px;}.gs-document-buttons button{width:100%;}}
 
 
-/* v3.36.4: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
+/* v3.37.0: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
 .gs-related-documents { border:3px solid #5489bd; background:#edf6ff; box-shadow:0 2px 8px rgba(45,94,143,.12); }
 .gs-doc-heading strong { font-size:17px; color:#214d79 !important; }
 .gs-document-buttons button { border-color:#8eafd0; background:white; font-weight:600; }
@@ -387,7 +387,7 @@
 @media(max-width:540px){.sb-current-period{max-width:calc(100vw - 175px);}.gs-navigation strong{font-size:14px;}.gs-doc-heading strong{font-size:16px;}}
 
 
-/* v3.36.4: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
+/* v3.37.0: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
 .sb-view-switch { max-width:100%; flex-wrap:wrap; justify-content:flex-end; }
 .sb-view-switch .ow-launch { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border:1px solid #a8bfdb; border-radius:24px; background:#edf5ff; font-size:14px; font-weight:700; white-space:nowrap; }
 .sb-view-switch .ow-launch:hover { background:#dcecff; }
@@ -444,7 +444,7 @@
 @media(max-width:640px){.ow-filter-bar{flex:none;}.ow-table-scroll{flex:1 0 300px;}.ow-dialog .ow-help{margin:0;}}
 
 
-/* v3.36.4: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
+/* v3.37.0: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
 .wf-patrol-row { gap:10px; padding:14px; }
 .wf-patrol-info { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; }
 .wf-patrol-info strong { font-size:16px; }.wf-patrol-info .wf-muted { font-size:14px; }
@@ -456,7 +456,7 @@
 @media(max-width:540px){.wf-patrol-row{padding:12px;}.wf-dialog .wf-patrol-complete{font-size:16px;min-height:60px;padding:12px 8px;}}
 
 
-/* v3.36.4: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
+/* v3.37.0: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
 .ow-dialog .sb-utility-body { gap:8px; padding:12px 20px; }
 .ow-compact-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; flex-shrink:0; }
 .ow-period { margin-right:auto; min-width:0; overflow-wrap:anywhere; }
@@ -485,7 +485,7 @@
 }
 
 
-/* v3.36.4: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
+/* v3.37.0: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
 .gs-horizontal-control { padding:8px 16px; border-top:1px solid #dbe4ee; background:#f7fafe; }
 .gs-horizontal-caption { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px 12px; font-size:14px; }
 .gs-horizontal-caption label { font-weight:700; }
@@ -497,12 +497,12 @@
 @media(max-width:640px) { .gs-horizontal-control { padding:8px 12px; }.gs-horizontal-track { gap:8px; } }
 
 
-/* v3.36.4: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
+/* v3.37.0: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
 .gs-slider-dates { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:#52657a !important; }
 .gs-slider-dates span { color:inherit !important; }
 @media(max-width:420px) { .gs-slider-dates { flex-wrap:wrap; }.gs-slider-dates span:nth-child(2) { order:3; width:100%; text-align:center; } }
 
-/* v3.36.4: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
+/* v3.37.0: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
 .ow-page { width:100%; min-width:0; display:flex; flex-direction:column; height:var(--ow-page-height,calc(100dvh - 150px)); min-height:320px; background:#fff; border:1px solid #d4dfeb; border-radius:12px; color:#233044 !important; font-size:15px; }
 .ow-page * { box-sizing:border-box; }
 .ow-page .sb-utility-body { min-height:0; overflow-y:auto; }
@@ -516,9 +516,9 @@
 @media(max-width:640px) { .ow-page { min-height:320px; }.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; } }
 @media print { .ow-page { height:auto; min-height:0; border:0; }.ow-page .sb-utility-body,.ow-page .ow-table-scroll { overflow:visible; display:block; }.ow-page .ow-table { min-width:0; font-size:11px; }.ow-page .ow-table .ow-person { width:150px; position:static; }.ow-page .ow-table th { position:static; }.ow-page .ow-filter-bar,.ow-page .ow-filters { display:none; } }
 
-/* v3.36.4: cache management lives only in Settings, not on the main page. */
+/* v3.37.0: cache management lives only in Settings, not on the main page. */
 .cache-settings{margin-bottom:24px;padding:16px;border:1px solid #dce4ed;border-radius:10px;font-size:14px;line-height:1.6;background:#f8fafc}.cache-settings h4{font-weight:800;margin:0 0 8px}.cache-settings p{margin:4px 0}.cache-settings>div{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cache-settings button{min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;background:white;border-radius:8px;cursor:pointer}.cache-settings button:disabled{opacity:.5;cursor:not-allowed}.cache-settings button:focus-visible{outline:3px solid #2783de;outline-offset:2px}
-/* v3.36.4: document-scrolling workflow page; existing popup stays unchanged for list screens. */
+/* v3.37.0: document-scrolling workflow page; existing popup stays unchanged for list screens. */
 .workflow-page-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 20px;background:white;border-bottom:1px solid #dce4ed;font-size:14px;line-height:1.5}
 .workflow-page-nav>div{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}.workflow-page-nav>div:first-child{align-items:flex-start;flex-direction:column;gap:2px}.workflow-page-nav span{font-size:13px}
 .workflow-page-nav a,.workflow-page-nav button,.workflow-page-message button,.workflow-page-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:white;cursor:pointer;text-decoration:none}
@@ -528,6 +528,7 @@
 @media print{.wf-page-surface{padding:0}.wf-page-dialog .wf-close,.wf-page-dialog .wf-footer{display:none!important}.wf-dialog.gs-dialog.wf-page-dialog{border:0}}
 
 
+.wf-dialog[aria-busy="true"]>.wf-scroll{pointer-events:none}.wf-close-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.wf-footer>p{min-width:0}.wf-close-actions{flex-shrink:0}
 </style>
 
 <!-- React 18 / lucide-react を ESM CDN 経由で読み込むための importmap -->
@@ -852,7 +853,7 @@ const showDesktopNotification = (title, body, tag) => {
 // カスタムフック / Hooks
 // =============================================================================
 
-// v3.36.4: Display-only, expiring cache. NEVER replay it into Firestore.
+// v3.37.0: Display-only, expiring cache. NEVER replay it into Firestore.
 const EMPTY_CACHE_LIST = Object.freeze([]);
 const VIEW_CACHE_TTL = 24 * 60 * 60 * 1000;
 const VIEW_CACHE_DB = `jissyuu_view_cache${ENV_SUFFIX}`;
@@ -1403,7 +1404,7 @@ const getWorkflowDates = (student, task) => {
   const field = {phone:'phoneDate',doc:'docDate',greeting:'greetingDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'}[task.key];
   return field && workflowDayKey(student[field]) ? [student[field]] : [];
 };
-// v3.36.4: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
+// v3.37.0: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
 const getWorkflowPlan = (student, task) => {
   if (task.state === 'exempt') return null;
   const days = [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
@@ -1423,7 +1424,7 @@ const getWorkflowPlan = (student, task) => {
   return null;
 };
 
-// v3.36.4: 完了記録の表示と、日付マスからの直接追加。
+// v3.37.0: 完了記録の表示と、日付マスからの直接追加。
 const workflowCompletion = (student, task) => {
   if (task.state !== 'done' || task.key === 'dates') return null;
   const fields={phone:'phoneDate',doc:'docDate',greeting:'greetingCompletedDate',gift:'giftCompletedDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'};
@@ -1501,7 +1502,7 @@ function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, read
   </section>;
 }
 
-function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdmin, suspended, initialTask = null, returnToOverview = false, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onOpenMaterial, onEditPatrol, onConfirm }) {
+function StudentWorkflowDialog({ student: s, standalone = false, deferredSave = false, saving = false, onDiscard, readOnly, isAdmin, suspended, initialTask = null, returnToOverview = false, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onOpenMaterial, onEditPatrol, onConfirm }) {
   const rootRef = useRef(null);
   const [quickAdd,setQuickAdd]=useState(null);
   const [quickError,setQuickError]=useState('');
@@ -1512,7 +1513,7 @@ function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdm
   const [patrolDraft, setPatrolDraft] = useState({ date: '', time: '', teacher: s.teacher || '' });
   const model = getWorkflowModel(s);
   const exemptions = workflowExemptions(s);
-  const fieldLocked = (field) => readOnly || (!isAdmin && (s.lockedFields || []).includes(field) && (WORKFLOW_LOCKABLE_FIELDS.includes(field) || String(field).startsWith('patrol:')));
+  const fieldLocked = (field) => saving || readOnly || (!isAdmin && (s.lockedFields || []).includes(field) && (WORKFLOW_LOCKABLE_FIELDS.includes(field) || String(field).startsWith('patrol:')));
   useEffect(() => {
     const previous = document.activeElement;
     const overflow = document.body.style.overflow;
@@ -1523,7 +1524,7 @@ function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdm
   useEffect(() => {
     const keydown = (event) => {
       if (standalone || suspended || quickAdd) return;
-      if (event.key === 'Escape') { event.preventDefault(); onClose(); return; }
+      if (event.key === 'Escape') { event.preventDefault(); if(!deferredSave)onClose(); return; }
       if (event.key !== 'Tab') return;
       const controls = [...(rootRef.current?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]') || [])].filter((el) => el.getClientRects().length);
       if (!controls.length) return;
@@ -1533,7 +1534,7 @@ function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdm
     };
     document.addEventListener('keydown', keydown);
     return () => document.removeEventListener('keydown', keydown);
-  }, [standalone, suspended, quickAdd, onClose]);
+  }, [standalone, suspended, quickAdd, onClose, deferredSave]);
   const scrollToTask = (key) => setSelectedTask(key);
   // Refresh highlighting after data changes, but scroll only on an explicit task selection.
   useEffect(() => {
@@ -1568,7 +1569,7 @@ function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdm
     const dateLabel = task.key === 'phone' ? '連絡日' : task.key === 'doc' ? '配付日' : '送付日';
     return <article key={task.key} data-wf-task={task.key} className="wf-task" aria-label={task.title}>
       <div className="wf-task-top"><h4>{task.title}</h4><WorkflowBadge state={task.state}>{task.label}</WorkflowBadge></div>
-      {locked && <p className="wf-muted">🔒 {readOnly ? '閲覧のみ（接続確認中・または終了済み実習期）' : '管理者ロック中'}</p>}
+      {locked && !saving && <p className="wf-muted">🔒 {readOnly ? '閲覧のみ（接続確認中・または終了済み実習期）' : '管理者ロック中'}</p>}
       {task.state === 'deferred' && <p className="wf-muted">現在は対応時期ではありません。</p>}
       {task.key === 'greeting' && task.state === 'unknown' && <p className="wf-muted">旧表示「―」は、不要と断定せず要確認にしています。</p>}
       {cfg?.dateField && selected === 'completed' && <button className="wf-date-button" type="button" disabled={locked} onClick={() => onPickDate({ value: s[cfg.dateField] || '', title: `${task.title}：${dateLabel}`, onSelect: (value) => onPatch(s, { [cfg.dateField]: value }) })}>{dateLabel}：{s[cfg.dateField] ? formatShortDate(s[cfg.dateField]) : '未設定・日付を選択'}</button>}
@@ -1616,9 +1617,9 @@ function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdm
     await apply();
   };
 
-  return <><div className={standalone ? "wf-page-surface" : "wf-overlay no-print"} onMouseDown={(event) => { if (!standalone && event.target === event.currentTarget) onClose(); }}>
-    <div ref={rootRef} role={standalone ? "region" : "dialog"} aria-modal={standalone ? undefined : true} aria-labelledby="wf-title" className={`wf-dialog gs-dialog ${standalone ? "wf-page-dialog" : ""}`}>
-      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・見学</p><h2 id="wf-title" tabIndex={standalone ? -1 : undefined}>業務ワークフロー <span>工程表</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label={standalone ? "業務フローのタブを閉じる" : "ワークフローを閉じる"} onClick={onClose}>×</button></header>
+  return <><div className={standalone ? "wf-page-surface" : "wf-overlay no-print"} onMouseDown={(event) => { if (!standalone && !deferredSave && event.target === event.currentTarget) onClose(); }}>
+    <div ref={rootRef} aria-busy={saving} role={standalone ? "region" : "dialog"} aria-modal={standalone ? undefined : true} aria-labelledby="wf-title" className={`wf-dialog gs-dialog ${standalone ? "wf-page-dialog" : ""}`}>
+      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・見学</p><h2 id="wf-title" tabIndex={standalone ? -1 : undefined}>業務ワークフロー <span>工程表</span></h2></div><button type="button" className="wf-close" disabled={saving} data-wf-close aria-label={standalone ? "業務フローのタブを閉じる" : "ワークフローを閉じる"} onClick={onClose}>×</button></header>
       <div className="wf-scroll">
         <div className="gs-person-summary student-identity-color" style={studentIdentityStyle(s)} data-identity-grade={s.grade||'unset'} data-identity-type={s.internshipType==='observation'?'observation':'internship'}><strong>{s.name || '氏名未設定'}（{s.location || '実習先未設定'}）</strong><span>{s.grade ? `${s.grade}年${s.classVal || '―'}組` : ''} {s.teacher || '担当未設定'}</span><span className="gs-identity-kind">{s.internshipType==='observation'?'見学':'実習'}</span><button type="button" className="gs-detail-toggle" aria-expanded={showBasics} onClick={()=>setShowBasics(v=>!v)}>基本情報 {showBasics?'を閉じる':'を編集'}</button></div>
         <section className="gs-related-documents" aria-label="関連文書"><div className="gs-doc-heading"><strong>関連文書</strong><button type="button" onClick={onMaterials}>資料を登録・管理</button></div><div className="gs-document-buttons">{(s.materials||[]).map((m,i)=><button type="button" key={m.id||i} onClick={()=>onOpenMaterial(m)}><span aria-hidden="true">📎 </span>{m.name||'名称未設定'}</button>)}{!(s.materials||[]).length&&<span className="wf-muted">関連文書なし</span>}</div></section>
@@ -1661,7 +1662,7 @@ function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdm
         </div>
         <details className="gs-extra-disclosure"><summary className="gs-detail-toggle">メモ・関連資料</summary><section className="wf-extras" aria-label="特記事項と関連資料"><div><h3>特記事項・配慮事項</h3><button type="button" className="wf-notes" disabled={readOnly} onClick={() => editText('notes', '特記事項・配慮事項を編集', true)}>{s.notes || '特記事項を入力する'}</button></div><div><h3>関連資料</h3><p className="wf-muted">実施計画・評価票などの登録資料を確認できます。</p><button type="button" className="wf-secondary" onClick={onMaterials}>関連資料を開く（{(s.materials || []).length}件）</button></div></section></details>
       </div>
-      <footer className="wf-footer"><p className="wf-muted" aria-live="polite">変更は通常の保存先へ反映します。状態は選択して変更でき、順番による操作制限はありません。</p><button type="button" className="wf-secondary" onClick={onClose}>{standalone?'このタブを閉じる':returnToOverview?'業務一覧へ戻る':'閉じる'}</button></footer>
+      <footer className="wf-footer"><p className="wf-muted">{deferredSave?'編集中の変更はまだ保存されていません。「閉じる」でまとめて保存します。':'変更は通常の保存先へ反映します。'}</p><div className="wf-close-actions">{deferredSave && <button type="button" className="wf-secondary" disabled={saving} onClick={onDiscard}>編集を破棄</button>}<button type="button" className="wf-secondary" disabled={saving} onClick={onClose}>{saving?'保存中…':standalone?'このタブを閉じる':returnToOverview?'業務一覧へ戻る':deferredSave?'保存して閉じる':'閉じる'}</button></div></footer>
     </div>
   </div>
       {quickAdd && <AppUtilityDialog title="日付から予定を追加" suspended={suspended} onClose={()=>{if(!quickSaving)setQuickAdd(null);}}><form className="gs-quick-form" onSubmit={saveQuickAdd}>
@@ -2191,7 +2192,7 @@ function AppUtilityDialog({ title, onClose, children, wide = false, suspended = 
   return <div className="sb-utility-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`sb-utility-dialog ${wide ? 'sb-board-dialog' : ''} ${className}`}><header><h2>{title}</h2><button type="button" className="sb-icon-button" aria-label={`${title}を閉じる`} onClick={onClose}>×</button></header><div className="sb-utility-body">{children}</div></section></div>;
 }
 
-// v3.36.4: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
+// v3.37.0: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
 const WORKFLOW_OVERVIEW_COLUMNS=[
   {key:'phone',title:'事前電話連絡'}, {key:'doc',title:'保護者お知らせ'},
   {key:'greeting',title:'事前あいさつ・打合せ'}, {key:'gift',title:'菓子折'},
@@ -2276,7 +2277,7 @@ const chooseActivePeriod=(list,preferred)=>{
   return list.reduce((latest,p)=>!latest||Number(p.createdAtClient||0)>=Number(latest.createdAtClient||0)?p:latest,null)?.id||DEFAULT_PERIOD_ID;
 };
 
-// v3.36.4: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
+// v3.37.0: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
 const readWorkflowPage = () => {
   if (!location.hash.startsWith('#workflow?')) return null;
   const q = new URLSearchParams(location.hash.slice('#workflow?'.length));
@@ -2284,7 +2285,43 @@ const readWorkflowPage = () => {
   const valid = [student, room, period].every(v => v.length > 0 && v.length <= 512 && !v.includes('/') && !/[\x00-\x1f]/.test(v));
   return { student, room, period, project: q.get('project') || '', invalid: !valid };
 };
+// v3.37.0: in-memory popup drafts. No draft is persisted or automatically replayed.
+const cloneWorkflowDraft = value => JSON.parse(JSON.stringify(value));
+const workflowComparable = value => {
+  if (value === undefined) return null;
+  if (Array.isArray(value)) return value.map(workflowComparable);
+  if (value && typeof value === 'object') {
+    if (typeof value.toMillis === 'function') return value.toMillis();
+    return Object.fromEntries(Object.keys(value).sort().map(k => [k,workflowComparable(value[k])]));
+  }
+  return value;
+};
+const sameWorkflowValue = (a,b) => JSON.stringify(workflowComparable(a)) === JSON.stringify(workflowComparable(b));
+const workflowDraftPatch = draft => Object.fromEntries(Object.entries(draft.value).filter(([key,value]) => key !== 'id' && !sameWorkflowValue(value,draft.base[key])));
+const assertWorkflowCommit = (draft, latest, patch, isAdmin, periodLocked) => {
+  if (!latest) throw Error('対象の記録が削除されています。自動で作り直しません。');
+  if ((latest.periodId || DEFAULT_PERIOD_ID) !== (draft.base.periodId || DEFAULT_PERIOD_ID)) throw Error('対象の実習期が変更されています。');
+  if (periodLocked && !isAdmin) throw Error('この実習期はロックされています。');
+  const keys=Object.keys(patch);
+  if (keys.some(key => !sameWorkflowValue(latest[key],draft.base[key]) && !sameWorkflowValue(latest[key],patch[key]))) throw Error('他の端末で同じ項目が更新されています。上書きを防ぐため保存を停止しました。必要な内容を控え、編集を破棄して開き直してください。');
+  if (!isAdmin) {
+    const locked=latest.lockedFields || [];
+    const mapping={phoneDate:'phoneStatus',greetingCompletedDate:'greetingStatus',giftCompletedDate:'giftStatus',greetingDate:'greetingStatus',greetingTime:'greetingStatus',greetingVisitor:'greetingStatus',studentThankYouDate:'studentThankYouStatus'};
+    if (keys.includes('lockedFields') || keys.some(key=>locked.includes(key) || (WORKFLOW_LOCKABLE_FIELDS.includes(mapping[key]||key) && locked.includes(mapping[key]||key)))) throw Error('管理者によって編集項目がロックされています。');
+    if (patch.workflowExemptions) {
+      for (const [key,field] of [['greeting','greetingStatus'],['patrol','patrolStatus']]) {
+        if (locked.includes(field) && workflowExemptions(latest).includes(key)!==patch.workflowExemptions.includes(key)) throw Error('管理者によって対象業務がロックされています。');
+      }
+    }
+    if (patch.patrols && (locked.includes('patrolStatus') || (latest.patrols||[]).some(p=>locked.includes('patrol:'+p.id) && !sameWorkflowValue(p,patch.patrols.find(n=>n.id===p.id))))) throw Error('巡回・同行が管理者によってロックされています。');
+  }
+};
+
 function App() {
+  const [workflowDraft,setWorkflowDraft]=useState(null);
+  const workflowDraftRef=useRef(null);
+  const [workflowSaving,setWorkflowSaving]=useState(false);
+  const workflowSavingRef=useRef(false);
   const [workflowPage] = useState(readWorkflowPage);
   // v3.5: 外部 config.js が読み込まれていれば window.FIREBASE_CONFIG を優先利用。
   // 無ければ従来通り localStorage の手動入力値にフォールバック。
@@ -2313,11 +2350,17 @@ function App() {
 
   const configuredProject = (() => { try { return JSON.parse(firebaseConfigStr || '{}').projectId || ''; } catch { return ''; } })();
   const workflowConfigMismatch = !!(workflowPage?.project && workflowPage.project !== configuredProject);
-  const { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError, cloudReadOnly, cloudConfigured, cachedPeriods, cacheSavedAt, cacheNotice, cacheEnabled, pendingWrites, clearTemporaryCache, retryConnection, cloudScopeKey } =
+  const { students: cloudStudents, setStudents, isLoading, setIsLoading, connectionStatus, connectionError, cloudReadOnly, cloudConfigured, cachedPeriods, cacheSavedAt, cacheNotice, cacheEnabled, pendingWrites, clearTemporaryCache, retryConnection, cloudScopeKey } =
     useFirestoreSync(workflowConfigMismatch || workflowPage?.invalid ? '' : firebaseConfigStr, roomKey);
+  const students = useMemo(()=>workflowDraft ? workflowDraft.roster.map(s=>s.id===workflowDraft.base.id?workflowDraft.value:s) : cloudStudents,[workflowDraft,cloudStudents]);
   const { history, redo, push: pushHistory, popUndo, popRedo, clear: clearHistory } = useHistory(10);
   const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
   const requireWriteAccess = () => {
+    const draft=workflowDraftRef.current;
+    if (draft) {
+      if (draft.scope!==cloudScopeKey || draft.room!==roomKey || draft.initialReadOnly || workflowSavingRef.current) {showAlert('この下書きは現在編集できません。保存中、または接続先・編集権限を確認できません。');return false;}
+      return true; // Edits affect memory only; the live cloud gate is checked again when closing.
+    }
     if (workflowPage?.invalid || workflowConfigMismatch || (workflowPage && roomKey !== workflowPage.room)) { showAlert('リンクと接続設定が一致しません。元のカレンダーから開き直してください。'); return false; }
     if (!cloudConfigured) return !cloudWriteGate.configured;
     if (canWriteCloud(cloudScopeKey)) return true;
@@ -2366,6 +2409,7 @@ function App() {
   }, [roomKey, cloudConfigured, cachedPeriods, connectionStatus, cloudScopeKey]);
 
   useEffect(() => {
+    if (workflowDraftRef.current) return; // Never discard an open draft because a server snapshot changes periods.
     setSelectedIds(new Set());
     clearHistory();
     setSelectedStudentDetail(null);
@@ -2446,7 +2490,22 @@ function App() {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
-  const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
+  const [selectedStudentDetail, setSelectedStudentDetailState] = useState(null);
+  const setSelectedStudentDetail = (student) => {
+    if (!student) {workflowDraftRef.current=null;setWorkflowDraft(null);setSelectedStudentDetailState(null);return;}
+    if (workflowDraftRef.current) return;
+    const base=cloneWorkflowDraft(student);
+    const period=periods.find(p=>p.id===(base.periodId||DEFAULT_PERIOD_ID));
+    const draft={token:'draft-'+Date.now()+'-'+Math.random().toString(36).slice(2),base,value:cloneWorkflowDraft(base),roster:cloneWorkflowDraft(cloudStudents),scope:cloudScopeKey,room:roomKey,initialReadOnly:cloudReadOnly || (!!period?.locked&&!isAdmin)};
+    workflowDraftRef.current=draft;setWorkflowDraft(draft);setSelectedStudentDetailState(base);
+  };
+  const stageWorkflowPatch = (studentId,partial) => {
+    const draft=workflowDraftRef.current;
+    if (!draft || draft.base.id!==studentId) return null;
+    if (!requireWriteAccess()) return false;
+    const next={...draft,value:{...draft.value,...cloneWorkflowDraft(partial)}};
+    workflowDraftRef.current=next;setWorkflowDraft(next);return true;
+  };
   const [workflowOverviewFilters,setWorkflowOverviewFilters]=useState({...EMPTY_WORKFLOW_OVERVIEW_FILTERS});
   const [workflowInitialTask,setWorkflowInitialTask]=useState(null);
   const [workflowReturnToOverview,setWorkflowReturnToOverview]=useState(false);
@@ -2466,8 +2525,63 @@ function App() {
     setTimeout(() => setWorkflowCloseNotice(true), 100);
   };
   const [workflowCloseNotice, setWorkflowCloseNotice] = useState(false);
-  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.36.4'; }, [workflowPage]);
-  const closeWorkflowDetail=()=>{setSelectedStudentDetail(null);setWorkflowInitialTask(null);if(workflowReturnToOverview)setCurrentView('workflow');setWorkflowReturnToOverview(false);};
+  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.37.0'; }, [workflowPage]);
+  const finishWorkflowClose = () => {
+    workflowDraftRef.current=null; setWorkflowDraft(null); setSelectedStudentDetailState(null);
+    setWorkflowInitialTask(null); if(workflowReturnToOverview)setCurrentView('workflow'); setWorkflowReturnToOverview(false);
+    setMaterialModalStudentId(null); setPatrolEditState(null); setStatusEditState(null);
+    setDatePickerState(null);setTextEditState(null);setSelectEditState(null);setMaterialPreview(null);
+  };
+  const closeWorkflowDetail = async () => {
+    const draft=workflowDraftRef.current;
+    if (workflowSavingRef.current) return;
+    if (!draft) { finishWorkflowClose(); return; }
+    const patch=workflowDraftPatch(draft);
+    if (!Object.keys(patch).length) { finishWorkflowClose(); return; }
+    if (draft.scope !== cloudScopeKey || draft.room !== roomKey) { showAlert('接続先が変わっています。下書きは保存していません。内容を控えてから編集を破棄してください。'); return; }
+    if (draft.initialReadOnly || (cloudConfigured && !canWriteCloud(draft.scope))) { showAlert('接続を確認できないため保存できません。下書きは残しています。再接続してから「閉じる」を押してください。'); return; }
+    workflowSavingRef.current=true;setWorkflowSaving(true);
+    try {
+      const periodId=draft.base.periodId || DEFAULT_PERIOD_ID;
+      const currentPeriod=periods.find(p=>p.id===periodId);
+      if (cloudConfigured) {
+        const db=guardedFirestore(window.firebase.app().firestore(),roomKey);
+        const studentRef=db.collection('rooms').doc(roomKey).collection('students').doc(draft.base.id);
+        const metaRef=db.collection('rooms').doc(roomKey).collection('students').doc(periodMetaDocId(periodId));
+        const rawStudent=guardedRaw.get(studentRef)||studentRef, rawMeta=guardedRaw.get(metaRef)||metaRef;
+        await db.runTransaction(async transaction => {
+          requireCloudWrite(draft.scope,rawStudent.path);
+          const [studentSnap,metaSnap]=await Promise.all([transaction.get(rawStudent),transaction.get(rawMeta)]);
+          const latest=studentSnap.exists ? { ...studentSnap.data(),id:studentSnap.id } : null;
+          const locked=metaSnap.exists ? !!metaSnap.data().locked : !!currentPeriod?.locked;
+          assertWorkflowCommit(draft,latest,patch,isAdmin,locked);
+          requireCloudWrite(draft.scope,rawStudent.path);
+          transaction.update(rawStudent,patch);
+        });
+      } else {
+        // Read the current local store, not the frozen popup roster, to preserve unrelated changes.
+        const local=JSON.parse(localStorage.getItem(`local_students_${roomKey}`)||'[]');
+        if (!Array.isArray(local)) throw Error('端末データの形式を確認できません。');
+        const latest=local.find(s=>s.id===draft.base.id);
+        const localPeriod=readLocalPeriods(roomKey).find(p=>p.id===periodId);
+        assertWorkflowCommit(draft,latest,patch,isAdmin,!!localPeriod?.locked);
+        const next=local.map(s=>s.id===draft.base.id?{...s,...patch}:s);
+        localStorage.setItem(`local_students_${roomKey}`,JSON.stringify(next));setStudents(next);
+      }
+      const before=Object.fromEntries(Object.keys(patch).map(key=>[key,draft.base[key]??'']));
+      pushHistory({kind:'update',studentId:draft.base.id,before,after:patch});
+      try { window.__bumpVisitorEditCount?.(1); } catch {}
+      finishWorkflowClose();
+    } catch (error) {
+      showAlert('保存できませんでした。下書きはポップアップ内に残しています。\n'+(error.message||'接続を確認してください。'));
+    } finally { workflowSavingRef.current=false;setWorkflowSaving(false); }
+  };
+  const discardWorkflowDetail = () => {
+    if (workflowSavingRef.current) return;
+    if (!workflowDraftRef.current || !Object.keys(workflowDraftPatch(workflowDraftRef.current)).length) {finishWorkflowClose();return;}
+    showConfirm('このポップアップの未保存の変更を破棄して閉じますか？クラウドには反映しません。',finishWorkflowClose);
+  };
+
   const [draggingStudentId, setDraggingStudentId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
   const [dragHandleArmed, setDragHandleArmed] = useState(null);
@@ -2807,6 +2921,7 @@ function App() {
   const [filterTeacherThankYouStatus, setFilterTeacherThankYouStatus] = useState('all');
 
   const persistPartial = async (studentId, partial) => {
+    if (workflowDraftRef.current?.base.id===studentId) return stageWorkflowPatch(studentId,partial);
     if (!requireWriteAccess()) return false;
     const targetStudent = students.find((s) => s.id === studentId);
     const targetPeriodId = targetStudent?.periodId || DEFAULT_PERIOD_ID;
@@ -2831,7 +2946,7 @@ function App() {
   const patchWorkflowStudent = async (student, partial) => {
     if (!requireWriteAccess()) return false;
     const current = students.find((item) => item.id === student.id) || student;
-    const period = periods.find((item) => item.id === (current.periodId || DEFAULT_PERIOD_ID));
+    const period = workflowDraftRef.current?.base.id===student.id ? {locked:workflowDraftRef.current.initialReadOnly} : periods.find((item) => item.id === (current.periodId || DEFAULT_PERIOD_ID));
     if (period?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return false; }
     if (!isAdmin) {
       const locked = current.lockedFields || [];
@@ -2911,7 +3026,7 @@ function App() {
   };
 
   // v3.9: 編集アクションと同時に「今日の訪問者」の編集件数を +1 する。undo/redo からは呼ばれないので重複カウントしない。
-  const recordUpdate = (studentId, before, after) => { if (!requireWriteAccess()) return false; const s = students.find((x) => x.id === studentId); const p = periods.find((x) => x.id === (s?.periodId || DEFAULT_PERIOD_ID)); if (p?.locked && !isAdmin) return false; pushHistory({ kind: 'update', studentId, before, after }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} return true; };
+  const recordUpdate = (studentId, before, after) => { if (!requireWriteAccess()) return false; if(workflowDraftRef.current?.base.id===studentId)return true; const s = students.find((x) => x.id === studentId); const p = periods.find((x) => x.id === (s?.periodId || DEFAULT_PERIOD_ID)); if (p?.locked && !isAdmin) return false; pushHistory({ kind: 'update', studentId, before, after }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} return true; };
   const recordCreate = (student) => { if (!requireWriteAccess()) return false; pushHistory({ kind: 'create', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
   const recordDelete = (student) => { if (!requireWriteAccess()) return false; pushHistory({ kind: 'delete', student }); try { if (window.__bumpVisitorEditCount) window.__bumpVisitorEditCount(1); } catch (e) {} };
 
@@ -3040,6 +3155,7 @@ function App() {
   });
 
   const handleAddMaterial = async (material) => {
+    const draftToken=workflowDraftRef.current?.token;
     if (!requireWriteAccess()) return false;
     const target = students.find((s) => s.id === materialModalStudentId);
     if (!target) return;
@@ -3058,7 +3174,8 @@ function App() {
       }
       setIsLoading(false);
     }
-    const current = target.materials || [];
+    if(draftToken && workflowDraftRef.current?.token!==draftToken)return false;
+    const current = (workflowDraftRef.current?.base.id===target.id?workflowDraftRef.current.value:target).materials || [];
     const next = [...current, item];
     if (!materialsTotalSizeOk(next)) {
       showAlert('この生徒の関連資料の合計サイズが上限（約900KB）を超えるため保存できません。不要なファイルを削除するか、Google Drive 等の共有URLとして登録してください。');
@@ -3075,7 +3192,7 @@ function App() {
     const current = target.materials || [];
     const removed = current.find((m) => m.id === materialId);
     // v3.18: Storage 上のファイル本体も削除する（本体削除に失敗しても一覧からは消す）。
-    if (removed && removed.storagePath && connectionStatus === 'connected' && window.firebase) {
+    if (!workflowDraftRef.current && removed && removed.storagePath && connectionStatus === 'connected' && window.firebase) {
       try { await window.firebase.app().storage().ref().child(removed.storagePath).delete(); }
       catch (e) { console.warn('Storage ファイルの削除に失敗:', e.message); }
     }
@@ -3099,6 +3216,7 @@ function App() {
   // v3.6: リスト画面の「追加」ボタンへのファイルドロップで、その生徒の関連資料として一括インポートする。
   // v3.23: ファイル本体は dataUrl として Firestore / localStorage に保存する（1ファイル 500KB まで）。
   const handleDropFilesForMaterial = async (studentId, files) => {
+    const draftToken=workflowDraftRef.current?.token;
     const target = students.find((s) => s.id === studentId);
     if (!target || !files || files.length === 0) return;
     const arr = Array.from(files);
@@ -3125,7 +3243,8 @@ function App() {
     const items = results.filter((r) => r.ok).map((r) => r.item);
     if (failed.length > 0) showAlert('読み込みに失敗したファイル: ' + failed.join('、'));
     if (items.length === 0) return;
-    const latest = students.find((s) => s.id === studentId) || target;
+    if(draftToken && workflowDraftRef.current?.token!==draftToken)return false;
+    const latest = workflowDraftRef.current?.base.id===studentId ? workflowDraftRef.current.value : students.find((s) => s.id === studentId) || target;
     const current = latest.materials || [];
     const next = [...current, ...items];
     if (!materialsTotalSizeOk(next)) {
@@ -3216,7 +3335,7 @@ function App() {
         try { localStorage.setItem(`admin_password_hash_${roomKey}`, cloudHash); } catch (e) {}
         // クラウドと一致しない “以前設定した管理者状態” を強制クリアしない（他端末で変更しただけの可能性もあるため）
       } else if (localHash) {
-        // v3.36.4: local credentials must never be uploaded automatically.
+        // v3.37.0: local credentials must never be uploaded automatically.
       }
     }, (err) => { console.warn('admin hash snapshot:', err.message); });
     return () => { try { unsub(); } catch (e) {} };
@@ -4045,12 +4164,12 @@ function App() {
   }, [sidebarOpen]);
 
   useEffect(() => {
-    if (!cloudReadOnly) return;
+    if (!cloudReadOnly || workflowDraftRef.current) return;
     setIsAddEditOpen(false); setEditingStudent(null); setDatePickerState(null); setTextEditState(null); setSelectEditState(null); setPatrolEditState(null); setIsBulkImportOpen(false);
     clearHistory();
   }, [cloudReadOnly, cloudScopeKey]);
   useEffect(() => {
-    const warn = (event) => { if (cloudWriteGate.pending > 0) { event.preventDefault(); event.returnValue = ''; } };
+    const warn = (event) => { if (cloudWriteGate.pending > 0 || (workflowDraftRef.current && Object.keys(workflowDraftPatch(workflowDraftRef.current)).length)) { event.preventDefault(); event.returnValue = ''; } };
     window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn);
   }, []);
 
@@ -4155,7 +4274,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.36.4 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.37.0 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
@@ -5011,7 +5130,7 @@ function App() {
         const student = workflowPage ? workflowPageStudent : students.find((item) => item.id === selectedStudentDetail.id);
         if (!student) return null;
         const period = periods.find((item) => item.id === (student.periodId || DEFAULT_PERIOD_ID));
-        return <StudentWorkflowDialog key={student.id} standalone={!!workflowPage} student={student} initialTask={workflowInitialTask} returnToOverview={workflowReturnToOverview} readOnly={cloudReadOnly || (!!period?.locked && !isAdmin)} isAdmin={isAdmin}
+        return <StudentWorkflowDialog key={student.id} standalone={!!workflowPage} student={student} initialTask={workflowInitialTask} returnToOverview={workflowReturnToOverview} deferredSave={!!workflowDraft} saving={workflowSaving} onDiscard={discardWorkflowDetail} readOnly={workflowDraft ? (workflowDraft.initialReadOnly) : cloudReadOnly || (!!period?.locked && !isAdmin)} isAdmin={isAdmin}
           suspended={!!(textEditState || selectEditState || datePickerState || materialModalStudentId || materialPreview || patrolEditState || alertState || confirmState)}
           onClose={workflowPage ? closeWorkflowPage : closeWorkflowDetail} onPatch={patchWorkflowStudent}
           onText={setTextEditState} onSelect={setSelectEditState} onPickDate={setDatePickerState}
