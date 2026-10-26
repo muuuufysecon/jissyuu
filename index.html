@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.27.0</title>
+<title>現場実習進捗マネージャー v3.34.3</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -154,6 +154,368 @@
 @media (max-width:899px) { .wf-board { grid-template-columns:1fr; gap:24px; } .wf-prep-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } .wf-basics { grid-template-columns:repeat(2,minmax(0,1fr)); } .wf-phase-summary { grid-template-columns:1fr; gap:8px; } .wf-extras { grid-template-columns:1fr; } }
 @media (max-width:540px) { .wf-overlay { padding:6px; } .wf-dialog { width:100%; height:calc(100dvh - 12px); max-height:none; border-radius:12px; } .wf-header { padding:12px 16px; gap:8px; } .wf-header h2 { font-size:18px; gap:2px; display:block; } .wf-header h2 span { display:block; font-size:14px; } .wf-scroll { padding:16px; } .wf-basics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:12px; } .wf-basics .wf-basic-edit-help { display:none; } .wf-phase-chip { padding:10px 12px; } .wf-basic-name { font-size:20px !important; } .wf-prep-cards { grid-template-columns:1fr; } .wf-phase-summary { gap:8px; } .wf-footer { padding:12px 16px; } .wf-footer p { display:none; } .wf-footer { justify-content:flex-end; } }
 @media (prefers-reduced-motion:reduce) { .wf-dialog * { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+
+/* v3.28.0: サイドバー・フローティング操作。既存の業務データ保存先は変更しない。 */
+.sb-app { min-width:0; }
+.sb-sidebar { position:fixed; inset:0 auto 0 0; width:292px; max-width:calc(100vw - 24px); z-index:45; background:#fff; border-right:1px solid #dce4ec; display:flex; flex-direction:column; transform:translateX(-102%); visibility:hidden; transition:transform .18s ease,visibility .18s; font-size:14px; }
+.sb-open .sb-sidebar { transform:translateX(0); visibility:visible; }
+.sb-sidebar * { box-sizing:border-box; }
+.sb-sidebar button,.sb-sidebar select,.sb-topbar button,.sb-floating button { min-height:44px; }
+.sb-sidebar select { min-width:0; max-width:100%; }
+.sb-sidebar .text-xs,.sb-sidebar [class*="text-[10px]"],.sb-sidebar [class*="text-[11px]"] { font-size:14px !important; }
+.sb-sidebar :focus-visible,.sb-topbar :focus-visible,.sb-floating :focus-visible,.sb-utility-dialog :focus-visible { outline:3px solid #2783de; outline-offset:3px; }
+.sb-sidebar-top { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 16px; border-bottom:1px solid #e4e9ef; flex-shrink:0; }
+.sb-sidebar-top strong { font-size:14px; color:#52657a !important; }
+.sb-icon-button { min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; background:#fff; border:1px solid #d8e1eb; border-radius:8px; cursor:pointer; font-size:14px; }
+.sb-sidebar-scroll { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:16px; }
+.sb-header { margin-bottom:16px; }
+.sb-brand { margin-bottom:16px; }
+.sb-brand-title { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.sb-brand h1 { font-size:19px; line-height:1.4; font-weight:800; overflow-wrap:anywhere; }
+.sb-brand p { margin-top:6px; font-size:14px; line-height:1.5; color:#5b6b7d !important; }
+.sb-header-controls { display:flex; flex-direction:column; align-items:stretch; gap:8px; }
+.sb-header-controls>* { width:100%; min-width:0; }
+.sb-header-controls>button,.sb-header-controls>div>button { width:100%; border-radius:8px; justify-content:flex-start; flex-wrap:wrap; }
+.sb-header-controls>div[title="表示する実習期を切り替えます"] { border-radius:8px; min-height:48px; }
+.sb-header-controls>div[title="表示する実習期を切り替えます"] select { flex:1; max-width:none; }
+.sb-header-controls>div[title="表示する実習期を切り替えます"] button { width:36px; min-width:36px; min-height:44px; flex-shrink:0; }
+.sb-connection>div { width:100%; display:flex; flex-wrap:wrap; border-radius:8px; gap:6px; padding:8px 10px; }
+.sb-connection span { max-width:100%; overflow-wrap:anywhere; white-space:normal; }
+.sb-inline-panel { margin-top:8px; padding:8px; background:#f8fafc; border:1px solid #dce4ec; border-radius:8px; width:100%; min-width:0; max-height:300px; overflow:auto; font-size:14px; }
+.sb-inline-panel .truncate { white-space:normal; overflow-wrap:anywhere; }
+.sb-inline-panel [class*="text-[9px]"] { font-size:13px !important; }
+.sb-sidebar-section { border-top:1px solid #e4e9ef; padding-top:16px; margin-top:16px; }
+.sb-sidebar-section h2 { font-size:14px; font-weight:800; color:#52657a !important; margin:0 0 10px; }
+.sb-board-actions { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+.sb-board-actions button { min-height:44px; padding:8px 10px; border:1px solid #e4d6b4; border-radius:8px; background:#fffaf0; text-align:left; font-size:14px; font-weight:700; }
+.sb-operation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.sb-operation-grid button { min-width:0; justify-content:center; border-radius:8px; }
+.sb-filter-list { display:flex; flex-direction:column; align-items:stretch; gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid #e4e9ef; }
+.sb-filter-list>div { min-height:44px; width:100%; border-radius:8px; }
+.sb-filter-list select { flex:1; min-width:0; width:100%; min-height:44px; font-size:14px !important; }
+.sb-filter-list>button { width:100%; justify-content:center; }
+.sb-presets { margin-top:16px; border-top:1px solid #e4e9ef; padding-top:16px; }
+.sb-presets>[role=group] { display:flex; flex-wrap:wrap; gap:6px; }
+.sb-presets>[role=group]>span { width:100%; margin-bottom:4px; font-size:14px !important; }
+.sb-presets button { flex:1 1 calc(50% - 6px); border-radius:8px; text-align:center; }
+.sb-presets p { font-size:14px !important; line-height:1.5; margin-top:10px; color:#5b6b7d !important; }
+.sb-topbar { position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; min-height:64px; border-bottom:1px solid #dce4ec; background:rgba(255,255,255,.97); }
+.sb-topbar-title { display:flex; flex-wrap:wrap; align-items:center; gap:10px; min-width:0; }
+.sb-topbar-title strong { font-size:16px; font-weight:800; }
+.sb-topbar-subtitle { font-size:14px; color:#5b6b7d !important; }
+.sb-filter-chips { display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:8px; min-width:0; }
+.sb-keyword-chip { display:inline-flex; align-items:center; gap:6px; min-height:40px; max-width:260px; background:#e5f2fc; border:1px solid #bcd6ee; padding:4px 8px; border-radius:8px; font-size:14px; }
+.sb-keyword-chip>span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sb-keyword-chip button { min-height:32px; min-width:32px; border:0; background:transparent; cursor:pointer; }
+.sb-backdrop { position:fixed; inset:0; z-index:44; background:rgba(15,23,42,.4); border:0; }
+.sb-demo-note { padding:10px 16px; border-bottom:1px solid #efdfbd; background:#fffaf0; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; font-size:14px; }
+.sb-demo-note button { border:1px solid #e4d6b4; border-radius:8px; padding:4px 8px; background:#fff; min-height:40px; font-weight:700; }
+.sb-floating { gap:10px !important; }
+.sb-float-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; }
+.sb-float-actions button { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:48px; padding:10px 14px; background:#fff; border:1px solid #cbd6e2; border-radius:24px; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 4px 16px rgba(15,23,42,.12); }
+.sb-float-actions .sb-register { background:#fde68a; border-color:#e8bf44; }
+.sb-float-actions .sb-search-active { background:#e5f2fc; border-color:#8cbce7; }
+.sb-float-actions button:hover { background:#edf4fb; }
+.sb-float-actions .sb-register:hover { background:#fcd34d; }
+.sb-utility-overlay { position:fixed; inset:0; z-index:115; background:rgba(15,23,42,.48); display:flex; justify-content:center; align-items:center; padding:16px; }
+.sb-utility-dialog { display:flex; flex-direction:column; width:min(580px,100%); max-height:90dvh; border:1px solid #dce4ec; background:#fff; border-radius:12px; box-shadow:0 16px 56px rgba(15,23,42,.2); color:#233044 !important; font-size:15px; }
+.sb-utility-dialog header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 20px; border-bottom:1px solid #e1e7ee; }
+.sb-utility-dialog h2 { font-size:18px; font-weight:800; margin:0; }
+.sb-utility-body { padding:20px; min-height:0; overflow:auto; }
+.sb-utility-dialog p { margin:0 0 12px; font-size:14px; color:#5b6b7d !important; line-height:1.5; }
+.sb-search-form label { display:block; font-size:14px; font-weight:700; margin-bottom:8px; }
+.sb-search-form input { width:100%; min-height:48px; font-size:16px; border:1px solid #bbcddd; border-radius:8px; padding:10px 12px; background:#fff; }
+.sb-dialog-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:16px; }
+.sb-dialog-actions button { min-height:44px; padding:8px 12px; border:1px solid #cfd9e4; border-radius:8px; background:#fff; font-size:14px; font-weight:700; }
+.sb-dialog-actions .sb-primary { background:#e5f2fc; border-color:#a4c9e9; }
+.sb-board-dialog { width:min(920px,100%); }
+.sb-board-panel { min-width:0; }
+.sb-board-panel textarea { width:100%; min-width:0; min-height:72px; }
+.sb-board-panel form { display:grid; grid-template-columns:minmax(0,1fr) auto; }
+.sb-board-panel form>div:first-child { grid-column:1/-1; justify-self:start; }
+.sb-board-panel button { min-height:44px; }
+.sb-board-panel [class*="text-[9px]"],.sb-board-panel [class*="text-[10px]"],.sb-board-panel [class*="text-[11px]"],.sb-board-panel .text-xs { font-size:14px !important; }
+@media(min-width:1100px) { .sb-app.sb-open { padding-left:292px; } .sb-backdrop { display:none; } }
+@media(max-width:1099px) { .sb-topbar-title strong { font-size:15px; } }
+@media(max-width:540px) { .sb-topbar { padding:8px; gap:8px; flex-wrap:wrap; } .sb-topbar-subtitle { font-size:14px; } .sb-topbar-title { gap:8px; } .sb-filter-chips { width:100%; justify-content:flex-start; } .sb-filter-chips:empty { display:none; } .sb-floating { right:12px !important; bottom:max(12px,env(safe-area-inset-bottom)) !important; } .sb-float-actions { gap:6px; } .sb-float-actions button { padding:10px 12px; } .sb-utility-overlay { padding:8px; } .sb-utility-dialog header { padding:12px 16px; } .sb-utility-body { padding:16px; } .sb-board-panel .space-y-1>div { flex-wrap:wrap; } .sb-board-panel .space-y-1>div>div:first-child { min-width:0; width:100%; } }
+@media(prefers-reduced-motion:reduce) { .sb-sidebar { transition:none; } }
+@media print { .sb-app,.sb-app.sb-open { padding-left:0 !important; } .sb-sidebar,.sb-backdrop,.sb-topbar,.sb-floating,.sb-utility-overlay { display:none !important; } }
+/* 進捗カードはサイドバーを除いた実際の作業幅に合わせる。 */
+.sb-app main>div.grid:first-child { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.sb-app main>div.grid:first-child>button,.sb-app main>div.grid:first-child>div { min-width:0; gap:8px; }
+.sb-app main>div.grid:first-child>button>div:first-child,.sb-app main>div.grid:first-child>div>div:first-child { flex:1; min-width:0; }
+.sb-app main>div.grid:first-child .w-32 { width:100%; max-width:128px; }
+@media(min-width:700px) { .sb-app main>div.grid:first-child { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(min-width:1700px) { .sb-app main>div.grid:first-child { grid-template-columns:repeat(6,minmax(0,1fr)); } }
+@media(max-width:540px) { .sb-app main>div.grid:first-child>button>div:last-child,.sb-app main>div.grid:first-child>div>div:last-child { display:none; } .sb-app main>div.grid:first-child { gap:8px; } }
+.sb-icon-button { font-family:Arial,sans-serif; }
+.sb-calendar-toolbar>div:last-child { flex-wrap:wrap; min-width:0; }
+.sb-calendar-toolbar button { white-space:nowrap; min-height:40px; flex-shrink:0; }
+@media(max-width:540px) { .sb-calendar-toolbar { padding:12px !important; } .sb-calendar-toolbar>div:last-child { gap:8px; } .sb-calendar-toolbar>div:last-child>div:last-child { width:100%; } }
+
+/* v3.29.0: 工程表を主役にし、編集カードは選択した業務だけを表示。 */
+.wf-dialog.gs-dialog { width:min(1540px,98vw); }
+.gs-person-summary { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:12px; margin-bottom:12px; border:1px solid #d4dfeb; border-radius:10px; }
+.gs-person-summary .gs-identity-kind { font-size:14px; font-weight:700; border:1px solid #cbd5e1; border-radius:5px; padding:2px 7px; background:rgba(255,255,255,.65); }
+.gs-person-summary strong { font-size:20px; }
+.gs-person-summary span { font-size:14px; color:#52657a !important; }
+.gs-person-summary button,.gs-detail-toggle { min-height:44px; border:1px solid #ccd8e4; background:#fff; border-radius:8px; padding:8px 12px; font-size:14px !important; }
+.gs-compact-basics { margin-bottom:16px; }
+.gs-detail-toggle { margin-left:auto; }
+.gs-schedule { border:1px solid #ced9e4; border-radius:10px; background:#fff; overflow:hidden; }
+.gs-toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; }
+.gs-toolbar h3 { font-size:17px; font-weight:800; }
+.gs-toolbar p { font-size:14px; color:#52657a !important; }
+.gs-navigation { display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:14px; }
+.gs-navigation button { min-width:44px; min-height:44px; background:#fff; border:1px solid #cbd7e3; border-radius:8px; padding:6px 10px; }
+.gs-navigation small { font-size:14px; font-weight:400; }
+.gs-scroll { overflow:auto; max-width:100%; }
+.gs-table { width:100%; min-width:1080px; table-layout:fixed; border-collapse:separate; border-spacing:0; font-size:14px; }
+.gs-table th,.gs-table td { border-right:1px solid #dce4ec; border-bottom:1px solid #dce4ec; text-align:center; height:53px; padding:0; }
+.gs-table thead th { background:#3d505b; color:#fff !important; height:52px; font-weight:700; }
+.gs-table thead th * { color:#fff !important; }
+.gs-table thead small { display:block; font-size:14px; font-weight:400; }
+.gs-table .gs-label { width:144px; position:sticky; left:0; z-index:2; background:#f2f5f7; text-align:left; padding:0 10px; }
+.gs-table thead .gs-label { background:#3d505b; z-index:3; }
+.gs-label button { display:flex; flex-direction:column; justify-content:center; width:100%; min-height:52px; text-align:left; font-size:14px; font-weight:700; }
+.gs-label small { display:block; font-size:14px; font-weight:400; color:#52657a !important; }
+.gs-table td { background:#fff; position:relative; }
+.gs-table tr:nth-child(even) td { background:#f3f6f8; }
+.gs-table td.gs-weekend,.gs-table tr:nth-child(even) td.gs-weekend { background:#fff0dd; }
+.gs-table thead th.gs-weekend { background:#775431; }
+.gs-table td.gs-today { box-shadow:inset 2px 0 #2783de,inset -2px 0 #2783de; }
+.gs-table thead .gs-today { background:#245d91; }
+.gs-table .gs-status-heading { width:124px; }
+.gs-status button { min-height:44px; font-size:14px; }
+.gs-status small { display:block; font-size:14px; color:#52657a !important; }
+.gs-status .wf-badge { padding:2px 5px; font-size:14px; }
+.gs-mark { position:absolute; left:3px; right:3px; top:9px; height:36px; width:calc(100% - 6px); min-height:36px; border:1px solid; border-radius:5px; padding:0; font-size:14px !important; font-weight:700 !important; z-index:1; }
+.gs-mark.gs-join-left { left:-1px; width:calc(100% - 2px); border-left:0; border-radius:0 5px 5px 0; }
+.gs-mark.gs-join-right { right:-1px; width:calc(100% - 2px); border-right:0; border-radius:5px 0 0 5px; }
+.gs-mark.gs-join-left.gs-join-right { width:calc(100% + 2px); border-radius:0; }
+.gs-done { background:#dcefe4; color:#245a3a !important; border-color:#75a68a; }
+.gs-scheduled { background:#dcecff; color:#245583 !important; border-color:#83afd4; }
+.gs-todo,.gs-unknown { background:#fff0d8; color:#754610 !important; border-color:#d6aa67; }
+.gs-deferred,.gs-exempt { background:#eef1f4; color:#52657a !important; border-color:#cbd5df; }
+.gs-selected .gs-label { box-shadow:inset 4px 0 #2783de; background:#e5f2fc; }
+.gs-phase-divider>* { border-top:3px solid #b6c5d2; }
+.gs-legend { padding:10px 16px; display:flex; flex-wrap:wrap; gap:8px 18px; font-size:14px; }
+.gs-legend-item { display:inline-flex; align-items:center; gap:6px; }
+.gs-legend-item i { width:18px; height:12px; display:inline-block; border:1px solid #91a6b8; border-radius:2px; }
+.gs-legend-note { color:#52657a !important; }
+.gs-editor-title { margin:16px 0 8px; display:flex; align-items:center; justify-content:space-between; font-size:16px; font-weight:700; }
+.gs-editor-title button { font-size:14px; min-height:44px; padding:6px 12px; border:1px solid #ccd8e4; border-radius:8px; background:#fff; }
+.gs-dialog .wf-board { display:block; max-width:760px; margin:auto; }
+.gs-dialog .wf-phase,.gs-dialog .wf-prep-cards,.gs-dialog .wf-stack { display:contents; }
+.gs-dialog .wf-phase-heading,.gs-dialog .wf-stack>.wf-help { display:none; }
+.gs-dialog .wf-task { display:none; }
+.gs-dialog .wf-task.gs-active-task { display:flex; }
+.gs-dialog .wf-extras { margin-top:16px; }
+.gs-dialog .wf-footer p { display:none; }
+.gs-dialog .wf-header { padding:12px 20px; }
+.gs-dialog .wf-header .wf-eyebrow { display:none; }
+.gs-dialog .wf-footer { padding:8px 20px; justify-content:flex-end; }
+@media(max-width:640px) { .wf-dialog.gs-dialog { width:100%; height:98dvh; border-radius:10px; } .gs-dialog .wf-scroll { padding:12px; } .gs-dialog .wf-header { padding:10px 12px; } .gs-dialog .wf-header h2 { font-size:18px; } .gs-person-summary strong { font-size:18px; } .gs-person-summary { gap:4px 10px; } .gs-person-summary .gs-detail-toggle { margin-left:0; } .gs-toolbar { padding:12px; } .gs-navigation { gap:6px; } .gs-toolbar p { max-width:280px; } .gs-table { min-width:1040px; } .gs-table .gs-label { width:124px; } .gs-legend { padding:8px 12px; gap:6px 12px; } }
+.gs-row-state { display:none !important; }
+.gs-navigation>button:first-child,.gs-navigation>button[aria-label="工程表を翌月へ"] { font-size:22px !important; }
+.gs-mark { height:44px; min-height:44px; top:4px; }
+@media(max-width:640px) { .gs-label .gs-row-state { display:inline-block !important; font-size:14px; padding:1px 4px; border-radius:3px; align-self:flex-start; } .gs-label .gs-row-state+small { display:none; } .gs-label button { gap:2px; } }
+
+
+.gs-table thead th span { font-variant-numeric:tabular-nums; }
+.gs-mark { overflow:hidden; white-space:nowrap; }
+
+/* v3.29.2: 未完了・必要なしを月のマス全幅へ表示し、完了業務をグレー表示。 */
+.gs-table .gs-banner-cell { padding:3px; background:#fff; }
+.gs-row-banner { width:100%; min-height:46px; display:block; text-align:center; border:1px solid #d8ac6e; border-radius:4px; background-color:#fff0d8; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e6d2b6 calc(100% - 1px)); background-size:calc(100% / var(--gs-month-days)) 100%; color:#754610 !important; }
+.gs-row-banner .gs-banner-text { display:inline-block; font-size:23px !important; font-weight:800; letter-spacing:.12em; line-height:1.35; padding:2px 12px; background:#fff0d8; border-radius:4px; color:#754610 !important; }
+.gs-banner-exempt .gs-row-banner { background-color:#edf0f3; border-color:#bac5cf; background-image:linear-gradient(to right,transparent calc(100% - 1px),#d4dce3 calc(100% - 1px)); }
+.gs-banner-exempt .gs-banner-text { background:#edf0f3; color:#465563 !important; }
+.gs-table tr.gs-row-done>td,.gs-table tr.gs-row-done>td.gs-weekend,.gs-table tr.gs-row-done>.gs-label { background:#e1e5e9; }
+.gs-legend .gs-done { background:#bdc6cf; border-color:#8c99a6; }
+.gs-row-done .gs-mark { background:#bdc6cf; border-color:#8c99a6; color:#263746 !important; }
+.gs-row-done .gs-status .wf-done { background:#d1d8df; border-color:#a4afb9; color:#344553 !important; }
+.gs-row-done.gs-selected .gs-label { background:#d4dce4; }
+@media(max-width:640px) { .gs-row-banner { text-align:left; padding-left:8px; } .gs-row-banner .gs-banner-text { position:sticky; left:140px; font-size:20px !important; letter-spacing:.08em; padding:2px 6px; } }
+
+
+/* v3.34.3: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
+.gs-table .gs-window-cell { padding:3px; background:#fff; }
+.gs-window-band { padding:0; width:100%; min-height:46px; border:1px solid #cc9b52; border-radius:4px; background:#fff0d8; color:#754610 !important; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e3cda9 calc(100% - 1px)); background-size:calc(100% / var(--gs-window-days)) 100%; }
+.gs-window-band>span { display:inline-block; max-width:100%; font-size:21px !important; line-height:1.2; font-weight:800; letter-spacing:.04em; padding:2px 3px; color:#754610 !important; }
+.gs-window-thanks .gs-window-band { background-color:#e5f2fc; border-color:#82afd5; background-image:linear-gradient(to right,transparent calc(100% - 1px),#bed5e8 calc(100% - 1px)); }
+.gs-window-thanks .gs-window-band>span { color:#245583 !important; }
+.gs-window-short>span { white-space:nowrap; padding:2px 0; font-size:14px !important; letter-spacing:0; overflow-wrap:anywhere; }
+.gs-window-done .gs-window-band { background:#bdc6cf; border-color:#8c99a6; }
+.gs-window-done .gs-window-band>span { color:#263746 !important; }
+@media(max-width:640px) { .gs-window-band { text-align:left; padding-left:3px; } .gs-window-band>span { position:sticky; left:140px; background:inherit; font-size:19px !important; } .gs-window-short>span { font-size:14px !important; } }
+
+
+/* v3.34.3: 元の曜日色と罫線を保った透明な完了表示。 */
+.gs-table tr.gs-row-done>td { background-color:#fff; }
+.gs-table tr.gs-row-done:nth-child(even)>td { background-color:#f3f6f8; }
+.gs-table tr.gs-row-done>td.gs-weekend { background-color:#fff0dd; }
+.gs-table tr.gs-row-done>.gs-label { background-color:#f3f6f8; }
+.gs-table tr.gs-row-done>td { position:relative; }
+.gs-table tr.gs-row-done>td:after { content:""; position:absolute; inset:0; background:rgba(80,98,115,.13); pointer-events:none; }
+.gs-table tr.gs-row-done>td.gs-label { position:sticky; }
+.gs-table .gs-completed-cell { padding:3px; }
+.gs-completed-banner { position:relative; z-index:1; background:rgba(80,98,115,.12); background-image:none; border-color:#a2afbc; }
+.gs-completed-banner .gs-banner-text { background:transparent; color:#304454 !important; font-size:21px !important; letter-spacing:.02em; }
+.gs-row-done .gs-mark,.gs-table .gs-mark.gs-done,.gs-window-done .gs-window-band { background:rgba(80,98,115,.16); border-color:#95a6b5; }
+.gs-legend .gs-done { background:rgba(80,98,115,.2); }
+.gs-related-documents { padding:12px 16px; margin-bottom:14px; border:1px solid #ccdbea; border-radius:10px; background:white; }
+.gs-doc-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.gs-doc-heading button,.gs-document-buttons button { min-height:44px; padding:9px 12px; border:1px solid #bdcee0; border-radius:7px; background:#f7fbff; font-size:14px; text-align:left; }
+.gs-document-buttons { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.gs-document-buttons button { max-width:100%; overflow-wrap:anywhere; }
+.gs-quick-form { display:grid; gap:14px; }
+.gs-quick-form label { display:grid; gap:6px; font-size:14px; font-weight:600; }
+.gs-quick-form input,.gs-quick-form select { width:100%; min-width:0; min-height:46px; padding:10px; border:1px solid #bdcee0; border-radius:8px; font-size:16px; background:#fff; }
+.gs-quick-error { background:#fff0dd; padding:10px; border-radius:6px; font-size:14px; }
+@media(max-width:640px){.gs-completed-banner .gs-banner-text{max-width:calc(100vw - 180px);white-space:normal;font-size:16px !important;letter-spacing:0;line-height:1.4;}.gs-doc-heading{align-items:flex-start;}.gs-related-documents{padding:10px;}.gs-document-buttons button{width:100%;}}
+
+
+/* v3.34.3: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
+.gs-related-documents { border:3px solid #5489bd; background:#edf6ff; box-shadow:0 2px 8px rgba(45,94,143,.12); }
+.gs-doc-heading strong { font-size:17px; color:#214d79 !important; }
+.gs-document-buttons button { border-color:#8eafd0; background:white; font-weight:600; }
+.sb-current-period { min-height:44px; max-width:min(400px,55vw); padding:8px 28px 8px 10px; border:1px solid #bacde2; border-radius:8px; background:#f3f7ff; font-size:14px; font-weight:700; }
+.gs-table thead th:not(.gs-label):not(.gs-status-heading)>span { font-size:14px; letter-spacing:-.2px; white-space:nowrap; }
+.gs-table td.gs-today { box-shadow:inset 2px 0 #2783de,inset -2px 0 #2783de; }
+.gs-mark:not(.gs-join-left):not(.gs-join-right) { left:1px;right:1px;width:calc(100% - 2px); }
+.gs-label button>span { overflow-wrap:anywhere; }
+@media(max-width:540px){.sb-current-period{max-width:calc(100vw - 175px);}.gs-navigation strong{font-size:14px;}.gs-doc-heading strong{font-size:16px;}}
+
+
+/* v3.34.3: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
+.sb-view-switch { max-width:100%; flex-wrap:wrap; justify-content:flex-end; }
+.sb-view-switch .ow-launch { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border:1px solid #a8bfdb; border-radius:24px; background:#edf5ff; font-size:14px; font-weight:700; white-space:nowrap; }
+.sb-view-switch .ow-launch:hover { background:#dcecff; }
+.sb-utility-dialog.ow-dialog { width:min(1480px,100%); height:min(900px,94dvh); max-height:94dvh; }
+.ow-dialog .sb-utility-body { display:flex; flex-direction:column; gap:12px; overflow:hidden; flex:1; padding:16px 20px; }
+.ow-summary { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 20px; }
+.ow-summary strong { font-size:17px; }.ow-summary p { margin:4px 0 0; }
+.ow-period-lock { display:inline-block; margin-left:10px; font-size:14px; }
+.ow-counts { display:flex; flex-wrap:wrap; gap:8px; font-size:14px; }
+.ow-counts>span { background:#f1f6fc; border:1px solid #d3dfed; padding:8px 10px; border-radius:8px; }
+.ow-counts>span:nth-child(2) { background:#fff4e2; border-color:#e5cda5; }
+.ow-filters { display:flex; flex-wrap:wrap; gap:10px; padding:12px; background:#f6f8fb; border:1px solid #dbe4ee; border-radius:10px; }
+.ow-filters label { display:flex; flex-direction:column; gap:5px; font-size:14px; font-weight:700; flex:1; min-width:100px; }
+.ow-filters select { min-width:0; width:100%; min-height:44px; padding:8px 10px; border:1px solid #bbcede; border-radius:7px; background:#fff; font-size:14px; }
+.ow-filters .ow-check { flex-direction:row; align-items:center; min-width:210px; align-self:flex-end; min-height:44px; gap:8px; }
+.ow-check input { width:20px; height:20px; flex:none; accent-color:#2563a5; }
+.ow-reset,.ow-close { min-height:44px; padding:8px 12px; border:1px solid #bbcede; background:#fff; border-radius:8px; font-size:14px; font-weight:700; align-self:flex-end; }
+.ow-reset:disabled { opacity:.5; cursor:default; }
+.ow-dialog .ow-help { font-size:14px; margin:0; }
+.ow-table-scroll { overflow:auto; flex:1; min-height:150px; border:1px solid #cbd9e7; border-radius:8px; }
+.ow-table { width:100%; min-width:1220px; border-collapse:separate; border-spacing:0; table-layout:fixed; font-size:14px; }
+.ow-table th,.ow-table td { border-bottom:1px solid #dbe4ee; border-right:1px solid #dbe4ee; padding:6px; vertical-align:middle; text-align:center; background:white; }
+.ow-table thead th { position:sticky; top:0; z-index:3; padding:12px 6px; background:#eaf1f9; font-weight:800; }
+.ow-table .ow-person { position:sticky; left:0; width:230px; z-index:2; text-align:left; background:#f7fafe; }
+.ow-table thead .ow-person { z-index:5; background:#e0ebf7; }
+.ow-table thead .ow-person>span { display:block; margin-top:4px; font-size:14px; font-weight:400; }
+.ow-table tbody tr:nth-child(even) td { background:#f9fbfd; }
+.ow-table tbody tr:hover td,.ow-table tbody tr:hover .ow-person { background:#f0f6fd; }
+.ow-person-button { display:flex; flex-direction:column; gap:5px; width:100%; min-height:70px; padding:8px; text-align:left; border-radius:6px; overflow-wrap:anywhere; }
+.ow-person-button strong { font-size:15px; font-weight:800; }.ow-person-button>span { font-size:14px; color:#50647a !important; }
+.ow-person-button small { align-self:flex-start; padding:2px 7px; border:1px solid #c6d8eb; border-radius:6px; background:#edf5ff; font-size:14px; }
+.ow-person-button small.ow-observation { background:#fff0f5; border-color:#e4bed1; }
+.ow-cell { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:5px; width:100%; min-height:72px; padding:6px 2px; border-radius:7px; }
+.ow-cell:hover,.ow-person-button:hover { box-shadow:inset 0 0 0 2px #90b8df; }
+.ow-cell .wf-badge { max-width:100%; text-align:left; font-size:14px; padding:3px 5px; gap:3px; }
+.ow-cell-date,.ow-lock { font-size:14px; color:#50647a !important; overflow-wrap:anywhere; }
+.ow-cell.ow-done { background:rgba(76,102,125,.08); }
+.ow-cell.ow-exempt { background:#f2f4f6; }
+.ow-cell.ow-todo,.ow-cell.ow-unknown { background:#fff7e9; }
+.ow-empty { padding:28px 16px; text-align:center; font-size:15px; }
+.ow-footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; align-items:center; }
+.ow-legend { display:flex; flex-wrap:wrap; gap:7px 14px; font-size:14px; }
+.ow-sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+@media(max-width:640px){.sb-utility-dialog.ow-dialog{height:96dvh;max-height:96dvh;}.ow-dialog .sb-utility-body{padding:12px;gap:10px;}.ow-filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:10px;gap:8px;}.ow-filters label{min-width:0;}.ow-filters .ow-check{min-width:0;grid-column:1 / -1;font-size:14px;}.ow-reset{grid-column:1 / -1;justify-self:start;}.ow-table .ow-person{width:180px;}.ow-summary{gap:8px;}.ow-counts{gap:5px;}.ow-counts>span{padding:5px 7px;}.ow-dialog .ow-help{font-size:14px;}.ow-table-scroll{min-height:140px;}.ow-footer{gap:8px;}.ow-dialog .sb-utility-body{overflow-y:auto;}.ow-table-scroll{flex:1 0 250px;}.ow-legend{gap:5px 10px;}.ow-period-lock{margin-left:0;display:block;}}
+
+
+.ow-filter-bar { display:flex; gap:8px; }
+.ow-filter-bar button { min-height:44px; padding:8px 12px; border:1px solid #bbcede; border-radius:8px; font-size:14px; font-weight:700; background:#f3f7fc; }
+.ow-cell .wf-badge { border-color:#c1cfdd; color:#263b50 !important; }
+.ow-cell .wf-done { background:#e3e9ef; border-color:#b4c2d0; }
+.ow-cell .wf-scheduled { background:#e5f2ff; border-color:#a6c8e7; }
+.ow-cell .wf-todo,.ow-cell .wf-unknown { background:#fff1db; border-color:#e2bd85; }
+.ow-cell .wf-exempt,.ow-cell .wf-deferred { background:#f0f3f6; border-color:#c9d3dd; }
+@media(max-width:640px){.ow-filter-bar{flex:none;}.ow-table-scroll{flex:1 0 300px;}.ow-dialog .ow-help{margin:0;}}
+
+
+/* v3.34.3: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
+.wf-patrol-row { gap:10px; padding:14px; }
+.wf-patrol-info { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; }
+.wf-patrol-info strong { font-size:16px; }.wf-patrol-info .wf-muted { font-size:14px; }
+.wf-dialog .wf-patrol-complete { display:flex; align-items:center; justify-content:center; width:100%; min-height:58px; padding:12px 16px; border:2px solid #3c7ab4; border-radius:10px; background:#e1f0ff; color:#1e4f7a !important; font-size:17px; font-weight:800; line-height:1.45; text-align:center; }
+.wf-dialog .wf-patrol-complete:hover:not(:disabled) { background:#cde6ff; }
+.wf-dialog .wf-patrol-complete.wf-patrol-completed { background:#e7edf3; border-color:#8fa5b9; color:#304b60 !important; }
+.wf-dialog .wf-patrol-complete.wf-patrol-completed:hover:not(:disabled) { background:#dce6ee; }
+.wf-patrol-completion-note { margin:0; }
+@media(max-width:540px){.wf-patrol-row{padding:12px;}.wf-dialog .wf-patrol-complete{font-size:16px;min-height:60px;padding:12px 8px;}}
+
+
+/* v3.34.3: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
+.ow-dialog .sb-utility-body { gap:8px; padding:12px 20px; }
+.ow-compact-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; flex-shrink:0; }
+.ow-period { margin-right:auto; min-width:0; overflow-wrap:anywhere; }
+.ow-period strong { font-size:17px; }
+.ow-compact-bar .ow-counts { gap:6px; }
+.ow-compact-bar .ow-counts>span { padding:4px 8px; border-radius:6px; }
+.ow-compact-bar .ow-filter-bar button { padding:6px 10px; }
+.ow-active-filters { margin:0; font-size:14px; color:#50647a !important; overflow-wrap:anywhere; flex-shrink:0; }
+.ow-dialog .ow-filters { padding:8px; gap:8px; flex-shrink:0; }
+.ow-dialog .ow-filters>label:not(.ow-check) { flex-direction:row; align-items:center; gap:6px; white-space:nowrap; }
+.ow-dialog .ow-filters>label:not(.ow-check) select { flex:1; }
+.ow-dialog .ow-filters .ow-check { min-width:196px; }
+.ow-legend-help { color:#50647a !important; }
+@media(max-width:1000px) { .ow-compact-bar { gap:6px 10px; }.ow-dialog .ow-filters>label:not(.ow-check){min-width:180px;} }
+@media(max-width:640px) {
+ .ow-dialog .sb-utility-body { padding:10px 12px; gap:8px; }
+ .ow-compact-bar { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 8px; }
+ .ow-period { grid-column:1; grid-row:1; margin-right:0; }
+ .ow-compact-bar .ow-filter-bar { grid-column:2; grid-row:1; }
+ .ow-compact-bar .ow-counts { grid-column:1 / -1; gap:4px; }
+ .ow-compact-bar .ow-counts>span { padding:3px 5px; }
+ .ow-dialog .ow-filters>label:not(.ow-check) { min-width:0; flex-direction:column; align-items:stretch; gap:4px; }
+ .ow-dialog .ow-filters .ow-check { min-width:0; }
+ .ow-dialog .ow-table-scroll { flex:1 1 250px; min-height:180px; }
+ .ow-legend-help { display:none; }
+}
+
+
+/* v3.34.3: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
+.gs-horizontal-control { padding:8px 16px; border-top:1px solid #dbe4ee; background:#f7fafe; }
+.gs-horizontal-caption { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px 12px; font-size:14px; }
+.gs-horizontal-caption label { font-weight:700; }
+.gs-horizontal-caption span { color:#52657a !important; }
+.gs-horizontal-track { display:flex; align-items:center; gap:10px; }
+.gs-dialog .gs-horizontal-track button { width:44px; min-height:44px; flex:none; border:1px solid #bbcede; border-radius:8px; background:#fff; font-size:22px; }
+.gs-dialog .gs-horizontal-track input[type=range] { width:100%; min-width:0; height:44px; margin:0; padding:0; cursor:pointer; accent-color:#2783de; touch-action:pan-y; }
+.gs-dialog .gs-horizontal-track input[type=range]:disabled { cursor:default; opacity:.5; }
+@media(max-width:640px) { .gs-horizontal-control { padding:8px 12px; }.gs-horizontal-track { gap:8px; } }
+
+
+/* v3.34.3: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
+.gs-slider-dates { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:#52657a !important; }
+.gs-slider-dates span { color:inherit !important; }
+@media(max-width:420px) { .gs-slider-dates { flex-wrap:wrap; }.gs-slider-dates span:nth-child(2) { order:3; width:100%; text-align:center; } }
+
+/* v3.34.3: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
+.ow-page { width:100%; min-width:0; display:flex; flex-direction:column; height:var(--ow-page-height,calc(100dvh - 150px)); min-height:320px; background:#fff; border:1px solid #d4dfeb; border-radius:12px; color:#233044 !important; font-size:15px; }
+.ow-page * { box-sizing:border-box; }
+.ow-page .sb-utility-body { min-height:0; overflow-y:auto; }
+.ow-page button,.ow-page input,.ow-page select { font:inherit; }
+.ow-page button { cursor:pointer; }
+.ow-page :focus-visible { outline:3px solid #2783de; outline-offset:3px; }
+.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; }
+.ow-page .ow-footer { flex-shrink:0; }
+.ow-page .ow-filters,.ow-page .ow-filter-bar { flex-shrink:0; }
+.ow-page .ow-filter-bar button,.ow-page .ow-reset,.ow-page .ow-filters select { font-size:14px; }
+@media(max-width:640px) { .ow-page { min-height:320px; }.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; } }
+@media print { .ow-page { height:auto; min-height:0; border:0; }.ow-page .sb-utility-body,.ow-page .ow-table-scroll { overflow:visible; display:block; }.ow-page .ow-table { min-width:0; font-size:11px; }.ow-page .ow-table .ow-person { width:150px; position:static; }.ow-page .ow-table th { position:static; }.ow-page .ow-filter-bar,.ow-page .ow-filters { display:none; } }
 
 </style>
 
@@ -347,6 +709,12 @@ const getNextListAction = (student, today) => {
 // ユーティリティ / Utilities
 // =============================================================================
 
+// カレンダーの右10%だけを学年色にする。予定種別の背景色は残す。
+const CALENDAR_GRADE_COLORS={'1':'#e0f2fe','2':'#d1fae5','3':'#ffe4e6'};
+const calendarGradeStyle=(grade)=>({backgroundImage:`linear-gradient(to right, transparent 0%, transparent 90%, ${CALENDAR_GRADE_COLORS[String(grade)]||'#f1f5f9'} 90%, ${CALENDAR_GRADE_COLORS[String(grade)]||'#f1f5f9'} 100%)`});
+const studentIdentityStyle=(student)=>({...calendarGradeStyle(student.grade),backgroundColor:student.internshipType==='observation'?'#fce7f3':'#fef9c3'});
+const calendarGradeLabel=(grade)=>['1','2','3'].includes(String(grade))?grade+'年':grade==='other'?'他学年':'学年未設定';
+
 const getTodayString = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -391,6 +759,8 @@ const buildStepUpdate = (stepKey, newStatus) => {
   if (cfg.dateField) {
     update[cfg.dateField] = newStatus === 'completed' ? getTodayString() : '';
   }
+  if(stepKey==='greeting')update.greetingCompletedDate=newStatus==='completed'?getTodayString():'';
+  if(stepKey==='gift')update.giftCompletedDate=newStatus==='brought'?getTodayString():'';
   return update;
 };
 
@@ -870,8 +1240,8 @@ const getWorkflowModel = (s, today = getTodayString()) => {
   };
   const prep = [
     normal('phone', '事前電話連絡', 'phoneStatus', '連絡済み', '未連絡'),
-    normal('doc', '連絡票・実施計画配付', 'docStatus', '配付済み', '未配付'),
-    { key: 'greeting', title: '事前挨拶訪問', field: 'greetingStatus',
+    normal('doc', '保護者お知らせ', 'docStatus', '配付済み', '未配付'),
+    { key: 'greeting', title: '事前あいさつ・打合せ', field: 'greetingStatus',
       state: exemptions.includes('greeting') ? 'exempt' : s.greetingStatus === 'completed' ? 'done' : s.greetingStatus === 'scheduled' ? 'scheduled' : s.greetingStatus === 'unadjusted' ? 'todo' : 'unknown',
       label: exemptions.includes('greeting') ? '対象外' : s.greetingStatus === 'completed' ? '挨拶終了' : s.greetingStatus === 'scheduled' ? '予定あり' : s.greetingStatus === 'unadjusted' ? '未調整' : '要否を確認' },
     { key: 'gift', title: '菓子折', field: 'giftStatus', state: s.giftStatus === 'brought' ? 'done' : s.giftStatus === 'bring' ? 'todo' : 'exempt', label: s.giftStatus === 'brought' ? '持参済み' : s.giftStatus === 'bring' ? '準備・持参待ち' : '持参予定なし' }
@@ -899,7 +1269,7 @@ const getWorkflowModel = (s, today = getTodayString()) => {
     if (['done', 'exempt', 'deferred'].includes(task.state)) continue;
     const text = task.key === 'dates' ? (!days.length ? '実習・見学の日程を設定' : '')
       : task.key === 'patrol' ? (!patrols.length ? '巡回・同行の予定／要否を確認' : (finished ? '巡回・同行の実施記録を確認' : '巡回・同行の予定を確認'))
-      : task.key === 'greeting' ? (task.state === 'unknown' ? '事前挨拶の要否を確認' : task.state === 'scheduled' ? (finished ? '事前挨拶の実施記録を確認' : '事前挨拶の予定を確認') : '事前挨拶の日程を調整')
+      : task.key === 'greeting' ? (task.state === 'unknown' ? '事前あいさつ・打合せの要否を確認' : task.state === 'scheduled' ? (finished ? '事前あいさつ・打合せの実施記録を確認' : '事前あいさつ・打合せの予定を確認') : '事前あいさつ・打合せの日程を調整')
       : task.key === 'gift' ? '菓子折の準備・持参を確認'
       : finished && ['phone', 'doc'].includes(task.key) ? `${task.title}の記録を確認` : `${task.title}：${task.label}`;
     if (text) attention.push({ key: task.key, text });
@@ -908,9 +1278,124 @@ const getWorkflowModel = (s, today = getTodayString()) => {
 };
 const WorkflowBadge = ({ state, children }) => <span className={`wf-badge wf-${state}`}><span aria-hidden="true">{state === 'done' ? '✓' : state === 'scheduled' ? <Clock style={{width:14,height:14}} /> : state === 'exempt' ? '—' : state === 'deferred' ? '…' : state === 'unknown' ? '?' : '○'}</span>{children}</span>;
 
-function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onEditPatrol, onConfirm }) {
+// v3.29.0: 登録済みの日付だけを配置する、クリック編集付き工程表。
+const workflowDayKey = (value) => {
+  const match = String(value || '').match(/^\d{4}-\d{2}-\d{2}$/);
+  return match && !Number.isNaN(Date.parse(value + 'T12:00:00Z')) ? value : '';
+};
+const shiftWorkflowDay = (day, count) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate()+count); return d.toISOString().slice(0,10); };
+const getWorkflowDates = (student, task) => {
+  if (task.key === 'dates') return [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
+  if (task.key === 'patrol') return [...new Set((student.patrols || []).map(p => p.date))].filter(workflowDayKey).sort();
+  const field = {phone:'phoneDate',doc:'docDate',greeting:'greetingDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'}[task.key];
+  return field && workflowDayKey(student[field]) ? [student[field]] : [];
+};
+// v3.34.3: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
+const getWorkflowPlan = (student, task) => {
+  if (task.state === 'exempt') return null;
+  const days = [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
+  if (!days.length) return null;
+  const first = days[0], last = days[days.length-1];
+  if (task.key === 'gift' && ['bring','brought'].includes(student.giftStatus)) return {dates:[first],label:student.giftStatus==='brought'?'持参済':'持参',kind:'gift',basis:'実施初日'};
+  if (task.state === 'done') return null;
+  if (['phone','doc'].includes(task.key)) {
+    const from = shiftWorkflowDay(first,-21);
+    return {dates:Array.from({length:15},(_,i)=>shiftWorkflowDay(from,i)),label:task.key==='phone'?'事前連絡':'保護者お知らせ',kind:'prep',basis:'開始日の21日前〜7日前'};
+  }
+  if (['studentThankYou','teacherThankYou'].includes(task.key)) {
+    const dates=[]; let cursor=last;
+    while (dates.length<10) {cursor=shiftWorkflowDay(cursor,1);const dow=new Date(cursor+'T12:00:00Z').getUTCDay();if (dow!==0&&dow!==6) dates.push(cursor);}
+    return {dates,label:'送付予定',kind:'thanks',basis:'最終日の翌日から土日を除く10日間（祝日は除外しません）'};
+  }
+  return null;
+};
+
+// v3.34.3: 完了記録の表示と、日付マスからの直接追加。
+const workflowCompletion = (student, task) => {
+  if (task.state !== 'done' || task.key === 'dates') return null;
+  const fields={phone:'phoneDate',doc:'docDate',greeting:'greetingCompletedDate',gift:'giftCompletedDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'};
+  let date=fields[task.key] ? workflowDayKey(student[fields[task.key]]) : '';
+  if(task.key==='patrol') {const entries=student.patrols || [];const recorded=entries.map(p=>workflowDayKey(p.completedDate));date=entries.length && recorded.every(Boolean) ? [...recorded].sort().at(-1) : '';}
+  const action={phone:'電話連絡',doc:'保護者お知らせ',greeting:'事前あいさつ・打合せ',gift:'菓子折持参',studentThankYou:'生徒お礼状送付',teacherThankYou:'教師お礼状送付',patrol:'巡回・同行'}[task.key];
+  return {date,label:`✅ ${date ? `${Number(date.slice(5,7))}月${Number(date.slice(8))}日` : '日付未設定'} ${action || task.title}`};
+};
+const workflowCalendarFill=(start,count)=>{
+  const stops=[];for(let i=0;i<count;i++){const day=shiftWorkflowDay(start,i),dow=new Date(day+'T12:00:00Z').getUTCDay(),color=dow===0||dow===6?'#fff0dd':'#ffffff',from=i/count*100,to=(i+1)/count*100;stops.push(`${color} ${from}%`,`${color} calc(${to}% - 1px)`,`#dce4ec calc(${to}% - 1px)`,`#dce4ec ${to}%`);}
+  return `linear-gradient(to right,${stops.join(',')})`;
+};
+function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, readOnly }) {
+  const initial=model.days.find(workflowDayKey)||getTodayString();
+  const [center,setCenter]=useState(()=>getTodayString());
+  const start=shiftWorkflowDay(center,-15);
+  const scheduleScrollRef=useRef(null);
+  const [sliderAnchor,setSliderAnchor]=useState(getTodayString);
+  const sliderOffset=Math.round((Date.parse(center+'T12:00:00Z')-Date.parse(sliderAnchor+'T12:00:00Z'))/86400000);
+  useEffect(()=>{if(Math.abs(sliderOffset)>90)setSliderAnchor(center);},[center,sliderOffset]);
+  useEffect(()=>{const region=scheduleScrollRef.current;if(!region)return;const heading=region.querySelectorAll('thead th')[16],label=region.querySelector('.gs-label');if(!heading||!label)return;const r=region.getBoundingClientRect(),h=heading.getBoundingClientRect(),left=label.getBoundingClientRect().width;region.scrollLeft=Math.max(0,region.scrollLeft+h.left-r.left-left-(region.clientWidth-left)/2+h.width/2);},[center]);
+  const clickTimer=useRef(null);useEffect(()=>()=>clearTimeout(clickTimer.current),[]);
+  const selectCell=(event,key)=>{clearTimeout(clickTimer.current);if(event.detail===0){onSelect(key);return;}if(event.detail===1)clickTimer.current=setTimeout(()=>onSelect(key),450);};
+  const addFromCell=(event)=>{
+    clearTimeout(clickTimer.current);event.preventDefault();event.stopPropagation();if(readOnly)return;
+    const cell=event.target.closest('td[data-gs-date-start]');if(!cell)return;
+    const rect=cell.getBoundingClientRect(),span=Number(cell.dataset.gsDateCount)||1;
+    const offset=Math.max(0,Math.min(span-1,Math.floor((event.clientX-rect.left)/rect.width*span)));
+    onQuickAdd(shiftWorkflowDay(cell.dataset.gsDateStart,offset),cell.closest('tr')?.dataset.gsTask || 'patrol');
+  };
+  const shiftMonth=(offset)=>{const d=new Date(center+'T12:00:00Z'),day=d.getUTCDate();d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()+offset);const last=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,0)).getUTCDate();d.setUTCDate(Math.min(day,last));setCenter(d.toISOString().slice(0,10));};
+  const days=Array.from({length:31},(_,i)=>shiftWorkflowDay(start,i)),end=days.at(-1);
+  const rangeLabel=`${start.slice(0,4)}年 ${Number(start.slice(5,7))}/${Number(start.slice(8))}〜${start.slice(0,4)!==end.slice(0,4)?end.slice(0,4)+'年 ':''}${Number(end.slice(5,7))}/${Number(end.slice(8))}`;
+  const tasks=model.phases.flatMap(phase=>phase.tasks.map(task=>({...task,phase:phase.title})));
+  const stateText={done:'完了',todo:'未完了',unknown:'要確認',scheduled:'予定',exempt:'必要なし',deferred:'終了後'};
+  return <section className="gs-schedule" aria-label="業務工程表">
+    <div className="gs-toolbar"><div><h3>業務工程表</h3><p>31日間表示・下のスライダーで日付移動・ダブルクリックで予定追加</p></div><div className="gs-navigation"><button type="button" aria-label="工程表を前月へ" onClick={()=>shiftMonth(-1)}>‹</button><strong aria-live="polite">{rangeLabel}</strong><button type="button" aria-label="工程表を翌月へ" onClick={()=>shiftMonth(1)}>›</button><button type="button" onClick={()=>setCenter(getTodayString())}>今日へ</button><button type="button" onClick={()=>setCenter(initial)}>実施日へ</button><button type="button" disabled={readOnly} onClick={()=>onQuickAdd(getTodayString(),'patrol')}>＋ 予定追加</button></div></div>
+    <div ref={scheduleScrollRef} className="gs-scroll" tabIndex={0} role="region" aria-label="工程表。狭い画面では左右にスクロールできます">
+      <table className="gs-table" style={{minWidth:`${268+days.length*34}px`}} onDoubleClick={addFromCell}>
+        <thead><tr><th scope="col" className="gs-label">業務</th>{days.map(day=>{const dow=new Date(day+'T12:00:00Z').getUTCDay();return <th key={day} data-gs-day={day} title={day} scope="col" className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}><span>{day===start||day.endsWith('-01')?Number(day.slice(5,7))+'/':''}{Number(day.slice(8))}</span><small>{'日月火水木金土'[dow]}</small></th>;})}<th scope="col" className="gs-status-heading">進捗</th></tr></thead>
+        <tbody>{tasks.map((task,index)=>{
+          const plan=getWorkflowPlan(student,task),completion=workflowCompletion(student,task);
+          const dates=task.state==='exempt'?[]:plan?plan.dates:getWorkflowDates(student,task),visible=dates.filter(d=>d>=start&&d<=end),outside=dates.length>0&&!visible.length;
+          const badgeText=task.state!=='done'&&plan?.kind==='thanks'?'送付予定':stateText[task.state];
+          const fullBanner=!!completion||task.state==='exempt'||(task.state==='todo'&&!plan);
+          const shortTitle={doc:'保護者お知らせ',greeting:'事前あいさつ・打合せ',dates:'現場実習・見学',patrol:'巡回・同行',studentThankYou:'生徒お礼状',teacherThankYou:'教師お礼状',phone:'事前電話',gift:'菓子折'}[task.key];
+          const cells=[];
+          if(fullBanner){const text=completion?.label||(task.state==='exempt'?'必要なし':'未完了');cells.push(<td key="banner" colSpan={days.length} data-gs-date-start={days[0]} data-gs-date-count={days.length} className={`gs-banner-cell gs-banner-${task.state} ${completion?'gs-completed-cell':''}`} style={{'--gs-month-days':days.length,backgroundImage:workflowCalendarFill(start,days.length)}}><button type="button" className={`gs-row-banner ${completion?'gs-completed-banner':''}`} aria-label={`${task.title}：${text}。押して編集`} onClick={e=>selectCell(e,task.key)}><span className="gs-banner-text">{text}</span></button></td>);}
+          else for(let i=0;i<days.length;i++){
+            const day=days[i],dow=new Date(day+'T12:00:00Z').getUTCDay();
+            if(plan&&dates.includes(day)){
+              const begin=i;while(i+1<days.length&&dates.includes(days[i+1]))i++;
+              const count=i-begin+1,finish=days[i];
+              cells.push(<td key={day} colSpan={count} data-gs-date-start={day} data-gs-date-count={count} className={`gs-window-cell gs-window-${plan.kind} ${task.state==='done'?'gs-window-done':''}`} data-window-start={day} data-window-end={finish} style={{'--gs-window-days':count,backgroundImage:workflowCalendarFill(day,count)}}><button type="button" className={`gs-window-band ${count<3?'gs-window-short':''}`} aria-label={`${task.title} ${day}〜${finish} ${plan.label}を編集`} title={`${plan.label}：${day}〜${finish}（${plan.basis}）`} onClick={e=>selectCell(e,task.key)}><span>{count===1&&plan.label.length>2?<>{plan.label.slice(0,2)}<br/>{plan.label.slice(2)}</>:plan.label}</span></button></td>);continue;
+            }
+            const hit=dates.includes(day),previous=dates.includes(shiftWorkflowDay(day,-1)),next=dates.includes(shiftWorkflowDay(day,1));
+            const patrolEntries=task.key==='patrol'?(student.patrols||[]).filter(p=>p.date===day):[];
+            const markState=patrolEntries.length&&patrolEntries.every(p=>p.done)?'done':task.state;
+            cells.push(<td key={day} data-gs-date-start={day} data-gs-date-count="1" data-calendar-day={day} className={`${dow===0||dow===6?'gs-weekend':''} ${day===getTodayString()?'gs-today':''}`}>{hit&&<button type="button" className={`gs-mark gs-${markState} ${previous&&i>0?'gs-join-left':''} ${next&&i<days.length-1?'gs-join-right':''}`} title={`${task.title} ${day}：${task.label}`} aria-label={`${task.title} ${day} ${task.label}を編集`} onClick={e=>selectCell(e,task.key)}>{!previous||i===0?<span>{task.key==='dates'?'実施':task.key==='patrol'?(markState==='done'?'✓':'巡回'):task.state==='done'?'✓':'予定'}</span>:<span aria-hidden="true">—</span>}</button>}</td>);
+          }
+          return <tr key={task.key} data-gs-task={task.key} className={`gs-row-${task.state} ${selected===task.key?'gs-selected':''} ${index===4||index===6?'gs-phase-divider':''}`}><th scope="row" className="gs-label"><button type="button" aria-label={`${task.title}を編集`} aria-pressed={selected===task.key} onClick={()=>onSelect(task.key)}><span>{task.key==='greeting'?<>事前あいさつ<br/>・打合せ</>:shortTitle}</span><small className={`gs-row-state gs-${task.state!=='done'&&plan?.kind==='thanks'?'scheduled':task.state}`}>{badgeText}</small>{index===0||index===4||index===6?<small>{task.phase}</small>:null}</button></th>{cells}<td className="gs-status"><button type="button" onClick={()=>outside&&!completion?setCenter(dates[0]):onSelect(task.key)} aria-label={outside&&!completion?`${task.title}の日付がある月へ移動`:`${task.title}の詳細を開く`}><WorkflowBadge state={task.state!=='done'&&plan?.kind==='thanks'?'scheduled':task.state}>{badgeText}</WorkflowBadge><small>{completion?'':outside?'期間外 →':!dates.length&&task.state!=='exempt'?(task.state==='deferred'?'日付未設定':'日付なし'):task.key==='dates'?`${dates.length}日`:''}</small></button></td></tr>;
+        })}</tbody>
+      </table>
+    </div>
+    <div className="gs-horizontal-control" role="group" aria-label="カレンダーの日付移動">
+      <div className="gs-horizontal-caption"><label htmlFor="gs-horizontal-slider">表示する日付を移動</label><span>中心：{center.slice(0,4)}年{Number(center.slice(5,7))}月{Number(center.slice(8))}日</span></div>
+      <div className="gs-horizontal-track">
+        <button type="button" aria-label="カレンダーを1週間前へ" onClick={()=>setCenter(shiftWorkflowDay(center,-7))}>‹</button>
+        <input id="gs-horizontal-slider" type="range" min="-90" max="90" step="1" value={Math.max(-90,Math.min(90,sliderOffset))} aria-label="カレンダーの表示日付" aria-valuetext={center+'を中心に31日間表示'} onChange={event=>setCenter(shiftWorkflowDay(sliderAnchor,Number(event.target.value)))}/>
+        <button type="button" aria-label="カレンダーを1週間後へ" onClick={()=>setCenter(shiftWorkflowDay(center,7))}>›</button>
+      </div>
+      <div className="gs-slider-dates"><span>{formatShortDate(shiftWorkflowDay(sliderAnchor,-90))}</span><span>左右で日付移動・矢印は1週間</span><span>{formatShortDate(shiftWorkflowDay(sliderAnchor,90))}</span></div>
+    </div>
+    <div className="gs-legend"><span className="gs-legend-item"><i className="gs-done"/>完了（半透明）</span><span className="gs-legend-item"><i className="gs-scheduled"/>予定</span><span className="gs-legend-item"><i className="gs-todo"/>未完了・要確認</span><span className="gs-legend-note">お礼状：土日を除く10日間。事前連絡・保護者お知らせ：開始21日前〜7日前。</span></div>
+  </section>;
+}
+
+function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, initialTask = null, returnToOverview = false, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onOpenMaterial, onEditPatrol, onConfirm }) {
   const rootRef = useRef(null);
+  const [quickAdd,setQuickAdd]=useState(null);
+  const [quickError,setQuickError]=useState('');
+  const [quickSaving,setQuickSaving]=useState(false);
   const [addingPatrol, setAddingPatrol] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(initialTask);
+  const [showBasics, setShowBasics] = useState(false);
   const [patrolDraft, setPatrolDraft] = useState({ date: '', time: '', teacher: s.teacher || '' });
   const model = getWorkflowModel(s);
   const exemptions = workflowExemptions(s);
@@ -924,7 +1409,7 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
   }, []);
   useEffect(() => {
     const keydown = (event) => {
-      if (suspended) return;
+      if (suspended || quickAdd) return;
       if (event.key === 'Escape') { event.preventDefault(); onClose(); return; }
       if (event.key !== 'Tab') return;
       const controls = [...(rootRef.current?.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]') || [])].filter((el) => el.getClientRects().length);
@@ -935,8 +1420,13 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
     };
     document.addEventListener('keydown', keydown);
     return () => document.removeEventListener('keydown', keydown);
-  }, [suspended, onClose]);
-  const scrollToTask = (key) => rootRef.current?.querySelector(`[data-wf-task="${key}"]`)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  }, [suspended, quickAdd, onClose]);
+  const scrollToTask = (key) => setSelectedTask(key);
+  useEffect(() => {
+    const cards = rootRef.current?.querySelectorAll('[data-wf-task]') || [];
+    cards.forEach(card => card.classList.toggle('gs-active-task', card.dataset.wfTask === selectedTask));
+    if (selectedTask) rootRef.current?.querySelector('.gs-active-task')?.scrollIntoView({block:'center',behavior:'auto'});
+  }, [selectedTask, s]);
   const editText = (field, title, multiline = false, extra = {}) => onText({ value: s[field] || '', title, label: title, multiline, onSave: (v) => onPatch(s, { [field]: v, ...extra }) });
   const changeTask = (task, value) => {
     if (fieldLocked(task.field)) return;
@@ -947,6 +1437,8 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
     } else patch[task.field] = value;
     const cfg = STEP_CONFIG[FIELD_TO_STEP[task.field]];
     if (cfg?.dateField) patch[cfg.dateField] = value === 'completed' ? (s[cfg.dateField] || getTodayString()) : '';
+    if(task.key==='greeting') patch.greetingCompletedDate=value==='completed'?(s.greetingCompletedDate||getTodayString()):'';
+    if(task.key==='gift') patch.giftCompletedDate=value==='brought'?(s.giftCompletedDate||getTodayString()):'';
     onPatch(s, patch);
   };
   const statusOptions = (key) => key === 'greeting' ? [['pending', '要否を確認'], ['unadjusted', '未調整'], ['scheduled', '予定あり'], ['completed', '挨拶終了'], ['none', '対象外']]
@@ -964,10 +1456,11 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
       {task.state === 'deferred' && <p className="wf-muted">現在は対応時期ではありません。</p>}
       {task.key === 'greeting' && task.state === 'unknown' && <p className="wf-muted">旧表示「―」は、不要と断定せず要確認にしています。</p>}
       {cfg?.dateField && selected === 'completed' && <button className="wf-date-button" type="button" disabled={locked} onClick={() => onPickDate({ value: s[cfg.dateField] || '', title: `${task.title}：${dateLabel}`, onSelect: (value) => onPatch(s, { [cfg.dateField]: value }) })}>{dateLabel}：{s[cfg.dateField] ? formatShortDate(s[cfg.dateField]) : '未設定・日付を選択'}</button>}
+      {['greeting','gift'].includes(task.key) && task.state==='done' && <button className="wf-date-button" type="button" disabled={locked} onClick={()=>{const field=task.key==='greeting'?'greetingCompletedDate':'giftCompletedDate';onPickDate({value:s[field]||'',title:task.title+'：実施日',onSelect:value=>onPatch(s,{[field]:value})});}}>実施日：{s[task.key==='greeting'?'greetingCompletedDate':'giftCompletedDate']?formatShortDate(s[task.key==='greeting'?'greetingCompletedDate':'giftCompletedDate']):'未設定・日付を選択'}</button>}
       {task.key === 'greeting' && !['pending', 'none'].includes(selected) && <div className="wf-task-details">
-        <button className="wf-date-button" type="button" disabled={locked} onClick={() => onPickDate({ value: s.greetingDate || '', title: '事前挨拶の予定日', onSelect: (value) => onPatch(s, { greetingDate: value }) })}>予定日：{s.greetingDate ? formatShortDate(s.greetingDate) : '未設定'}</button>
-        <button className="wf-date-button" type="button" disabled={locked} onClick={() => editText('greetingTime', '事前挨拶の時間')}>時間：{s.greetingTime || '未設定'}</button>
-        <button className="wf-date-button" type="button" disabled={locked} onClick={() => editText('greetingVisitor', '事前挨拶の引率教員')}>引率：{s.greetingVisitor || '未設定'}</button>
+        <button className="wf-date-button" type="button" disabled={locked} onClick={() => onPickDate({ value: s.greetingDate || '', title: '事前あいさつ・打合せの予定日', onSelect: (value) => onPatch(s, { greetingDate: value }) })}>予定日：{s.greetingDate ? formatShortDate(s.greetingDate) : '未設定'}</button>
+        <button className="wf-date-button" type="button" disabled={locked} onClick={() => editText('greetingTime', '事前あいさつ・打合せの時間')}>時間：{s.greetingTime || '未設定'}</button>
+        <button className="wf-date-button" type="button" disabled={locked} onClick={() => editText('greetingVisitor', '事前あいさつ・打合せの引率教員')}>引率：{s.greetingVisitor || '未設定'}</button>
       </div>}
       <div className="wf-task-actions">
         {!['done', 'exempt'].includes(task.state) && <button className="wf-primary" type="button" disabled={locked} onClick={() => changeTask(task, targetStatus)}>{task.key === 'phone' ? '連絡済みにする' : task.key === 'doc' ? '配付済みにする' : task.key === 'greeting' ? '挨拶終了にする' : task.key === 'gift' ? '持参済みにする' : '送付済みにする'}</button>}
@@ -977,21 +1470,53 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
   };
   const dateTask = model.phases[1].tasks[0], patrolTask = model.phases[1].tasks[1];
   const patrolLocked = readOnly || (!isAdmin && (s.lockedFields || []).some((field) => field === 'patrolStatus'));
-  return <div className="wf-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <div ref={rootRef} role="dialog" aria-modal="true" aria-labelledby="wf-title" className="wf-dialog">
-      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・施設見学</p><h2 id="wf-title">実習生 詳細情報 <span>業務ワークフロー</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label="ワークフローを閉じる" onClick={onClose}>×</button></header>
+  const toggleWorkflowPatrolCompletion=(patrol)=>{
+    if(patrolLocked||fieldLocked(`patrol:${patrol.id}`))return;
+    const apply=()=>onPatch(s,{patrols:(s.patrols||[]).map(item=>item.id===patrol.id?{...item,done:!item.done,completedDate:!item.done?(item.completedDate||getTodayString()):''}:item)});
+    if(patrol.done)onConfirm('この巡回・同行を未完了に戻しますか？',apply);else apply();
+  };
+  const openQuickAdd=(day,key='patrol')=>{
+    if(readOnly)return;
+    const requested=key==='greeting'?'greeting':key==='dates'?'dates':'patrol';
+    const type=requested==='patrol'&&patrolLocked?(fieldLocked('greetingStatus')?'dates':'greeting'):requested;
+    setQuickError('');setQuickAdd({date:day||getTodayString(),time:'',teacher:s.teacher||'',type});
+  };
+  const saveQuickAdd=async(event)=>{
+    event.preventDefault();setQuickError('');if(readOnly||!quickAdd?.date||quickSaving)return;
+    const draft={...quickAdd};let patch={};
+    if(draft.type==='patrol'){
+      if(patrolLocked){setQuickError('巡回・同行はロックされています。');return;}
+      if((s.patrols||[]).some(p=>p.date===draft.date&&(p.time||'')===draft.time&&(p.teacher||'')===draft.teacher)){setQuickError('同じ巡回・同行予定が登録されています。');return;}
+      patch={patrols:[...(s.patrols||[]),{id:'p-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),date:draft.date,time:draft.time,teacher:draft.teacher,done:false}].sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))),workflowExemptions:exemptions.filter(v=>v!=='patrol')};
+    }else if(draft.type==='greeting'){
+      if(fieldLocked('greetingStatus')){setQuickError('事前あいさつ・打合せはロックされています。');return;}
+      patch={greetingStatus:'scheduled',greetingDate:draft.date,greetingTime:draft.time,greetingVisitor:draft.teacher,greetingCompletedDate:'',workflowExemptions:exemptions.filter(v=>v!=='greeting')};
+    }else{
+      if(model.days.includes(draft.date)){setQuickError('この日は実施日に登録済みです。');return;}
+      patch={internshipDates:[...model.days,draft.date].sort()};
+    }
+    const apply=async()=>{setQuickSaving(true);try{const saved=await onPatch(s,patch);if(saved!==false)setQuickAdd(null);else setQuickError('保存できませんでした。設定を確認してください。');}finally{setQuickSaving(false);}};
+    if(draft.type==='greeting'&&s.greetingDate){onConfirm('登録済みの事前あいさつ・打合せ予定を変更しますか？',apply);return;}
+    await apply();
+  };
+
+  return <><div className="wf-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <div ref={rootRef} role="dialog" aria-modal="true" aria-labelledby="wf-title" className="wf-dialog gs-dialog">
+      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・見学</p><h2 id="wf-title">業務ワークフロー <span>工程表</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label="ワークフローを閉じる" onClick={onClose}>×</button></header>
       <div className="wf-scroll">
         {readOnly && <p className="wf-readonly" role="status">🔒 この実習期は終了済みのため閲覧のみです。管理者に確認してください。</p>}
+        <div className="gs-person-summary student-identity-color" style={studentIdentityStyle(s)} data-identity-grade={s.grade||'unset'} data-identity-type={s.internshipType==='observation'?'observation':'internship'}><strong>{s.name || '氏名未設定'}（{s.location || '実習先未設定'}）</strong><span>{s.grade ? `${s.grade}年${s.classVal || '―'}組` : ''} {s.teacher || '担当未設定'}</span><span className="gs-identity-kind">{s.internshipType==='observation'?'見学':'実習'}</span><button type="button" className="gs-detail-toggle" aria-expanded={showBasics} onClick={()=>setShowBasics(v=>!v)}>基本情報 {showBasics?'を閉じる':'を編集'}</button></div>
+        <section className="gs-related-documents" aria-label="関連文書"><div className="gs-doc-heading"><strong>関連文書</strong><button type="button" onClick={onMaterials}>資料を登録・管理</button></div><div className="gs-document-buttons">{(s.materials||[]).map((m,i)=><button type="button" key={m.id||i} onClick={()=>onOpenMaterial(m)}><span aria-hidden="true">📎 </span>{m.name||'名称未設定'}</button>)}{!(s.materials||[]).length&&<span className="wf-muted">関連文書なし</span>}</div></section>
+        {showBasics && <div className="gs-compact-basics">
         <section className="wf-basics" aria-label="実習生の基本情報">
           <div><p className="wf-field-label">生徒・学級</p><button type="button" disabled={readOnly} className="wf-basic-name" onClick={() => editText('name', '生徒氏名を編集')}>{s.name || '氏名未設定'}</button><div className="wf-inline"><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.grade || '3', title: '学年を選択', options: [['1','1年'],['2','2年'],['3','3年'],['other','他']], onSave: (v) => onPatch(s, { grade: v }) })}>{s.grade ? `${s.grade}年` : '学年未設定'}</button><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.classVal || '', title: '組を変更', options: [['','未設定'],['1','1組'],['2','2組'],['3','3組']], onSave: (v) => onPatch(s, { classVal: v }) })}>{s.classVal ? `${s.classVal}組` : '組未設定'}</button></div></div>
           <div><p className="wf-field-label">実習先・活動種別</p><button type="button" className="wf-basic-value" disabled={readOnly} onClick={() => editText('location', '実習先を編集')}>{s.location || '実習先未設定'}</button><button type="button" className="wf-small-button" disabled={readOnly} onClick={() => onSelect({ value: s.internshipType || 'internship', title: '活動種別を選択', options: [['internship','実習'],['observation','見学']], onSave: (v) => onPatch(s, { internshipType: v }) })}>{s.internshipType === 'observation' ? '見学' : '実習'}</button></div>
           <div><p className="wf-field-label">実施期間</p><button type="button" className="wf-basic-value" onClick={() => scrollToTask('dates')}>{model.days.length ? formatShortDate(model.days[0]) + (model.days.length > 1 ? ' 〜 ' + formatShortDate(model.days[model.days.length - 1]) : '') : '日程未設定'}</button><p className="wf-muted">{model.days.length ? `実施 ${model.days.length}日・日程カードで確認` : '実施日を設定してください'}</p></div>
           <div><p className="wf-field-label">担当教員</p><button type="button" className="wf-basic-value" disabled={readOnly} onClick={() => editText('teacher', '担当教員を編集')}>{s.teacher || '担当未設定'}</button><p className="wf-muted wf-basic-edit-help">基本情報は各項目から編集できます</p></div>
         </section>
-        <section className="wf-overview" aria-label="進捗の概要">
-          <div className="wf-phase-summary">{model.phases.map((phase) => <button key={phase.key} type="button" className={`wf-phase-chip wf-chip-${phase.state}`} onClick={() => rootRef.current?.querySelector(`[data-wf-phase="${phase.key}"]`)?.scrollIntoView({ behavior: 'auto', block: 'start' })}><span className="wf-summary-top"><strong>{phase.number} {phase.title}</strong><WorkflowBadge state={phase.state}>{phase.label}</WorkflowBadge></span><span className="wf-summary-count">{phase.target ? `${phase.done} / ${phase.target} 項目完了` : '対象業務なし'}{phase.unknown > 0 ? `・うち要確認 ${phase.unknown}` : ''}</span><span className="wf-track"><span style={{ width: `${phase.target ? 100 * phase.done / phase.target : 100}%` }} /></span></button>)}</div>
-          <div className="wf-attention"><h3>次に確認すること</h3>{model.attention.length ? <div className="wf-attention-list">{model.attention.map((task) => <button type="button" key={task.key} onClick={() => scrollToTask(task.key)}>{task.text}<span aria-hidden="true"> ↗</span></button>)}</div> : <p className="wf-muted">現在の登録情報では、対応・確認待ちの項目はありません。</p>}<p className="wf-help">対象外は集計から除外。要否が未確認の項目は「要確認」として残します。期限超過の判定はしません。</p></div>
-        </section>
+        </div>}
+        <WorkflowSchedule student={s} model={model} selected={selectedTask} onSelect={scrollToTask} onQuickAdd={openQuickAdd} readOnly={readOnly} />
+        {selectedTask && <div className="gs-editor-title"><span>選択した業務の編集</span><button type="button" onClick={()=>setSelectedTask(null)}>編集を閉じる</button></div>}
         <div className="wf-board">
           {model.phases.map((phase, phaseIndex) => <section key={phase.key} data-wf-phase={phase.key} className={`wf-phase wf-phase-${phase.key}`} aria-label={`${phase.title}の業務`}>
             <div className="wf-phase-heading"><span className="wf-step-number">{phase.number}</span><div><h3>{phase.title}</h3><p>{phase.description}</p></div></div>
@@ -1003,7 +1528,13 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
               </article>
               <article className="wf-task" data-wf-task="patrol" aria-label="巡回・同行"><div className="wf-task-top"><h4>巡回・同行</h4><WorkflowBadge state={patrolTask.state}>{patrolTask.label}</WorkflowBadge></div>
                 {!(s.patrols || []).length && <p className="wf-muted">未設定だけでは不要と判断しません。予定を追加するか、要否を指定してください。</p>}
-                <div className="wf-patrol-list">{(s.patrols || []).map((p) => <div key={p.id} className="wf-patrol-row"><label><input type="checkbox" checked={!!p.done} disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onChange={() => onPatch(s, { patrols: (s.patrols || []).map((item) => item.id === p.id ? { ...item, done: !item.done } : item) })} /><span><strong>{p.date ? formatShortDate(p.date) : '日付未設定'} {p.time || ''}</strong><span className="wf-muted">{p.teacher || '担当未設定'}・{p.done ? '完了' : '未完了'}</span></span></label><div className="wf-inline"><button type="button" className="wf-small-button" disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onClick={() => onEditPatrol(s.id, p.id)}>編集</button><button type="button" className="wf-small-button" disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onClick={() => onConfirm('この巡回・同行予定を削除しますか？', () => onPatch(s, { patrols: (s.patrols || []).filter((item) => item.id !== p.id) }))}>削除</button></div></div>)}</div>
+                <div className="wf-patrol-list">{(s.patrols || []).map((p) => <div key={p.id} className="wf-patrol-row" data-wf-patrol={p.id}>
+                  <div className="wf-patrol-info"><strong>{p.date ? formatShortDate(p.date) : '日付未設定'} {p.time || ''}</strong><span className="wf-muted">{p.teacher || '担当未設定'}</span></div>
+                  <button type="button" className={`wf-patrol-complete ${p.done?'wf-patrol-completed':''}`} aria-pressed={!!p.done} aria-label={`${p.date||'日付未設定'} ${p.time||''}の巡回・同行：${p.done?'終了済み。未完了に戻す':'終了しましたと記録する'}`} disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onClick={()=>toggleWorkflowPatrolCompletion(p)}>{p.done?'✅ 巡回・同行終了済み':'巡回・同行終了しました'}</button>
+                  {p.done&&<p className="wf-muted wf-patrol-completion-note">完了記録：{p.completedDate?formatShortDate(p.completedDate):'日付未設定'}{!patrolLocked&&!fieldLocked(`patrol:${p.id}`)&&' · ボタンを押すと未完了に戻せます'}</p>}
+                  {(patrolLocked||fieldLocked(`patrol:${p.id}`))&&<p className="wf-muted">🔒 {readOnly?'終了済み実習期・閲覧のみ':'管理者ロック中'}</p>}
+                  <div className="wf-inline"><button type="button" className="wf-small-button" disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onClick={() => onEditPatrol(s.id, p.id)}>編集</button><button type="button" className="wf-small-button" disabled={patrolLocked || fieldLocked(`patrol:${p.id}`)} onClick={() => onConfirm('この巡回・同行予定を削除しますか？', () => onPatch(s, { patrols: (s.patrols || []).filter((item) => item.id !== p.id) }))}>削除</button></div>
+                </div>)}</div>
                 {!(s.patrols || []).length && <label className="wf-select-label">巡回・同行の要否<select aria-label="巡回・同行の要否" disabled={patrolLocked} value={exemptions.includes('patrol') ? 'none' : 'check'} onChange={(e) => onPatch(s, { workflowExemptions: e.target.value === 'none' ? [...new Set([...exemptions, 'patrol'])] : exemptions.filter((v) => v !== 'patrol') })}><option value="check">要否を確認</option><option value="none">対象外</option></select></label>}
                 {!addingPatrol ? <button type="button" className="wf-secondary" disabled={patrolLocked} onClick={() => setAddingPatrol(true)}>＋ 巡回・同行予定を追加</button> : <form className="wf-patrol-form" onSubmit={async (event) => { event.preventDefault(); if (!patrolDraft.date || patrolLocked) return; const next = [...(s.patrols || []), { id: 'p-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7), ...patrolDraft, done: false }].sort((a, b) => String(a.date + (a.time || '')).localeCompare(String(b.date + (b.time || '')))); await onPatch(s, { patrols: next, workflowExemptions: exemptions.filter((v) => v !== 'patrol') }); setAddingPatrol(false); setPatrolDraft({ date: '', time: '', teacher: s.teacher || '' }); }}>
                   <label>日付<input type="date" required aria-label="追加する巡回日" value={patrolDraft.date} onChange={(e) => setPatrolDraft({ ...patrolDraft, date: e.target.value })} /></label><label>時間<input type="time" aria-label="追加する巡回時間" value={patrolDraft.time} onChange={(e) => setPatrolDraft({ ...patrolDraft, time: e.target.value })} /></label><label>担当<input type="text" aria-label="追加する巡回担当" value={patrolDraft.teacher} onChange={(e) => setPatrolDraft({ ...patrolDraft, teacher: e.target.value })} /></label><div className="wf-inline"><button type="submit" className="wf-primary" disabled={patrolLocked}>予定を保存</button><button type="button" className="wf-secondary" onClick={() => setAddingPatrol(false)}>キャンセル</button></div>
@@ -1013,11 +1544,20 @@ function StudentWorkflowDialog({ student: s, readOnly, isAdmin, suspended, onClo
             {phaseIndex === 2 && <div className="wf-stack">{phase.tasks.map(renderStandardTask)}<p className="wf-help">実施期間が終わるまでは、未送付を要対応として強調しません。送付済み・対象外の記録はそのまま表示します。</p></div>}
           </section>)}
         </div>
-        <section className="wf-extras" aria-label="特記事項と関連資料"><div><h3>特記事項・配慮事項</h3><button type="button" className="wf-notes" disabled={readOnly} onClick={() => editText('notes', '特記事項・配慮事項を編集', true)}>{s.notes || '特記事項を入力する'}</button></div><div><h3>関連資料</h3><p className="wf-muted">実施計画・評価票などの登録資料を確認できます。</p><button type="button" className="wf-secondary" onClick={onMaterials}>関連資料を開く（{(s.materials || []).length}件）</button></div></section>
+        <details className="gs-extra-disclosure"><summary className="gs-detail-toggle">メモ・関連資料</summary><section className="wf-extras" aria-label="特記事項と関連資料"><div><h3>特記事項・配慮事項</h3><button type="button" className="wf-notes" disabled={readOnly} onClick={() => editText('notes', '特記事項・配慮事項を編集', true)}>{s.notes || '特記事項を入力する'}</button></div><div><h3>関連資料</h3><p className="wf-muted">実施計画・評価票などの登録資料を確認できます。</p><button type="button" className="wf-secondary" onClick={onMaterials}>関連資料を開く（{(s.materials || []).length}件）</button></div></section></details>
       </div>
-      <footer className="wf-footer"><p className="wf-muted" aria-live="polite">変更は通常の保存先へ反映します。状態は選択して変更でき、順番による操作制限はありません。</p><button type="button" className="wf-secondary" onClick={onClose}>閉じる</button></footer>
+      <footer className="wf-footer"><p className="wf-muted" aria-live="polite">変更は通常の保存先へ反映します。状態は選択して変更でき、順番による操作制限はありません。</p><button type="button" className="wf-secondary" onClick={onClose}>{returnToOverview?'業務一覧へ戻る':'閉じる'}</button></footer>
     </div>
-  </div>;
+  </div>
+      {quickAdd && <AppUtilityDialog title="日付から予定を追加" suspended={suspended} onClose={()=>{if(!quickSaving)setQuickAdd(null);}}><form className="gs-quick-form" onSubmit={saveQuickAdd}>
+        <label>追加する予定<select aria-label="追加する予定の種類" value={quickAdd.type} onChange={e=>{setQuickError('');setQuickAdd({...quickAdd,type:e.target.value});}}><option value="patrol" disabled={patrolLocked}>巡回・同行</option><option value="greeting" disabled={fieldLocked('greetingStatus')}>事前あいさつ・打合せ</option><option value="dates">実習・見学日</option></select></label>
+        <label>日付<input type="date" required aria-label="直接追加する日付" value={quickAdd.date} onChange={e=>setQuickAdd({...quickAdd,date:e.target.value})}/></label>
+        {quickAdd.type!=='dates'&&<><label>時間<input type="time" aria-label="直接追加する時間" value={quickAdd.time} onChange={e=>setQuickAdd({...quickAdd,time:e.target.value})}/></label><label>担当・引率<input type="text" aria-label="直接追加する担当" value={quickAdd.teacher} onChange={e=>setQuickAdd({...quickAdd,teacher:e.target.value})}/></label></>}
+        {quickError&&<p role="alert" className="gs-quick-error">{quickError}</p>}
+        <div className="sb-dialog-actions"><button type="button" disabled={quickSaving} onClick={()=>setQuickAdd(null)}>キャンセル</button><button type="submit" disabled={quickSaving} className="sb-primary">{quickSaving?'保存中…':'予定を追加'}</button></div>
+      </form></AppUtilityDialog>}
+
+  </>;
 }
 
 
@@ -1512,6 +2052,115 @@ const BulkImportModal = ({ onClose, onCommit, onAlert, defaultTeacher }) => {
 // メインコンポーネント
 // =============================================================================
 
+// v3.28.0: 検索・掲示板を必要なときだけ表示する補助ダイアログ。
+function AppUtilityDialog({ title, onClose, children, wide = false, suspended = false, className = '' }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    (ref.current?.querySelector('input') || ref.current?.querySelector('button'))?.focus();
+    return () => { document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus?.(); };
+  }, []);
+  useEffect(() => {
+    const keydown = (event) => {
+      if (suspended) return;
+      if (event.key === 'Escape') { event.preventDefault(); onClose(); }
+      if (event.key !== 'Tab') return;
+      const nodes = [...(ref.current?.querySelectorAll('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"]') || [])].filter((node) => node.getClientRects().length);
+      if (event.shiftKey && document.activeElement === nodes[0]) { event.preventDefault(); nodes[nodes.length-1]?.focus(); }
+      else if (!event.shiftKey && document.activeElement === nodes[nodes.length-1]) { event.preventDefault(); nodes[0]?.focus(); }
+    };
+    document.addEventListener('keydown',keydown); return () => document.removeEventListener('keydown',keydown);
+  }, [suspended,onClose]);
+  return <div className="sb-utility-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`sb-utility-dialog ${wide ? 'sb-board-dialog' : ''} ${className}`}><header><h2>{title}</h2><button type="button" className="sb-icon-button" aria-label={`${title}を閉じる`} onClick={onClose}>×</button></header><div className="sb-utility-body">{children}</div></section></div>;
+}
+
+// v3.34.3: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
+const WORKFLOW_OVERVIEW_COLUMNS=[
+  {key:'phone',title:'事前電話連絡'}, {key:'doc',title:'保護者お知らせ'},
+  {key:'greeting',title:'事前あいさつ・打合せ'}, {key:'gift',title:'菓子折'},
+  {key:'dates',title:'現場実習・見学'}, {key:'patrol',title:'巡回・同行'},
+  {key:'studentThankYou',title:'生徒お礼状'}, {key:'teacherThankYou',title:'教師お礼状'}
+];
+const EMPTY_WORKFLOW_OVERVIEW_FILTERS={grade:'all',classVal:'all',teacher:'all',type:'all',unfinished:false};
+const getWorkflowOverviewRow=(student)=>{
+  const model=getWorkflowModel(student),tasks=model.phases.flatMap(p=>p.tasks);
+  const unfinished=tasks.filter(t=>!['done','exempt','deferred'].includes(t.state)).length;
+  return {student,model,tasks,unfinished,done:tasks.filter(t=>t.state==='done').length};
+};
+function WorkflowOverview({students,period,filters,onFilters,onOpenStudent,isAdmin,searchQuery=''}) {
+  const pageRef=useRef(null);
+  const [pageHeight,setPageHeight]=useState(null);
+  useEffect(()=>{
+    const page=pageRef.current;if(!page)return;
+    const measure=()=>{const top=page.getBoundingClientRect().top+window.scrollY;const next=Math.max(320,Math.floor(window.innerHeight-top-8));setPageHeight(old=>old===next?old:next);};
+    measure();
+    const observer=new ResizeObserver(measure);
+    [page.parentElement,document.querySelector('.sb-topbar'),document.querySelector('.sb-demo-note')].filter(Boolean).forEach(el=>observer.observe(el));
+    window.addEventListener('resize',measure);
+    window.visualViewport?.addEventListener('resize',measure);
+    return ()=>{observer.disconnect();window.removeEventListener('resize',measure);window.visualViewport?.removeEventListener('resize',measure);};
+  },[]);
+  const options=(field)=>[...new Set(students.map(s=>String(s[field]||'')).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja',{numeric:true}));
+  const query=searchQuery.trim().toLowerCase();
+  const rows=students.map(getWorkflowOverviewRow).filter(({student:s,unfinished})=>
+    (!query||[s.name,s.location,s.teacher,s.grade?String(s.grade)+'年':'',s.classVal?String(s.classVal)+'組':'',...(s.internshipDates||[])].some(value=>String(value||'').toLowerCase().includes(query)))&&
+    (filters.grade==='all'||String(s.grade||'')===filters.grade)&&
+    (filters.classVal==='all'||String(s.classVal||'')===filters.classVal)&&
+    (filters.teacher==='all'||String(s.teacher||'')===filters.teacher)&&
+    (filters.type==='all'||(s.internshipType==='observation'?'observation':'internship')===filters.type)&&
+    (!filters.unfinished||unfinished>0)
+  ).sort((a,b)=>String(a.student.grade||'').localeCompare(String(b.student.grade||''),'ja',{numeric:true})||String(a.student.classVal||'').localeCompare(String(b.student.classVal||''),'ja',{numeric:true})||String(a.student.name||'').localeCompare(String(b.student.name||''),'ja'));
+  const change=(key,value)=>onFilters({...filters,[key]:value});
+  const filterCount=Object.keys(EMPTY_WORKFLOW_OVERVIEW_FILTERS).filter(k=>k==='unfinished'?filters[k]:filters[k]!=='all').length;
+  const filtersOpen=filters.expanded ?? false;
+  const activeFilterLabels=[filters.grade!=='all'?(filters.grade==='other'?'他学年':filters.grade+'年'):'',filters.classVal!=='all'?filters.classVal+'組':'',filters.teacher!=='all'?filters.teacher:'',filters.type!=='all'?(filters.type==='observation'?'見学':'実習'):'',filters.unfinished?'未完了あり':''].filter(Boolean);
+  const totals=rows.reduce((sum,r)=>({unfinished:sum.unfinished+r.unfinished,done:sum.done+r.done}),{unfinished:0,done:0});
+  const tableRef=useRef(null);
+  const lastScroll=useRef({left:filters.scrollLeft||0,top:filters.scrollTop||0});
+  useEffect(()=>{if(tableRef.current){tableRef.current.scrollLeft=filters.scrollLeft||0;tableRef.current.scrollTop=filters.scrollTop||0;}},[]);
+  const rememberScroll=()=>{const e=tableRef.current;if(e){lastScroll.current={left:e.scrollLeft,top:e.scrollTop};if(filters.scrollLeft!==e.scrollLeft||filters.scrollTop!==e.scrollTop)onFilters({...filters,scrollLeft:e.scrollLeft,scrollTop:e.scrollTop});}};
+  const open=(s,key)=>{onFilters({...filters,scrollLeft:lastScroll.current.left,scrollTop:lastScroll.current.top});onOpenStudent(s,key);};
+  return <section ref={pageRef} style={pageHeight?{'--ow-page-height':pageHeight+'px'}:undefined} className="ow-page ow-dialog" aria-label="業務ワークフロー 一括進捗一覧"><h2 className="ow-sr-only">業務ワークフロー 一括進捗一覧</h2><div className="sb-utility-body">
+    <section className="ow-compact-bar" aria-label="一覧の対象と集計">
+      <div className="ow-period"><strong>{period.name}</strong>{period.locked&&<span className="ow-period-lock">🔒 {isAdmin?'管理者として編集中':'終了済み・閲覧のみ'}</span>}</div>
+      <div className="ow-counts" role="status"><span>表示 <b>{rows.length}</b> / {students.length}名</span><span>未完了・予定・要確認 <b>{totals.unfinished}</b>件</span><span>完了 <b>{totals.done}</b>件</span></div>
+      <div className="ow-filter-bar"><button type="button" aria-expanded={filtersOpen} aria-controls="ow-filter-controls" onClick={()=>onFilters({...filters,expanded:!filtersOpen})}>絞り込み{filterCount?'（'+filterCount+'）':''} {filtersOpen?'⌃':'⌄'}</button></div>
+    </section>
+    {filtersOpen&&<div id="ow-filter-controls" className="ow-filters" role="group" aria-label="業務一覧の絞り込み">
+      <label>学年<select aria-label="業務一覧の学年" value={filters.grade} onChange={e=>change('grade',e.target.value)}><option value="all">すべて</option>{options('grade').map(v=><option key={v} value={v}>{v==='other'?'他':v+'年'}</option>)}</select></label>
+      <label>組<select aria-label="業務一覧の組" value={filters.classVal} onChange={e=>change('classVal',e.target.value)}><option value="all">すべて</option>{options('classVal').map(v=><option key={v} value={v}>{v}組</option>)}</select></label>
+      <label>担当教員<select aria-label="業務一覧の担当教員" value={filters.teacher} onChange={e=>change('teacher',e.target.value)}><option value="all">すべて</option>{options('teacher').map(v=><option key={v} value={v}>{v}</option>)}</select></label>
+      <label>種別<select aria-label="業務一覧の種別" value={filters.type} onChange={e=>change('type',e.target.value)}><option value="all">すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></label>
+      <label className="ow-check"><input type="checkbox" checked={filters.unfinished} onChange={e=>change('unfinished',e.target.checked)}/>未完了のある生徒のみ</label>
+      <button type="button" className="ow-reset" disabled={!filterCount} onClick={()=>onFilters({...EMPTY_WORKFLOW_OVERVIEW_FILTERS,expanded:true,scrollLeft:filters.scrollLeft,scrollTop:filters.scrollTop})}>絞り込み解除</button>
+    </div>}
+    <p className="ow-help ow-sr-only" id="ow-usage">{filtersOpen?'未完了には予定・要確認を含みます。終了後対応は除外。この実習期の全員から絞り込みます。':'左右にスクロールして全業務を確認できます。生徒名は固定表示です。'}</p>
+    {activeFilterLabels.length>0&&<p className="ow-active-filters" role="status">条件：{activeFilterLabels.join(' ／ ')}</p>}
+    <div ref={tableRef} onScroll={rememberScroll} aria-describedby="ow-usage" className="ow-table-scroll" tabIndex={0} role="region" aria-label="生徒別の業務進捗。狭い画面は左右にスクロール">
+      <table className="ow-table"><caption className="ow-sr-only">{period.name}の生徒別業務進捗一覧</caption><thead><tr><th scope="col" className="ow-person">生徒・実習先<span>学級／担当教員</span></th>{WORKFLOW_OVERVIEW_COLUMNS.map(c=><th key={c.key} scope="col">{c.key==='greeting'?<>事前あいさつ<br/>・打合せ</>:c.title}</th>)}</tr></thead>
+      <tbody>{rows.map(({student:s,model,tasks})=><tr key={s.id} data-ow-student={s.id}><th scope="row" className="ow-person student-identity-color" style={studentIdentityStyle(s)} data-identity-grade={s.grade||'unset'} data-identity-type={s.internshipType==='observation'?'observation':'internship'}><button type="button" className="ow-person-button" aria-label={`${s.name||'氏名未設定'}のワークフローを開く`} onClick={()=>open(s,null)}><strong>{s.name||'氏名未設定'}（{s.location||'実習先未設定'}）</strong><span>{s.grade?(s.grade==='other'?'他':s.grade+'年'):'学年未設定'}{s.classVal?' '+s.classVal+'組':''} · {s.teacher||'担当未設定'}</span><small className={s.internshipType==='observation'?'ow-observation':'ow-internship'}>{s.internshipType==='observation'?'見学':'実習'}</small></button></th>{WORKFLOW_OVERVIEW_COLUMNS.map(c=>{
+        const task=tasks.find(t=>t.key===c.key),plan=getWorkflowPlan(s,task),completion=workflowCompletion(s,task);
+        const state=task.state!=='done'&&plan?.kind==='thanks'?'scheduled':task.state;
+        const label=task.state==='unknown'&&task.key!=='dates'?'要確認':task.state==='deferred'&&!plan?'終了後に対応':task.state==='exempt'?'必要なし':task.key==='gift'&&task.state==='todo'?'持参待ち':plan?.kind==='thanks'&&task.state!=='done'?'送付予定':task.key==='dates'?(model.finished?'期間終了':model.started?'実施中':model.days.length?'実施予定':'日程未設定'):task.key==='patrol'&&task.state==='scheduled'?'予定あり':task.label;
+        let sub='';if(completion)sub=completion.date?formatShortDate(completion.date):'実施日未設定';else if(c.key==='dates'&&model.days.length)sub=formatShortDate(model.days[0])+(model.days.length>1?'〜'+formatShortDate(model.days.at(-1)):'');else if(c.key==='greeting'&&s.greetingDate)sub=formatShortDate(s.greetingDate);else if(c.key==='patrol'&&(s.patrols||[]).length){const ps=(s.patrols||[]).filter(p=>!p.done).map(p=>p.date).filter(workflowDayKey).sort();sub=ps[0]?formatShortDate(ps[0]):'';}else if(plan?.dates?.length)sub=formatShortDate(plan.dates[0])+(plan.dates.length>1?'〜'+formatShortDate(plan.dates.at(-1)):'');
+        const locked=!!period.locked&&!isAdmin||!isAdmin&&((s.lockedFields||[]).includes(task.field)||(c.key==='patrol'&&(s.lockedFields||[]).includes('patrolStatus')));
+        return <td key={c.key}><button type="button" className={`ow-cell ow-${state}`} aria-label={`${s.name||'氏名未設定'}：${c.title}（${label}）を開く`} onClick={()=>open(s,c.key)}><WorkflowBadge state={state}>{label}</WorkflowBadge>{sub&&<span className="ow-cell-date">{sub}</span>}{locked&&<span className="ow-lock">🔒 閲覧のみ</span>}</button></td>;
+      })}</tr>)}</tbody></table>
+      {!rows.length&&<div className="ow-empty" role="status">{students.length?'条件に一致する生徒はいません。絞り込みを解除してください。':'この実習期には生徒が登録されていません。'}</div>}
+    </div>
+    <footer className="ow-footer"><div className="ow-legend" title="状態を押して確認・編集。左右にスクロールして全業務を確認できます。未完了は予定・要確認を含み、終了後対応は除きます。"><span className="ow-legend-help">状態を押して編集</span><span>✓ 完了</span><span>○ 未完了</span><span>◷ 予定</span><span>? 要確認</span><span>— 必要なし</span></div></footer>
+  </div></section>;
+}
+
+const readPeriodSelection=(room)=>{try{return localStorage.getItem(`active_internship_period${ENV_SUFFIX}_${room}`)||'';}catch{return '';}};
+const readLocalPeriods=(room)=>{try{const list=JSON.parse(localStorage.getItem(`internship_periods${ENV_SUFFIX}_${room}`)||'[]');return Array.isArray(list)&&list.length?list:[DEFAULT_PERIOD];}catch{return [DEFAULT_PERIOD];}};
+const chooseActivePeriod=(list,preferred)=>{
+  if(list.some(p=>p.id===preferred))return preferred;
+  return list.reduce((latest,p)=>!latest||Number(p.createdAtClient||0)>=Number(latest.createdAtClient||0)?p:latest,null)?.id||DEFAULT_PERIOD_ID;
+};
+
 function App() {
   // v3.5: 外部 config.js が読み込まれていれば window.FIREBASE_CONFIG を優先利用。
   // 無ければ従来通り localStorage の手動入力値にフォールバック。
@@ -1544,11 +2193,14 @@ function App() {
   const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
 
   // v3.25: 実習期（前期・後期・年度別など）をルーム内で共有する。
-  const [periods, setPeriods] = useState([DEFAULT_PERIOD]);
-  const [activePeriodId, setActivePeriodId] = useState(() => {
-    try { return localStorage.getItem(`active_internship_period${ENV_SUFFIX}_${localStorage.getItem('school_room_key') || '3-1'}`) || DEFAULT_PERIOD_ID; }
-    catch (e) { return DEFAULT_PERIOD_ID; }
-  });
+  const [periods, setPeriods] = useState(()=>readLocalPeriods(roomKey));
+  const [activePeriodId, setActivePeriodIdState] = useState(()=>chooseActivePeriod(readLocalPeriods(roomKey),readPeriodSelection(roomKey)));
+  const periodChoiceRef=useRef({room:roomKey,id:readPeriodSelection(roomKey)});
+  const setActivePeriodId=useCallback((id)=>{
+    periodChoiceRef.current={room:roomKey,id};
+    setActivePeriodIdState(id);
+    try{localStorage.setItem(`active_internship_period${ENV_SUFFIX}_${roomKey}`,id);}catch{}
+  },[roomKey]);
   const [isPeriodManagerOpen, setIsPeriodManagerOpen] = useState(false);
   const [newPeriodName, setNewPeriodName] = useState('2026年度 後期');
   const [copyPreviousRoster, setCopyPreviousRoster] = useState(true);
@@ -1559,7 +2211,15 @@ function App() {
     const storageKey = `internship_periods${ENV_SUFFIX}_${roomKey}`;
     const activeKey = `active_internship_period${ENV_SUFFIX}_${roomKey}`;
     let unsubscribe = null;
-    try { setActivePeriodId(localStorage.getItem(activeKey) || DEFAULT_PERIOD_ID); } catch (e) { setActivePeriodId(DEFAULT_PERIOD_ID); }
+    let periodEffectActive=true;
+    if(periodChoiceRef.current.room!==roomKey)periodChoiceRef.current={room:roomKey,id:readPeriodSelection(roomKey)};
+    const applyPeriodList=(source)=>{
+      if(!periodEffectActive)return;
+      const list=source.length?source:[DEFAULT_PERIOD];setPeriods(list);
+      const chosen=chooseActivePeriod(list,periodChoiceRef.current.id);
+      setActivePeriodIdState(chosen);
+      try{localStorage.setItem(activeKey,chosen);}catch{}
+    };
 
     if (connectionStatus === 'connected' && window.firebase) {
       const db = window.firebase.app().firestore();
@@ -1572,9 +2232,7 @@ function App() {
         const map = new Map([[DEFAULT_PERIOD_ID, { ...DEFAULT_PERIOD }]]);
         [...legacyPeriods, ...metaPeriods].forEach((p) => map.set(p.id, { ...map.get(p.id), ...p }));
         const list = Array.from(map.values()).sort((a, b) => (a.createdAtClient || 0) - (b.createdAtClient || 0));
-        setPeriods(list);
-        const saved = (() => { try { return localStorage.getItem(activeKey); } catch (e) { return null; } })();
-        if (!list.some((x) => x.id === (saved || activePeriodId))) setActivePeriodId(DEFAULT_PERIOD_ID);
+        applyPeriodList(list);
       };
       unsubscribe = studentsRef.onSnapshot((snap) => {
         metaPeriods = [];
@@ -1598,17 +2256,17 @@ function App() {
     } else {
       try {
         const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        setPeriods(stored.length ? stored : [DEFAULT_PERIOD]);
-      } catch (e) { setPeriods([DEFAULT_PERIOD]); }
+        applyPeriodList(Array.isArray(stored)?stored:[]);
+      } catch (e) { applyPeriodList([DEFAULT_PERIOD]); }
     }
-    return () => { if (unsubscribe) unsubscribe(); };
+    return () => { periodEffectActive=false; if (unsubscribe) unsubscribe(); };
   }, [connectionStatus, roomKey]);
 
   useEffect(() => {
-    try { localStorage.setItem(`active_internship_period${ENV_SUFFIX}_${roomKey}`, activePeriodId); } catch (e) {}
     setSelectedIds(new Set());
     clearHistory();
     setSelectedStudentDetail(null);
+    setWorkflowReturnToOverview(false);setWorkflowInitialTask(null);setWorkflowOverviewFilters({...EMPTY_WORKFLOW_OVERVIEW_FILTERS});
     setIsAddEditOpen(false);
     setSearchQuery('');
     setFilterProgress('all');
@@ -1686,6 +2344,12 @@ function App() {
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [selectedStudentDetail, setSelectedStudentDetail] = useState(null);
+  const [workflowOverviewFilters,setWorkflowOverviewFilters]=useState({...EMPTY_WORKFLOW_OVERVIEW_FILTERS});
+  const [workflowInitialTask,setWorkflowInitialTask]=useState(null);
+  const [workflowReturnToOverview,setWorkflowReturnToOverview]=useState(false);
+  const openWorkflowOverview=()=>{setSidebarOpen(false);setWorkflowInitialTask(null);setWorkflowReturnToOverview(false);setCurrentView('workflow');};
+  const openOverviewStudent=(student,task)=>{setWorkflowInitialTask(task);setWorkflowReturnToOverview(true);setSelectedStudentDetail(student);};
+  const closeWorkflowDetail=()=>{setSelectedStudentDetail(null);setWorkflowInitialTask(null);if(workflowReturnToOverview)setCurrentView('workflow');setWorkflowReturnToOverview(false);};
   const [draggingStudentId, setDraggingStudentId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
   const [dragHandleArmed, setDragHandleArmed] = useState(null);
@@ -2005,6 +2669,12 @@ function App() {
   };
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchDraft, setSearchDraft] = useState('');
+  const [isBoardPanelOpen, setIsBoardPanelOpen] = useState(false);
+  const sidebarRef = useRef(null);
+  const menuButtonRef = useRef(null);
   const [filterProgress, setFilterProgress] = useState('all');
   const [filterGrade, setFilterGrade] = useState('all');
   const [filterClass, setFilterClass] = useState('all');
@@ -2041,7 +2711,7 @@ function App() {
     if (period?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return false; }
     if (!isAdmin) {
       const locked = current.lockedFields || [];
-      const mapped = Object.keys(partial).map((field) => ({ phoneDate: 'phoneStatus', greetingDate: 'greetingStatus', greetingTime: 'greetingStatus', greetingVisitor: 'greetingStatus', studentThankYouDate: 'studentThankYouStatus' }[field] || field));
+      const mapped = Object.keys(partial).map((field) => ({ phoneDate: 'phoneStatus', greetingCompletedDate: 'greetingStatus', giftCompletedDate: 'giftStatus', greetingDate: 'greetingStatus', greetingTime: 'greetingStatus', greetingVisitor: 'greetingStatus', studentThankYouDate: 'studentThankYouStatus' }[field] || field));
       if (mapped.some((field) => WORKFLOW_LOCKABLE_FIELDS.includes(field) && locked.includes(field))) { showAlert('この項目は管理者によりロックされています。'); return false; }
       if (partial.workflowExemptions && locked.includes('greetingStatus') && workflowExemptions(current).includes('greeting') !== partial.workflowExemptions.includes('greeting')) { showAlert('事前挨拶は管理者によりロックされています。'); return false; }
       if (partial.patrols) {
@@ -2214,7 +2884,7 @@ function App() {
 
   const handleTogglePatrol = async (student, patrolId) => {
     const current = student.patrols || [];
-    const next = current.map((p) => p.id === patrolId ? { ...p, done: !p.done } : p);
+    const next = current.map((p) => p.id === patrolId ? { ...p, done: !p.done, completedDate: !p.done ? (p.completedDate || getTodayString()) : '' } : p);
     recordUpdate(student.id, { patrols: current }, { patrols: next });
     await persistPartial(student.id, { patrols: next });
   };
@@ -2948,12 +3618,12 @@ function App() {
           : 'bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200';
         const patrolsOnDay = (student.patrols || []).filter((p) => p.date === target);
         const patrolNames = patrolsOnDay.map((p) => p.teacher).filter(Boolean);
-        const tipLines = [`${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`];
+        const tipLines = [(isObs ? `${student.name}（${student.location || '見学先未設定'}）` : `${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`)];
         if (student.teacher) tipLines.push(`同行: ${student.teacher}`);
         if (patrolNames.length > 0) tipLines.push(`巡回: ${patrolNames.join('、')}`);
         events.push({
           type: 'period',
-          label: `${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`,
+          label: (isObs ? `${student.name}（${student.location || '見学先未設定'}）` : `${student.name}　${info.dayNumber}／${info.totalDays}（${student.location}）`),
           title: tipLines.join('\n'),
           student,
           color,
@@ -3206,62 +3876,28 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    const query = window.matchMedia('(min-width:1100px)');
+    const change = () => { if(!query.matches)setSidebarOpen(false); };
+    query.addEventListener('change', change); return () => query.removeEventListener('change', change);
+  }, []);
+  useEffect(() => {
+    if (!sidebarOpen || window.innerWidth >= 1100) return;
+    const overflow = document.body.style.overflow; document.body.style.overflow = 'hidden';
+    sidebarRef.current?.querySelector('button')?.focus();
+    const keydown = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); setSidebarOpen(false); }
+      if (e.key !== 'Tab') return;
+      const nodes = [...(sidebarRef.current?.querySelectorAll('button:not(:disabled):not([hidden]),select:not(:disabled),input:not(:disabled),a[href]') || [])].filter(n => n.getClientRects().length);
+      if (e.shiftKey && document.activeElement === nodes[0]) { e.preventDefault(); nodes.at(-1)?.focus(); }
+      else if (!e.shiftKey && document.activeElement === nodes.at(-1)) { e.preventDefault(); nodes[0]?.focus(); }
+    };
+    document.addEventListener('keydown', keydown);
+    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', keydown); menuButtonRef.current?.focus(); };
+  }, [sidebarOpen]);
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-
-      {/* v3.7: 画面上部の掲示板。ルーム単位で共有され、投稿者名と削除ボタン付き。 */}
-      <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-300 shadow-sm no-print">
-        <div className="w-full max-w-none px-3 sm:px-4 py-2">
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setIsBoardOpen((v) => !v)} className="flex items-center gap-2 text-xs font-bold text-amber-900 hover:text-amber-700 cursor-pointer">
-              <span className="text-base">📣</span>
-              <span>掲示板</span>
-              <span className="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full text-[10px] font-mono">{boardPosts.length}件</span>
-              <ChevronDown className={"w-3.5 h-3.5 transition-transform " + (isBoardOpen ? "rotate-180" : "")} />
-            </button>
-            <button type="button" onClick={(e) => { e.stopPropagation(); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }} title="掲示板の「削除された投稿」と「非表示にした投稿」の履歴を表示します" className="shrink-0 inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-indigo-50 active:bg-indigo-100 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-300 rounded-lg text-[10px] font-bold cursor-pointer shadow-sm transition-all">
-<span className="text-[11px] leading-none">📜</span>
-<span>履歴</span>
-{((boardDeletedHistory || []).length + (boardHiddenHistory || []).length) > 0 && (
-<span className="text-[9px] font-mono bg-slate-100 text-slate-600 border border-slate-200 rounded px-1 py-0.5">{(boardDeletedHistory || []).length + (boardHiddenHistory || []).length}</span>
-)}
-</button>
-{!isBoardOpen && boardPosts[0] && (
-              <div className="text-[11px] text-amber-900 truncate flex-1 min-w-0">
-                <span className="font-bold">{boardPosts[0].author || '匿名'}:</span> {boardPosts[0].message}
-              </div>
-            )}
-          </div>
-          {isBoardOpen && (
-            <div className="mt-2 space-y-2">
-              <form onSubmit={(e) => { e.preventDefault(); if (!boardInput.trim()) return; addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); }} className="flex items-start gap-2">
-                <div className="flex-shrink-0 bg-amber-100 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-amber-900 whitespace-nowrap" title="投稿者名。「編集者名」と同じ。">
-                  {myTeacherName || '匿名'}
-                </div>
-                <textarea value={boardInput} onChange={(e) => setBoardInput(e.target.value)} placeholder="連絡事項やお知らせを入力（CtrlまたはCmd + Enter で投稿）" rows={1} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (boardInput.trim()) { addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); } } }} className="flex-1 bg-white border border-amber-300 focus:border-amber-500 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300 text-slate-800 resize-y min-h-[34px]" />
-                <button type="submit" disabled={!boardInput.trim()} className={"px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 " + (boardInput.trim() ? "bg-amber-600 hover:bg-amber-700 text-white cursor-pointer shadow-sm" : "bg-slate-200 text-slate-400 cursor-not-allowed")}>投稿</button>
-              </form>
-              {boardPosts.length === 0 ? (
-                <p className="text-[11px] text-amber-700/70 italic text-center py-2">まだ投稿はありません。</p>
-              ) : (
-                <div className="space-y-1 max-h-56 overflow-y-auto scrollbar-thin pr-1">
-                  {boardPosts.map((p) => { const ts = p.createdAt; const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0); const timeStr = ms ? new Date(ms).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; const canDelete = !myTeacherName || !p.author || p.author === '匿名' || p.author === myTeacherName; return (
-                    <div key={p.id} className="flex items-start gap-2 bg-white/80 border border-amber-200 rounded-lg px-3 py-2 text-xs">
-                      <div className="shrink-0 min-w-[80px]">
-                        <div className="font-bold text-amber-900 text-[11px] truncate">{p.author || '匿名'}</div>
-                        <div className="text-[9px] text-slate-500 font-mono">{timeStr}</div>
-                      </div>
-                      <div className="flex-1 text-slate-800 whitespace-pre-wrap break-words leading-relaxed">{p.message}</div>
-                      <div className="shrink-0 flex flex-col gap-1">{myTeacherName && p.author === myTeacherName ? (<><button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button><button type="button" onClick={() => showConfirm('この投稿を全員の画面から削除しますか？この操作は取り消せません。', () => deleteBoardPost(p.id, myTeacherName || '匿名'))} title="自分の投稿を全員の画面から削除します" className="px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">全員削除</button></>) : (<button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button>)}</div>
-                    </div>
-                  ); })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
+    <div className={`sb-app min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans ${sidebarOpen ? 'sb-open' : ''}`}>
 
       {/* 隠しファイル入力: 「config.js を読み込む」ボタンから呼ばれる */}
       <input
@@ -3350,28 +3986,32 @@ function App() {
         </div>
       )}
 
-      <header className="bg-white border-b border-slate-200 shrink-0 shadow-sm no-print">
-        <div className="w-full max-w-none px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      {sidebarOpen && <button className="sb-backdrop no-print" aria-label="メニューを閉じる" tabIndex={-1} onClick={() => setSidebarOpen(false)} />}
+      <aside ref={sidebarRef} id="app-sidebar" className="sb-sidebar no-print" aria-label="操作メニュー" aria-hidden={!sidebarOpen} inert={!sidebarOpen ? '' : undefined}>
+        <div className="sb-sidebar-top"><strong>操作メニュー</strong><button type="button" className="sb-icon-button" aria-label="サイドバーを閉じる" onClick={() => setSidebarOpen(false)}>×</button></div>
+        <div className="sb-sidebar-scroll">
+      <header className="sb-header">
+        <div className="sb-header-inner">
+          <div className="sb-brand">
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold tracking-tight text-slate-900">Work Experience Progress Status</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.27.0 HTML</span>
+              <div className="sb-brand-title">
+                <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.34.3 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
-              <p className="text-xs text-slate-500">教員間リアルタイム同期・実習開始/終了日カレンダーピッカー・履歴復元ボード</p>
+              <p className="text-xs text-slate-500">進捗管理・情報共有</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="sb-header-controls">
             <div className="flex items-center gap-1.5 bg-violet-50 border border-violet-200 rounded-full px-2 py-1 shadow-sm" title="表示する実習期を切り替えます">
               <span className="text-xs">🗂️</span>
-              <select value={activePeriodId} onChange={(e) => setActivePeriodId(e.target.value)} className="bg-transparent text-xs font-bold text-violet-900 outline-none cursor-pointer max-w-[170px]">
+              <select aria-label="サイドバーの実習期" value={activePeriodId} onChange={(e) => setActivePeriodId(e.target.value)} className="bg-transparent text-xs font-bold text-violet-900 outline-none cursor-pointer max-w-[170px]">
                 {periods.map((p) => <option key={p.id} value={p.id}>{p.locked ? '🔒 ' : ''}{p.name}</option>)}
               </select>
-              <button type="button" onClick={() => setIsPeriodManagerOpen(true)} className="w-6 h-6 rounded-full bg-white border border-violet-200 hover:bg-violet-100 text-violet-800 font-bold cursor-pointer" title="実習期を管理">＋</button>
+              <button type="button" onClick={() => { setSidebarOpen(false); setIsPeriodManagerOpen(true); }} className="w-6 h-6 rounded-full bg-white border border-violet-200 hover:bg-violet-100 text-violet-800 font-bold cursor-pointer" title="実習期を管理">＋</button>
             </div>
-            <ConnectionBadge status={connectionStatus} roomKey={roomKey} />
+            <div className="sb-connection"><ConnectionBadge status={connectionStatus} roomKey={roomKey} /></div>
             {/* v3.9: 管理者バッジ。管理者としてログイン中のときだけ表示。クリックでログアウト確認。 */}
             {isAdmin && (
               <button
@@ -3386,7 +4026,7 @@ function App() {
             )}
             {/* v3.6: 編集者名バッジ。未設定のときは赤くパルスして気づかせる。 */}
             <button
-              onClick={() => { setTempTeacherName(myTeacherName || ''); setIsNamePromptOpen(true); }}
+              onClick={() => { setTempTeacherName(myTeacherName || ''); setSidebarOpen(false); setIsNamePromptOpen(true); }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border ${myTeacherName ? 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-800' : 'bg-rose-50 hover:bg-rose-100 border-rose-300 text-rose-700 animate-pulse'}`}
               title="編集者名（あなたの名前）を設定・変更します。「接続中」一覧や記録に使われます。"
             >
@@ -3394,7 +4034,7 @@ function App() {
               <span className="max-w-[120px] truncate">{myTeacherName || '名前を入力'}</span>
             </button>
             {todayTargets.length > 0 && (
-              <button type="button" onClick={() => setIsTodayTargetsOpen(true)} title="今日の実習・見学対象者を表示します" className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-900 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer">
+              <button type="button" onClick={() => { setSidebarOpen(false); setIsTodayTargetsOpen(true); }} title="今日の実習・見学対象者を表示します" className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-yellow-900 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer">
                 <span className="text-sm leading-none">📅</span>
                 <span>本日の実習・見学 {todayTargets.length}名</span>
               </button>
@@ -3423,8 +4063,7 @@ function App() {
                 </button>
                 {isOnlineListOpen && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setIsOnlineListOpen(false)} />
-                    <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl p-2 min-w-[220px] z-50 animate-slideDown">
+                    <div className="sb-inline-panel">
                       <div className="text-[10px] font-bold text-slate-500 px-2 py-1 border-b border-slate-100 mb-1">
                         同期接続中 ({onlineCount}名)
                       </div>
@@ -3442,7 +4081,7 @@ function App() {
                         </div>
                       )}
                       <div className="text-[10px] text-slate-400 px-2 pt-2 pb-1 border-t border-slate-100 mt-1 leading-snug">
-                        ※ 同じルーム名({roomKey})の部屋を開いている端末を表示します。<br />25秒ごとに更新、最終更新から60秒以上経ったセッションは離脱として扱います。
+                        ※ 同じルーム名({roomKey})の部屋を開いている端末を表示します。<br />15秒ごとに更新、最終更新から35秒以上経ったセッションは離脱として扱います。
                       </div>
                     </div>
                   </>
@@ -3464,8 +4103,7 @@ function App() {
               </button>
               {isTodayVisitorsOpen && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setIsTodayVisitorsOpen(false)} />
-                  <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl p-2 min-w-[280px] z-50 animate-slideDown">
+                  <div className="sb-inline-panel">
                     <div className="text-[10px] font-bold text-slate-500 px-2 py-1 border-b border-slate-100 mb-1 flex items-center justify-between gap-2">
                       <span>今日の訪問者 ({Object.keys(todayVisitors).length}名)</span>
                       <span className="font-mono text-slate-400">{(() => { const d = new Date(); return `${d.getMonth()+1}/${d.getDate()}`; })()}</span>
@@ -3526,7 +4164,7 @@ function App() {
             </div>
             )}
             <button
-              onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
+              onClick={() => { setTempRoomKey(roomKey); setSidebarOpen(false); setIsConfigOpen(true); }}
               title="Firebase接続設定・ルーム名の切替・担当教員名の保存を行います"
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-sm"
             >
@@ -3536,27 +4174,186 @@ function App() {
           </div>
         </div>
       </header>
+          <section className="sb-sidebar-section"><h2>連絡・掲示板</h2><div className="sb-board-actions"><button type="button" onClick={() => { setSidebarOpen(false); setIsBoardOpen(true); setIsBoardPanelOpen(true); }}>📣 掲示板 {boardPosts.length}件</button><button type="button" onClick={() => { setSidebarOpen(false); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }}>履歴</button></div></section>
+          <section className="sb-sidebar-section"><h2>データ操作・絞り込み</h2>
+        <div className="sb-tools">
+          <div className="sb-operations">
 
-      {connectionStatus === 'local' && (
-        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs py-2.5 px-4 shadow-sm no-print">
-          <div className="w-full max-w-none flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
-            <span className="flex items-center gap-2 text-amber-800">
-              <AlertCircle className="w-5 h-5 shrink-0 text-amber-600" />
-              現在はPC1台のみの「体験デモ」で稼働しています。右上の<strong className="font-bold">「環境設定」ボタン</strong>から、config の貼り付け または config.js ファイルの読み込みでクラウド接続できます。
-            </span>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}
-                className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-[11px] transition-colors shadow-sm"
-              >
-                環境設定を開く
+
+            <div className="sb-operation-grid">
+              <button onClick={handleUndo} disabled={history.length === 0}
+                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${history.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
+                title="直前の操作を取り消して一つ前に戻します">
+                <RotateCcw className={`w-4 h-4 ${history.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
+                <span>戻る</span>
+              </button>
+
+              <button onClick={handleRedo} disabled={redo.length === 0}
+                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${redo.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
+                title="取り消した操作をやり直して一つ進めます">
+                <RotateCw className={`w-4 h-4 ${redo.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
+                <span>進む</span>
+              </button>
+
+              <button onClick={() => { setSidebarOpen(false); setIsBulkImportOpen(true); }}
+                className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-800 border border-indigo-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                title="CSV/TSVを使って複数の生徒を一括で登録します">
+                <Upload className="w-4 h-4 text-indigo-600" />
+                <span>一括登録</span>
+              </button>
+
+              <button onClick={handleExportExcel}
+                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 border border-emerald-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                title="表示中の一覧をExcel等で開けるCSVファイルとして保存します">
+                <Download className="w-4 h-4 text-emerald-600" />
+                <span>エクセル</span>
+              </button>
+
+              <button onClick={() => openAddModal()}
+                title="新しい生徒の進捗データを登録します" hidden aria-hidden="true"
+                className="px-4 py-2 bg-yellow-200 hover:bg-yellow-300 active:bg-yellow-400 text-yellow-900 border border-yellow-300 text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all transform active:scale-95 cursor-pointer">
+                <Plus className="w-4 h-4" />
+                <span>登録</span>
               </button>
             </div>
           </div>
-        </div>
-      )}
 
-      <main className="flex-1 w-full max-w-none mx-auto p-2 sm:p-3 lg:p-4 space-y-6" style={{ paddingBottom: '180px' }}>
+          <div className="sb-filter-list" style={{display:currentView==='workflow'?'none':undefined}}>
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を学年で絞り込みます">
+              <Filter className="w-3.5 h-3.5 text-slate-500" />
+              <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)} title="表示する学年を選んでください"
+                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
+                <option value="all">学年: すべて</option>
+                <option value="1">1年</option>
+                <option value="2">2年</option>
+                <option value="3">3年</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を組で絞り込みます">
+              <Filter className="w-3.5 h-3.5 text-slate-500" />
+              <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} title="表示する組を選んでください"
+                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
+                <option value="all">組: すべて</option>
+                {Array.from(new Set(activeStudents.map((st) => st.classVal).filter(Boolean))).sort().map((c) => (
+                  <option key={c} value={c}>{c}組</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を活動種別（実習/見学）で絞り込みます"><Filter className="w-3.5 h-3.5 text-slate-500" /><select value={filterInternshipType} onChange={(e) => setFilterInternshipType(e.target.value)} title="活動種別を選んでください" className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold"><option value="all">種別: すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></div>
+
+
+
+
+
+            {currentView === 'list' && (
+              <button type="button" onClick={() => { setSidebarOpen(false); setIsColumnSettingsOpen(true); }} title="一覧表に表示する項目を選びます" className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-violet-50 hover:border-violet-300 text-slate-700 rounded-xl text-xs font-bold cursor-pointer shadow-sm">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-violet-600" />
+                <span>表示項目</span>
+                <span className="text-[10px] bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded-full">{shownColumnDefs.length}</span>
+              </button>
+            )}
+
+            {hasActiveFilter && (
+              <button onClick={clearFilters} className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                <RotateCcw className="w-3 h-3" />
+                <span>解除</span>
+              </button>
+            )}
+          </div>
+
+        </div>
+
+        {currentView === 'list' && (
+          <section aria-label="用途別表示" className="sb-presets">
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="一覧の表示モード">
+              <span className="text-xs font-bold text-slate-600 mr-1">用途別表示</span>
+              {LIST_VIEW_PRESETS.map((preset) => (
+                <button key={preset.key} type="button" aria-pressed={listViewMode === preset.key}
+                  title={preset.description} onClick={() => applyListPreset(preset.key)}
+                  className={`px-3 py-2 rounded-lg border text-xs cursor-pointer transition-colors ${listViewMode === preset.key ? 'list-preset-active' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                  {preset.label}<span className="ml-1 text-slate-500">{preset.columns.length}</span>
+                </button>
+              ))}
+              <button type="button" aria-pressed={listViewMode === 'custom'} onClick={() => applyListPreset('custom')}
+                className={`px-3 py-2 rounded-lg border text-xs cursor-pointer ${listViewMode === 'custom' ? 'list-preset-active' : 'bg-white border-slate-200 hover:bg-slate-50'}`} title="保存済みの個別表示設定に切り替えます">カスタム</button>
+              <button type="button" onClick={() => { setSidebarOpen(false); setIsColumnSettingsOpen(true); }} className="px-3 py-2 rounded-lg border border-slate-200 text-xs cursor-pointer hover:bg-violet-50">項目を調整</button>
+            </div>
+            <p aria-live="polite" className="text-xs text-slate-500">{listViewMode === 'custom' ? '個別に選択した項目を表示しています' : LIST_VIEW_PRESETS.find((p) => p.key === listViewMode)?.description}。表示モードはこの端末・ルームごとに保存します。生徒の絞り込みは変わりません。</p>
+          </section>
+        )}
+
+
+          </section>
+        </div>
+      </aside>
+      <div className="sb-topbar no-print">
+        <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : currentView === 'workflow' ? '業務一覧' : 'リスト一覧'}</strong><select className="sb-current-period" aria-label="表示中の実習期" value={activePeriodId} onChange={e=>setActivePeriodId(e.target.value)}>{periods.map(p=><option key={p.id} value={p.id}>{p.locked?'🔒 ':''}{p.name}</option>)}</select></div>
+        <div className="sb-filter-chips">{searchQuery && <span className="sb-keyword-chip"><Search className="w-4 h-4"/><span>検索：{searchQuery}</span><button type="button" aria-label="検索条件を解除" onClick={() => setSearchQuery('')}>×</button></span>}{currentView !== 'workflow' && hasActiveFilter && <button type="button" className="sb-icon-button" onClick={clearFilters}>絞り込み解除</button>}</div>
+      </div>
+      {connectionStatus === 'local' && <div className="sb-demo-note no-print"><span>体験デモ：この端末に保存中。共有には環境設定が必要です。</span><button type="button" onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}>環境設定を開く</button></div>}
+      {isSearchOpen && <AppUtilityDialog title="検索" onClose={() => setIsSearchOpen(false)}><form className="sb-search-form" onSubmit={(e) => { e.preventDefault(); setSearchQuery(searchDraft.trim()); setIsSearchOpen(false); }}><p>生徒名・実習先・期間などで絞り込みます。表示切替後も検索条件を維持します。</p><label htmlFor="app-search-input">キーワード</label><input id="app-search-input" type="search" value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="生徒名、実習先、期間など"/><div className="sb-dialog-actions"><button type="button" onClick={() => { setSearchQuery(''); setSearchDraft(''); setIsSearchOpen(false); }}>検索を解除</button><button type="button" onClick={() => setIsSearchOpen(false)}>キャンセル</button><button type="submit" className="sb-primary">検索する</button></div></form></AppUtilityDialog>}
+      {isBoardPanelOpen && <AppUtilityDialog title="掲示板" wide suspended={isBoardHistoryOpen || !!confirmState || !!alertState} onClose={() => setIsBoardPanelOpen(false)}><div className="sb-board-panel">
+      {/* v3.7: 画面上部の掲示板。ルーム単位で共有され、投稿者名と削除ボタン付き。 */}
+      <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-300 shadow-sm no-print">
+        <div className="w-full max-w-none px-3 sm:px-4 py-2">
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setIsBoardOpen((v) => !v)} className="flex items-center gap-2 text-xs font-bold text-amber-900 hover:text-amber-700 cursor-pointer">
+              <span className="text-base">📣</span>
+              <span>掲示板</span>
+              <span className="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full text-[10px] font-mono">{boardPosts.length}件</span>
+              <ChevronDown className={"w-3.5 h-3.5 transition-transform " + (isBoardOpen ? "rotate-180" : "")} />
+            </button>
+            <button type="button" onClick={(e) => { e.stopPropagation(); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }} title="掲示板の「削除された投稿」と「非表示にした投稿」の履歴を表示します" className="shrink-0 inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-indigo-50 active:bg-indigo-100 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-300 rounded-lg text-[10px] font-bold cursor-pointer shadow-sm transition-all">
+<span className="text-[11px] leading-none">📜</span>
+<span>履歴</span>
+{((boardDeletedHistory || []).length + (boardHiddenHistory || []).length) > 0 && (
+<span className="text-[9px] font-mono bg-slate-100 text-slate-600 border border-slate-200 rounded px-1 py-0.5">{(boardDeletedHistory || []).length + (boardHiddenHistory || []).length}</span>
+)}
+</button>
+{!isBoardOpen && boardPosts[0] && (
+              <div className="text-[11px] text-amber-900 truncate flex-1 min-w-0">
+                <span className="font-bold">{boardPosts[0].author || '匿名'}:</span> {boardPosts[0].message}
+              </div>
+            )}
+          </div>
+          {isBoardOpen && (
+            <div className="mt-2 space-y-2">
+              <form onSubmit={(e) => { e.preventDefault(); if (!boardInput.trim()) return; addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); }} className="flex items-start gap-2">
+                <div className="flex-shrink-0 bg-amber-100 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-amber-900 whitespace-nowrap" title="投稿者名。「編集者名」と同じ。">
+                  {myTeacherName || '匿名'}
+                </div>
+                <textarea value={boardInput} onChange={(e) => setBoardInput(e.target.value)} placeholder="連絡事項やお知らせを入力（CtrlまたはCmd + Enter で投稿）" rows={1} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (boardInput.trim()) { addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); } } }} className="flex-1 bg-white border border-amber-300 focus:border-amber-500 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300 text-slate-800 resize-y min-h-[34px]" />
+                <button type="submit" disabled={!boardInput.trim()} className={"px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 " + (boardInput.trim() ? "bg-amber-600 hover:bg-amber-700 text-white cursor-pointer shadow-sm" : "bg-slate-200 text-slate-400 cursor-not-allowed")}>投稿</button>
+              </form>
+              {boardPosts.length === 0 ? (
+                <p className="text-[11px] text-amber-700/70 italic text-center py-2">まだ投稿はありません。</p>
+              ) : (
+                <div className="space-y-1 max-h-56 overflow-y-auto scrollbar-thin pr-1">
+                  {boardPosts.map((p) => { const ts = p.createdAt; const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0); const timeStr = ms ? new Date(ms).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; const canDelete = !myTeacherName || !p.author || p.author === '匿名' || p.author === myTeacherName; return (
+                    <div key={p.id} className="flex items-start gap-2 bg-white/80 border border-amber-200 rounded-lg px-3 py-2 text-xs">
+                      <div className="shrink-0 min-w-[80px]">
+                        <div className="font-bold text-amber-900 text-[11px] truncate">{p.author || '匿名'}</div>
+                        <div className="text-[9px] text-slate-500 font-mono">{timeStr}</div>
+                      </div>
+                      <div className="flex-1 text-slate-800 whitespace-pre-wrap break-words leading-relaxed">{p.message}</div>
+                      <div className="shrink-0 flex flex-col gap-1">{myTeacherName && p.author === myTeacherName ? (<><button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button><button type="button" onClick={() => showConfirm('この投稿を全員の画面から削除しますか？この操作は取り消せません。', () => deleteBoardPost(p.id, myTeacherName || '匿名'))} title="自分の投稿を全員の画面から削除します" className="px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">全員削除</button></>) : (<button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button>)}</div>
+                    </div>
+                  ); })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+
+
+      </div></AppUtilityDialog>}
+
+      <main className="flex-1 w-full max-w-none mx-auto p-2 sm:p-3 lg:p-4 space-y-6" style={{ paddingBottom: currentView === 'workflow' ? '8px' : '180px' }}>
+        {currentView !== 'workflow' && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 no-print">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
             <div>
@@ -3595,126 +4392,10 @@ function App() {
             barColor="bg-cyan-500" iconColor="text-cyan-600" />
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-4 shadow-sm no-print">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="relative flex-1 min-w-[180px]">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-              <input type="text" placeholder="生徒名、実習先、期間等で検索..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-all" />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 self-end lg:self-auto">
-              <button onClick={handleUndo} disabled={history.length === 0}
-                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${history.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
-                title="直前の操作を取り消して一つ前に戻します">
-                <RotateCcw className={`w-4 h-4 ${history.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
-                <span>戻る</span>
-              </button>
-
-              <button onClick={handleRedo} disabled={redo.length === 0}
-                className={`px-3 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 border transition-all ${redo.length > 0 ? 'bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border-slate-300 shadow-sm cursor-pointer' : 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'}`}
-                title="取り消した操作をやり直して一つ進めます">
-                <RotateCw className={`w-4 h-4 ${redo.length > 0 ? 'text-slate-600' : 'text-slate-300'}`} />
-                <span>進む</span>
-              </button>
-
-              <button onClick={() => setIsBulkImportOpen(true)}
-                className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-800 border border-indigo-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                title="CSV/TSVを使って複数の生徒を一括で登録します">
-                <Upload className="w-4 h-4 text-indigo-600" />
-                <span>一括登録</span>
-              </button>
-
-              <button onClick={handleExportExcel}
-                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 border border-emerald-200 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                title="表示中の一覧をExcel等で開けるCSVファイルとして保存します">
-                <Download className="w-4 h-4 text-emerald-600" />
-                <span>エクセル</span>
-              </button>
-
-              <button onClick={() => openAddModal()}
-                title="新しい生徒の進捗データを登録します" hidden aria-hidden="true"
-                className="px-4 py-2 bg-yellow-200 hover:bg-yellow-300 active:bg-yellow-400 text-yellow-900 border border-yellow-300 text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all transform active:scale-95 cursor-pointer">
-                <Plus className="w-4 h-4" />
-                <span>登録</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 no-print">
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を学年で絞り込みます">
-              <Filter className="w-3.5 h-3.5 text-slate-500" />
-              <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)} title="表示する学年を選んでください"
-                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
-                <option value="all">学年: すべて</option>
-                <option value="1">1年</option>
-                <option value="2">2年</option>
-                <option value="3">3年</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を組で絞り込みます">
-              <Filter className="w-3.5 h-3.5 text-slate-500" />
-              <select value={filterClass} onChange={(e) => setFilterClass(e.target.value)} title="表示する組を選んでください"
-                className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold">
-                <option value="all">組: すべて</option>
-                {Array.from(new Set(activeStudents.map((st) => st.classVal).filter(Boolean))).sort().map((c) => (
-                  <option key={c} value={c}>{c}組</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1" title="表示する生徒を活動種別（実習/見学）で絞り込みます"><Filter className="w-3.5 h-3.5 text-slate-500" /><select value={filterInternshipType} onChange={(e) => setFilterInternshipType(e.target.value)} title="活動種別を選んでください" className="bg-transparent text-xs text-slate-700 focus:outline-none pr-1 cursor-pointer font-bold"><option value="all">種別: すべて</option><option value="internship">実習</option><option value="observation">見学</option></select></div>
-
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 px-2 py-1" aria-live="polite">
-              {currentView === 'calendar' ? <Calendar className="w-4 h-4" /> : <List className="w-4 h-4" />}
-              表示中：{currentView === 'calendar' ? 'カレンダー' : 'リスト一覧'}
-            </span>
-
-            {/* v3.8: 印刷ボタン（現在の画面をプリンタ/PDFに出力） */}
-            <button type="button" onClick={() => setIsPrintOpen(true)} title="現在の画面（リスト/カレンダー）を印刷またはPDF保存します" className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 rounded-xl text-xs font-bold cursor-pointer shadow-sm">
-              <Printer className="w-3.5 h-3.5 text-indigo-600" />
-              <span>印刷</span>
-            </button>
-
-            {currentView === 'list' && (
-              <button type="button" onClick={() => setIsColumnSettingsOpen(true)} title="一覧表に表示する項目を選びます" className="flex items-center gap-1 px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-violet-50 hover:border-violet-300 text-slate-700 rounded-xl text-xs font-bold cursor-pointer shadow-sm">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-violet-600" />
-                <span>表示項目</span>
-                <span className="text-[10px] bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded-full">{shownColumnDefs.length}</span>
-              </button>
-            )}
-
-            {hasActiveFilter && (
-              <button onClick={clearFilters} className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
-                <RotateCcw className="w-3 h-3" />
-                <span>解除</span>
-              </button>
-            )}
-          </div>
-
-        </div>
-
-        {currentView === 'list' && (
-          <section aria-label="用途別表示" className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 no-print">
-            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="一覧の表示モード">
-              <span className="text-xs font-bold text-slate-600 mr-1">用途別表示</span>
-              {LIST_VIEW_PRESETS.map((preset) => (
-                <button key={preset.key} type="button" aria-pressed={listViewMode === preset.key}
-                  title={preset.description} onClick={() => applyListPreset(preset.key)}
-                  className={`px-3 py-2 rounded-lg border text-xs cursor-pointer transition-colors ${listViewMode === preset.key ? 'list-preset-active' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
-                  {preset.label}<span className="ml-1 text-slate-500">{preset.columns.length}</span>
-                </button>
-              ))}
-              <button type="button" aria-pressed={listViewMode === 'custom'} onClick={() => applyListPreset('custom')}
-                className={`px-3 py-2 rounded-lg border text-xs cursor-pointer ${listViewMode === 'custom' ? 'list-preset-active' : 'bg-white border-slate-200 hover:bg-slate-50'}`} title="保存済みの個別表示設定に切り替えます">カスタム</button>
-              <button type="button" onClick={() => setIsColumnSettingsOpen(true)} className="px-3 py-2 rounded-lg border border-slate-200 text-xs cursor-pointer hover:bg-violet-50">項目を調整</button>
-            </div>
-            <p aria-live="polite" className="text-xs text-slate-500">{listViewMode === 'custom' ? '個別に選択した項目を表示しています' : LIST_VIEW_PRESETS.find((p) => p.key === listViewMode)?.description}。表示モードはこの端末・ルームごとに保存します。生徒の絞り込みは変わりません。</p>
-          </section>
         )}
-
-        {currentView === 'list' ? (
+        {currentView === 'workflow' ? (
+          <WorkflowOverview students={activeStudents} period={activePeriod} filters={workflowOverviewFilters} onFilters={setWorkflowOverviewFilters} onOpenStudent={openOverviewStudent} isAdmin={isAdmin} searchQuery={searchQuery}/>
+        ) : currentView === 'list' ? (
           <div key="view-list" className="list-text-scale-2 bg-white border border-slate-200 rounded-2xl shadow-sm animate-fadeIn">
             <div className="hidden print:block px-4 py-2 font-bold">表示: {LIST_VIEW_PRESETS.find((p) => p.key === listViewMode)?.label || 'カスタム'}</div>
             {selectedIds.size > 0 && (
@@ -4009,7 +4690,7 @@ function App() {
           </div>
         ) : (
           <div key="view-calendar" className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col animate-fadeIn">
-            <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 rounded-t-2xl sticky top-0 z-30 shadow-sm no-print">
+            <div className="sb-calendar-toolbar p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 rounded-t-2xl shadow-sm no-print">
               <div className="flex items-center gap-2">
                 <button onClick={handlePrevMonth} className="p-1.5 hover:bg-slate-200 bg-white border border-slate-200 rounded-lg text-slate-700 transition-all cursor-pointer">
                   <ChevronLeft className="w-4 h-4" />
@@ -4031,6 +4712,7 @@ function App() {
                   <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-pink-100 border border-pink-300 rounded-md block"></span><span>見学</span></span>
                   <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-green-200 border border-green-400 rounded-md block"></span><span>挨拶</span></span>
                   <span className="flex items-center gap-1.5"><span className="w-3.5 h-3.5 bg-blue-200 border border-blue-400 rounded-md block"></span><span>巡回</span></span>
+                  <span className="flex flex-wrap items-center gap-2" aria-label="予定の右10%は学年色"><span>右側：学年</span>{['1','2','3',''].map(g=><span key={g} className="flex items-center gap-1"><span style={{backgroundColor:CALENDAR_GRADE_COLORS[g]||'#f1f5f9',width:14,height:14,borderRadius:3,display:'inline-block'}}></span>{g?g+'年':'未設定・他'}</span>)}</span>
                 </div>
               </div>
             </div>
@@ -4065,7 +4747,7 @@ function App() {
                         const renderEvent = (ev, evIdx) => {
                           if (ev.type === 'period') {
                             return (
-                              <div key={evIdx} className={`text-[10px] px-1.5 py-0.5 rounded border font-bold select-none transition-colors shadow-sm flex items-center justify-between gap-1 ${ev.color}`} title={ev.title || ev.label}>
+                              <div key={evIdx} data-calendar-grade={ev.student.grade||'unset'} style={calendarGradeStyle(ev.student.grade)} className={`calendar-grade-event text-[10px] px-1.5 py-0.5 rounded border font-bold select-none transition-colors shadow-sm flex items-center justify-between gap-1 ${ev.color}`} title={calendarGradeLabel(ev.student.grade)+'\n'+(ev.title || ev.label)}>
                                 <button onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }} className="truncate text-left flex-1 cursor-pointer">{ev.label}</button>
                                 <button onClick={(e) => { e.stopPropagation(); handleRemoveInternshipDate(ev.student, ev.dateKey); }}
                                   title="この日を実習日から外す"
@@ -4074,8 +4756,8 @@ function App() {
                             );
                           }
                           return (
-                            <div key={evIdx} onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }}
-                              className={`text-[10px] px-1.5 py-0.5 rounded border font-bold truncate select-none transition-colors shadow-sm cursor-pointer ${ev.color}`} title={ev.label}>
+                            <div key={evIdx} data-calendar-grade={ev.student.grade||'unset'} style={calendarGradeStyle(ev.student.grade)} onClick={(e) => { e.stopPropagation(); setSelectedStudentDetail(ev.student); }}
+                              className={`text-[10px] px-1.5 py-0.5 rounded border font-bold truncate select-none transition-colors shadow-sm cursor-pointer calendar-grade-event ${ev.color}`} title={calendarGradeLabel(ev.student.grade)+'\n'+ev.label}>
                               {ev.label}
                             </div>
                           );
@@ -4125,13 +4807,14 @@ function App() {
       </main>
 
       {/* v3.26.1: 表示切替と登録を右下に常駐。端末のセーフエリアを避ける。 */}
-      <div className="fixed z-40 flex flex-col items-end gap-3 no-print" style={{ right: 'max(16px, env(safe-area-inset-right))', bottom: 'max(16px, env(safe-area-inset-bottom))', maxWidth: 'calc(100vw - 32px)' }}>
-        <div role="group" aria-label="表示切替" className="flex items-center gap-1 p-1.5 bg-white border border-slate-300 rounded-full shadow-2xl">
+      <div className="sb-floating fixed z-40 flex flex-col items-end gap-3 no-print" style={{ right: 'max(16px, env(safe-area-inset-right))', bottom: 'max(16px, env(safe-area-inset-bottom))', maxWidth: 'calc(100vw - 32px)' }}>
+        <div role="group" aria-label="表示切替" className="sb-view-switch flex items-center gap-1 p-1.5 bg-white border border-slate-300 rounded-full shadow-2xl">
           {[
             { key: 'calendar', icon: Calendar, label: 'カレンダー' },
-            { key: 'list', icon: List, label: 'リスト一覧' }
+            { key: 'list', icon: List, label: 'リスト一覧' },
+            { key: 'workflow', icon: FileText, label: '業務一覧' }
           ].map(({ key, icon: Icon, label }) => (
-            <button key={key} type="button" onClick={() => setCurrentView(key)} aria-pressed={currentView === key}
+            <button key={key} type="button" onClick={() => key === 'workflow' ? openWorkflowOverview() : setCurrentView(key)} aria-pressed={currentView === key}
               title={`${label}に切り替えます`}
               className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-full text-xs font-bold cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${currentView === key ? 'list-preset-active border border-indigo-300' : 'bg-white border border-transparent hover:bg-slate-100'}`}>
               <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
@@ -4139,10 +4822,11 @@ function App() {
             </button>
           ))}
         </div>
-        <button type="button" onClick={() => openAddModal()} title="新しい実習生を登録する" aria-label="新しい実習生を登録" className="flex items-center gap-2 px-5 py-3.5 min-h-[44px] bg-yellow-300 hover:bg-yellow-400 active:bg-yellow-500 text-yellow-900 border border-yellow-400 rounded-full shadow-2xl hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer font-extrabold text-sm">
-          <Plus className="w-5 h-5" aria-hidden="true" />
-          <span>登録</span>
-        </button>
+        <div className="sb-float-actions">
+          <button type="button" aria-label="検索を開く" className={searchQuery ? 'sb-search-active' : ''} onClick={() => { setSearchDraft(searchQuery); setIsSearchOpen(true); }}><Search className="w-4 h-4"/><span>検索</span></button>
+          <button type="button" aria-label="印刷オプションを開く" onClick={() => setIsPrintOpen(true)}><Printer className="w-4 h-4"/><span>印刷</span></button>
+          <button type="button" className="sb-register" aria-label="新しい実習生を登録" onClick={() => openAddModal()}><Plus className="w-4 h-4"/><span>登録</span></button>
+        </div>
       </div>
       <footer className="bg-white border-t border-slate-200 py-6 px-4 mt-12 shrink-0 no-print">
         <div className="w-full max-w-none mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
@@ -4160,18 +4844,19 @@ function App() {
       {selectedStudentDetail && (() => {
         const student = students.find((item) => item.id === selectedStudentDetail.id) || selectedStudentDetail;
         const period = periods.find((item) => item.id === (student.periodId || DEFAULT_PERIOD_ID));
-        return <StudentWorkflowDialog key={student.id} student={student} readOnly={!!period?.locked && !isAdmin} isAdmin={isAdmin}
-          suspended={!!(textEditState || selectEditState || datePickerState || materialModalStudentId || patrolEditState || alertState || confirmState)}
-          onClose={() => setSelectedStudentDetail(null)} onPatch={patchWorkflowStudent}
+        return <StudentWorkflowDialog key={student.id} student={student} initialTask={workflowInitialTask} returnToOverview={workflowReturnToOverview} readOnly={!!period?.locked && !isAdmin} isAdmin={isAdmin}
+          suspended={!!(textEditState || selectEditState || datePickerState || materialModalStudentId || materialPreview || patrolEditState || alertState || confirmState)}
+          onClose={closeWorkflowDetail} onPatch={patchWorkflowStudent}
           onText={setTextEditState} onSelect={setSelectEditState} onPickDate={setDatePickerState}
           onMaterials={() => setMaterialModalStudentId(student.id)}
+          onOpenMaterial={(m)=>{if(m.kind==='url'){if(!/^https?:\/\//i.test(String(m.url||''))){showAlert('http または https のリンクを登録してください。');return;}window.open(m.url,'_blank','noopener,noreferrer');}else if(isPdfMaterial(m)){if(!openPdfInNewTab(m))showAlert('PDFを開けませんでした。ポップアップの許可をご確認ください。');}else if(m.mimeType?.startsWith('image/'))setMaterialPreview(m);else downloadMaterialFile(m);}}
           onEditPatrol={(studentId, patrolId) => setPatrolEditState({ studentId, patrolId })}
           onConfirm={showConfirm} />;
       })()}
 
       <TextEditModal state={textEditState} onClose={() => setTextEditState(null)} />
       <SelectEditModal state={selectEditState} onClose={() => setSelectEditState(null)} />
-      {statusEditState && (() => { const sd = students.find((s) => s.id === statusEditState.studentId); if (!sd) return null; const field = statusEditState.field; const title = field === 'phone' ? '事前電話の編集' : field === 'doc' ? '保護者お知らせの編集' : '事前挨拶の編集'; const statusKey = field + 'Status'; const dateKey = field + 'Date'; const currentStatus = sd[statusKey] || 'pending'; const phoneOpts = [['pending', '未連絡'], ['completed', '連絡済み'], ['none', '必要なし']]; const docOpts = [['pending', '未配付'], ['completed', '配付済み'], ['none', '配付の必要なし']]; const greetingOpts = [['pending', 'ー'], ['unadjusted', '未調整'], ['scheduled', '挨拶日決定'], ['completed', '挨拶終了']]; const opts = field === 'phone' ? phoneOpts : field === 'doc' ? docOpts : greetingOpts; const close = () => setStatusEditState(null); const saveStatus = (v) => { const update = { [statusKey]: v }; if (field !== 'greeting') { if (v === 'completed' && !sd[dateKey]) update[dateKey] = getTodayString(); if (v !== 'completed') update[dateKey] = ''; } const before = Object.fromEntries(Object.keys(update).map((k) => [k, sd[k] != null ? sd[k] : ''])); recordUpdate(sd.id, before, update); persistPartial(sd.id, update); }; return (<div className="fixed inset-0 z-[105] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={close}><div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-scaleIn"><div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between"><h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Edit className="w-4 h-4 text-indigo-600" /><span>{sd.name} - {title}</span></h3><button type="button" onClick={close} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button></div><div className="p-4 space-y-3"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">ステータス</div><div className="space-y-1">{opts.map(([val, lbl]) => (<button key={val} type="button" onClick={() => saveStatus(val)} className={'w-full text-left px-3 py-2 rounded-lg text-xs font-bold cursor-pointer transition-colors ' + (currentStatus === val ? 'bg-indigo-600 text-white' : 'bg-slate-50 hover:bg-indigo-50 text-slate-700 border border-slate-200')}>{currentStatus === val ? '● ' : '○ '}{lbl}</button>))}</div></div>{field !== 'greeting' && currentStatus === 'completed' && (<div><div className="text-[11px] font-bold text-slate-600 mb-1.5">{field === 'phone' ? '連絡日' : '配付日'}</div><button type="button" onClick={() => setDatePickerState({ value: sd[dateKey] || '', title: title, onSelect: (v) => persistPartial(sd.id, { [dateKey]: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd[dateKey] ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd[dateKey] ? formatShortDate(sd[dateKey]) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div>)}{field === 'greeting' && currentStatus !== 'pending' && (<div className="space-y-2"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">挨拶日</div><button type="button" onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: '事前挨拶日', onSelect: (v) => persistPartial(sd.id, { greetingDate: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd.greetingDate ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">時間</div><input type="text" placeholder="例: 13:30" defaultValue={sd.greetingTime || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingTime || '')) persistPartial(sd.id, { greetingTime: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">引率教員</div><input type="text" placeholder="例: 鈴木 先生" defaultValue={sd.greetingVisitor || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingVisitor || '')) persistPartial(sd.id, { greetingVisitor: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div></div>)}<div className="text-[10px] text-slate-500 leading-relaxed pt-1 border-t border-slate-100">※ クリック（タップ）で従来通りステータスを切替、長押し（0.5秒）またはダブルクリックでこの編集モーダルを開きます。</div></div><div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2"><button type="button" onClick={close} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer">閉じる</button></div></div></div>); })()}
+      {statusEditState && (() => { const sd = students.find((s) => s.id === statusEditState.studentId); if (!sd) return null; const field = statusEditState.field; const title = field === 'phone' ? '事前電話の編集' : field === 'doc' ? '保護者お知らせの編集' : '事前挨拶の編集'; const statusKey = field + 'Status'; const dateKey = field + 'Date'; const currentStatus = sd[statusKey] || 'pending'; const phoneOpts = [['pending', '未連絡'], ['completed', '連絡済み'], ['none', '必要なし']]; const docOpts = [['pending', '未配付'], ['completed', '配付済み'], ['none', '配付の必要なし']]; const greetingOpts = [['pending', 'ー'], ['unadjusted', '未調整'], ['scheduled', '挨拶日決定'], ['completed', '挨拶終了']]; const opts = field === 'phone' ? phoneOpts : field === 'doc' ? docOpts : greetingOpts; const close = () => setStatusEditState(null); const saveStatus = (v) => { const update = { [statusKey]: v }; if(field==='greeting')update.greetingCompletedDate=v==='completed'?(sd.greetingCompletedDate||getTodayString()):''; if (field !== 'greeting') { if (v === 'completed' && !sd[dateKey]) update[dateKey] = getTodayString(); if (v !== 'completed') update[dateKey] = ''; } const before = Object.fromEntries(Object.keys(update).map((k) => [k, sd[k] != null ? sd[k] : ''])); recordUpdate(sd.id, before, update); persistPartial(sd.id, update); }; return (<div className="fixed inset-0 z-[105] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={close}><div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-scaleIn"><div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between"><h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Edit className="w-4 h-4 text-indigo-600" /><span>{sd.name} - {title}</span></h3><button type="button" onClick={close} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button></div><div className="p-4 space-y-3"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">ステータス</div><div className="space-y-1">{opts.map(([val, lbl]) => (<button key={val} type="button" onClick={() => saveStatus(val)} className={'w-full text-left px-3 py-2 rounded-lg text-xs font-bold cursor-pointer transition-colors ' + (currentStatus === val ? 'bg-indigo-600 text-white' : 'bg-slate-50 hover:bg-indigo-50 text-slate-700 border border-slate-200')}>{currentStatus === val ? '● ' : '○ '}{lbl}</button>))}</div></div>{field !== 'greeting' && currentStatus === 'completed' && (<div><div className="text-[11px] font-bold text-slate-600 mb-1.5">{field === 'phone' ? '連絡日' : '配付日'}</div><button type="button" onClick={() => setDatePickerState({ value: sd[dateKey] || '', title: title, onSelect: (v) => persistPartial(sd.id, { [dateKey]: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd[dateKey] ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd[dateKey] ? formatShortDate(sd[dateKey]) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div>)}{field === 'greeting' && currentStatus !== 'pending' && (<div className="space-y-2"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">挨拶日</div><button type="button" onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: '事前挨拶日', onSelect: (v) => persistPartial(sd.id, { greetingDate: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd.greetingDate ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">時間</div><input type="text" placeholder="例: 13:30" defaultValue={sd.greetingTime || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingTime || '')) persistPartial(sd.id, { greetingTime: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">引率教員</div><input type="text" placeholder="例: 鈴木 先生" defaultValue={sd.greetingVisitor || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingVisitor || '')) persistPartial(sd.id, { greetingVisitor: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div></div>)}<div className="text-[10px] text-slate-500 leading-relaxed pt-1 border-t border-slate-100">※ クリック（タップ）で従来通りステータスを切替、長押し（0.5秒）またはダブルクリックでこの編集モーダルを開きます。</div></div><div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2"><button type="button" onClick={close} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer">閉じる</button></div></div></div>); })()}
 
       {patrolEditState && (() => { const sd = students.find((s) => s.id === patrolEditState.studentId); if (!sd) return null; const p = (sd.patrols || []).find((pp) => pp.id === patrolEditState.patrolId); if (!p) return null; const close = () => setPatrolEditState(null); const updatePatrol = (changes) => { const current = sd.patrols || []; const next = current.map((pp) => pp.id === p.id ? { ...pp, ...changes } : pp); recordUpdate(sd.id, { patrols: current }, { patrols: next }); persistPartial(sd.id, { patrols: next }); }; return (<div className="fixed inset-0 z-[105] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={close}><div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-scaleIn"><div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between"><h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Edit className="w-4 h-4 text-violet-600" /><span>{sd.name} - 巡回・同行予定の編集</span></h3><button type="button" onClick={close} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button></div><div className="p-4 space-y-3"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">日付</div><button type="button" onClick={() => setDatePickerState({ value: p.date || '', title: '巡回・同行日', onSelect: (v) => updatePatrol({ date: v }) })} className="w-full bg-white border border-slate-300 hover:border-violet-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={p.date ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{p.date ? formatShortDate(p.date) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-violet-500" /></button></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">時間</div><input type="text" placeholder="例: 10:00" defaultValue={p.time || ''} onBlur={(e) => { if (e.target.value !== (p.time || '')) updatePatrol({ time: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-violet-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-violet-400 text-slate-800" /></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">担当教員</div><input type="text" placeholder="例: 鈴木 先生" defaultValue={p.teacher || ''} onBlur={(e) => { if (e.target.value !== (p.teacher || '')) updatePatrol({ teacher: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-violet-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-violet-400 text-slate-800" /></div><label className="flex items-center gap-2 cursor-pointer p-2 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100"><input type="checkbox" checked={!!p.done} onChange={(e) => updatePatrol({ done: e.target.checked })} className="cursor-pointer accent-violet-600 w-4 h-4" /><span className="text-xs font-bold text-slate-700">完了済みにする</span></label><div className="text-[10px] text-slate-500 leading-relaxed pt-1 border-t border-slate-100">※ チップを長押し（0.5秒）するとこの編集モーダルが開きます。通常クリックは従来通り完了/未完了の切替えです。</div></div><div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2"><button type="button" onClick={() => { showConfirm('この巡回・同行予定を削除しますか？', () => { handleRemovePatrol(sd, p.id); close(); }); }} className="px-3 py-1.5 bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 rounded-lg text-xs font-bold cursor-pointer">この予定を削除</button><button type="button" onClick={close} className="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-bold cursor-pointer">閉じる</button></div></div></div>); })()}
 
@@ -4650,7 +5335,7 @@ function App() {
                         </div>
                         <div className="mt-2 text-sm font-bold text-slate-800 flex items-start gap-1.5"><span>🏢</span><span>{s.location || '実習先未設定'}</span></div>
                       </div>
-                      {info && <span className="shrink-0 text-xs font-extrabold bg-indigo-50 border border-indigo-200 text-indigo-800 px-2.5 py-1 rounded-full">{info.dayNumber}日目／全{info.totalDays}日</span>}
+                      {info && s.internshipType !== 'observation' && <span className="shrink-0 text-xs font-extrabold bg-indigo-50 border border-indigo-200 text-indigo-800 px-2.5 py-1 rounded-full">{info.dayNumber}日目／全{info.totalDays}日</span>}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
                       {s.teacher && <span>👤 担当：<b>{s.teacher}</b></span>}
@@ -4807,8 +5492,8 @@ function App() {
               <button type="button" onClick={() => setIsPrintOpen(false)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
             </div>
             <div className="p-5 space-y-3">
-              <p className="text-[11px] text-slate-600 leading-relaxed">現在表示中の<strong>{currentView === 'list' ? 'リスト一覧' : 'カレンダー'}</strong>を印刷します。下のオプションを選んで「印刷する」を押すと、ブラウザの印刷ダイアログが開きます。紙への印刷だけでなく<strong>PDFとして保存</strong>することもできます。</p>
-              {currentView === 'list' ? (
+              <p className="text-[11px] text-slate-600 leading-relaxed">現在表示中の<strong>{currentView === 'list' ? 'リスト一覧' : currentView === 'workflow' ? '業務一覧' : 'カレンダー'}</strong>を印刷します。下のオプションを選んで「印刷する」を押すと、ブラウザの印刷ダイアログが開きます。紙への印刷だけでなく<strong>PDFとして保存</strong>することもできます。</p>
+              {currentView === 'workflow' ? (<p>現在の検索・絞り込み条件に一致する生徒の業務進捗を印刷します。全業務の列が対象です。</p>) : currentView === 'list' ? (
                 <div className="space-y-2">
                   <label className={`flex items-start gap-2 text-xs p-2.5 rounded-xl border ${selectedIds.size === 0 ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed' : 'bg-white border-slate-200 hover:bg-indigo-50/30 hover:border-indigo-200 cursor-pointer'}`}>
                     <input type="checkbox" checked={printOptions.onlySelected && selectedIds.size > 0} onChange={(e) => setPrintOptions((o) => ({ ...o, onlySelected: e.target.checked }))} disabled={selectedIds.size === 0} className="mt-0.5 accent-indigo-600 w-4 h-4" />
