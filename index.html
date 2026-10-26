@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.37.0</title>
+<title>現場実習進捗マネージャー v3.38.1</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -324,7 +324,7 @@
 .gs-table thead th span { font-variant-numeric:tabular-nums; }
 .gs-mark { overflow:hidden; white-space:nowrap; }
 
-/* v3.29.2: 未完了・必要なしを月のマス全幅へ表示し、完了業務をグレー表示。 */
+/* v3.29.2: 未完了・対象外を月のマス全幅へ表示し、完了業務をグレー表示。 */
 .gs-table .gs-banner-cell { padding:3px; background:#fff; }
 .gs-row-banner { width:100%; min-height:46px; display:block; text-align:center; border:1px solid #d8ac6e; border-radius:4px; background-color:#fff0d8; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e6d2b6 calc(100% - 1px)); background-size:calc(100% / var(--gs-month-days)) 100%; color:#754610 !important; }
 .gs-row-banner .gs-banner-text { display:inline-block; font-size:23px !important; font-weight:800; letter-spacing:.12em; line-height:1.35; padding:2px 12px; background:#fff0d8; border-radius:4px; color:#754610 !important; }
@@ -338,7 +338,7 @@
 @media(max-width:640px) { .gs-row-banner { text-align:left; padding-left:8px; } .gs-row-banner .gs-banner-text { position:sticky; left:140px; font-size:20px !important; letter-spacing:.08em; padding:2px 6px; } }
 
 
-/* v3.37.0: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
+/* v3.38.1: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
 .gs-table .gs-window-cell { padding:3px; background:#fff; }
 .gs-window-band { padding:0; width:100%; min-height:46px; border:1px solid #cc9b52; border-radius:4px; background:#fff0d8; color:#754610 !important; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e3cda9 calc(100% - 1px)); background-size:calc(100% / var(--gs-window-days)) 100%; }
 .gs-window-band>span { display:inline-block; max-width:100%; font-size:21px !important; line-height:1.2; font-weight:800; letter-spacing:.04em; padding:2px 3px; color:#754610 !important; }
@@ -350,7 +350,7 @@
 @media(max-width:640px) { .gs-window-band { text-align:left; padding-left:3px; } .gs-window-band>span { position:sticky; left:140px; background:inherit; font-size:19px !important; } .gs-window-short>span { font-size:14px !important; } }
 
 
-/* v3.37.0: 元の曜日色と罫線を保った透明な完了表示。 */
+/* v3.38.1: 元の曜日色と罫線を保った透明な完了表示。 */
 .gs-table tr.gs-row-done>td { background-color:#fff; }
 .gs-table tr.gs-row-done:nth-child(even)>td { background-color:#f3f6f8; }
 .gs-table tr.gs-row-done>td.gs-weekend { background-color:#fff0dd; }
@@ -375,7 +375,7 @@
 @media(max-width:640px){.gs-completed-banner .gs-banner-text{max-width:calc(100vw - 180px);white-space:normal;font-size:16px !important;letter-spacing:0;line-height:1.4;}.gs-doc-heading{align-items:flex-start;}.gs-related-documents{padding:10px;}.gs-document-buttons button{width:100%;}}
 
 
-/* v3.37.0: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
+/* v3.38.1: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
 .gs-related-documents { border:3px solid #5489bd; background:#edf6ff; box-shadow:0 2px 8px rgba(45,94,143,.12); }
 .gs-doc-heading strong { font-size:17px; color:#214d79 !important; }
 .gs-document-buttons button { border-color:#8eafd0; background:white; font-weight:600; }
@@ -387,7 +387,7 @@
 @media(max-width:540px){.sb-current-period{max-width:calc(100vw - 175px);}.gs-navigation strong{font-size:14px;}.gs-doc-heading strong{font-size:16px;}}
 
 
-/* v3.37.0: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
+/* v3.38.1: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
 .sb-view-switch { max-width:100%; flex-wrap:wrap; justify-content:flex-end; }
 .sb-view-switch .ow-launch { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border:1px solid #a8bfdb; border-radius:24px; background:#edf5ff; font-size:14px; font-weight:700; white-space:nowrap; }
 .sb-view-switch .ow-launch:hover { background:#dcecff; }
@@ -444,7 +444,7 @@
 @media(max-width:640px){.ow-filter-bar{flex:none;}.ow-table-scroll{flex:1 0 300px;}.ow-dialog .ow-help{margin:0;}}
 
 
-/* v3.37.0: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
+/* v3.38.1: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
 .wf-patrol-row { gap:10px; padding:14px; }
 .wf-patrol-info { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; }
 .wf-patrol-info strong { font-size:16px; }.wf-patrol-info .wf-muted { font-size:14px; }
@@ -456,7 +456,7 @@
 @media(max-width:540px){.wf-patrol-row{padding:12px;}.wf-dialog .wf-patrol-complete{font-size:16px;min-height:60px;padding:12px 8px;}}
 
 
-/* v3.37.0: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
+/* v3.38.1: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
 .ow-dialog .sb-utility-body { gap:8px; padding:12px 20px; }
 .ow-compact-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; flex-shrink:0; }
 .ow-period { margin-right:auto; min-width:0; overflow-wrap:anywhere; }
@@ -485,7 +485,7 @@
 }
 
 
-/* v3.37.0: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
+/* v3.38.1: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
 .gs-horizontal-control { padding:8px 16px; border-top:1px solid #dbe4ee; background:#f7fafe; }
 .gs-horizontal-caption { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px 12px; font-size:14px; }
 .gs-horizontal-caption label { font-weight:700; }
@@ -497,12 +497,12 @@
 @media(max-width:640px) { .gs-horizontal-control { padding:8px 12px; }.gs-horizontal-track { gap:8px; } }
 
 
-/* v3.37.0: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
+/* v3.38.1: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
 .gs-slider-dates { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:#52657a !important; }
 .gs-slider-dates span { color:inherit !important; }
 @media(max-width:420px) { .gs-slider-dates { flex-wrap:wrap; }.gs-slider-dates span:nth-child(2) { order:3; width:100%; text-align:center; } }
 
-/* v3.37.0: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
+/* v3.38.1: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
 .ow-page { width:100%; min-width:0; display:flex; flex-direction:column; height:var(--ow-page-height,calc(100dvh - 150px)); min-height:320px; background:#fff; border:1px solid #d4dfeb; border-radius:12px; color:#233044 !important; font-size:15px; }
 .ow-page * { box-sizing:border-box; }
 .ow-page .sb-utility-body { min-height:0; overflow-y:auto; }
@@ -516,9 +516,9 @@
 @media(max-width:640px) { .ow-page { min-height:320px; }.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; } }
 @media print { .ow-page { height:auto; min-height:0; border:0; }.ow-page .sb-utility-body,.ow-page .ow-table-scroll { overflow:visible; display:block; }.ow-page .ow-table { min-width:0; font-size:11px; }.ow-page .ow-table .ow-person { width:150px; position:static; }.ow-page .ow-table th { position:static; }.ow-page .ow-filter-bar,.ow-page .ow-filters { display:none; } }
 
-/* v3.37.0: cache management lives only in Settings, not on the main page. */
+/* v3.38.1: cache management lives only in Settings, not on the main page. */
 .cache-settings{margin-bottom:24px;padding:16px;border:1px solid #dce4ed;border-radius:10px;font-size:14px;line-height:1.6;background:#f8fafc}.cache-settings h4{font-weight:800;margin:0 0 8px}.cache-settings p{margin:4px 0}.cache-settings>div{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cache-settings button{min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;background:white;border-radius:8px;cursor:pointer}.cache-settings button:disabled{opacity:.5;cursor:not-allowed}.cache-settings button:focus-visible{outline:3px solid #2783de;outline-offset:2px}
-/* v3.37.0: document-scrolling workflow page; existing popup stays unchanged for list screens. */
+/* v3.38.1: document-scrolling workflow page; existing popup stays unchanged for list screens. */
 .workflow-page-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 20px;background:white;border-bottom:1px solid #dce4ed;font-size:14px;line-height:1.5}
 .workflow-page-nav>div{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}.workflow-page-nav>div:first-child{align-items:flex-start;flex-direction:column;gap:2px}.workflow-page-nav span{font-size:13px}
 .workflow-page-nav a,.workflow-page-nav button,.workflow-page-message button,.workflow-page-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:white;cursor:pointer;text-decoration:none}
@@ -529,6 +529,19 @@
 
 
 .wf-dialog[aria-busy="true"]>.wf-scroll{pointer-events:none}.wf-close-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.wf-footer>p{min-width:0}.wf-close-actions{flex-shrink:0}
+
+/* v3.38.1: 対象外は文字ではなく斜線。印刷にも模様を維持。 */
+.ow-table td.ow-exempt-cell, .gs-banner-exempt .gs-row-banner, .exempt-legend-swatch {
+  background-color:#f2f4f6;
+  background-image:repeating-linear-gradient(135deg,transparent 0,transparent 9px,#b9c4cf 9px,#b9c4cf 10px,transparent 10px,transparent 19px);
+  background-size:auto;
+  print-color-adjust:exact; -webkit-print-color-adjust:exact;
+}
+.ow-cell.ow-exempt, .ow-cell.ow-exempt:hover { background:transparent; }
+.exempt-legend-swatch { display:inline-block; width:22px; height:16px; vertical-align:middle; border:1px solid #b9c4cf; border-radius:2px; margin-right:3px; }
+
+
+.sb-demand-button,.demand-actions button,.legacy-demand button{min-height:44px;padding:8px 12px;border:1px solid #bbcede;border-radius:8px;background:#fff;font-size:14px;cursor:pointer}.demand-members{padding:16px;display:flex;flex-direction:column;gap:12px;overflow:auto}.demand-members ul{display:flex;flex-direction:column;gap:8px}.demand-members li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid #dbe4ee}.demand-members p{line-height:1.6}.demand-actions{display:flex;gap:8px;flex-wrap:wrap}.legacy-demand{padding:12px;border:1px solid #dbe4ee;background:#f7f9fc;border-radius:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.legacy-demand small{font-size:13px}.legacy-demand button:disabled,.demand-actions button:disabled{opacity:.5;cursor:default}
 </style>
 
 <!-- React 18 / lucide-react を ESM CDN 経由で読み込むための importmap -->
@@ -853,19 +866,32 @@ const showDesktopNotification = (title, body, tag) => {
 // カスタムフック / Hooks
 // =============================================================================
 
-// v3.37.0: Display-only, expiring cache. NEVER replay it into Firestore.
+// v3.38.1: Display-only, expiring cache. NEVER replay it into Firestore.
 const EMPTY_CACHE_LIST = Object.freeze([]);
 const VIEW_CACHE_TTL = 24 * 60 * 60 * 1000;
 const VIEW_CACHE_DB = `jissyuu_view_cache${ENV_SUFFIX}`;
 const VIEW_CACHE_APP = `${location.origin}${location.pathname}`;
 const cloudWriteGate = { scope: '', room: '', configured: false, ready: false, epoch: 0, pending: 0 };
 const guardedRaw = new WeakMap();
-const cloudScope = (configStr, room) => {
-  try { const c = JSON.parse(configStr); return JSON.stringify([VIEW_CACHE_APP, ENV_SUFFIX, c.projectId || '', c.appId || '', c.authDomain || '', c.databaseURL || '', String(room)]); }
-  catch { return JSON.stringify([VIEW_CACHE_APP, ENV_SUFFIX, 'invalid-config', String(room)]); }
+// Stop nonessential periodic writes after quota errors; never queue them for replay.
+const quotaPausedScopes = new Set();
+const isQuotaError = error => /resource-exhausted|quota.*exceed|exceed.*quota/i.test(String(error?.code||'')+' '+String(error?.message||'')) || error?.name==='QuotaExceededError' || error?.code===22 || error?.code===1014;
+const isDeviceQuotaError = error => error?.name==='QuotaExceededError' || error?.code===22 || error?.code===1014;
+const pauseTelemetryOnQuota = (error, scope=cloudWriteGate.scope) => { if(isQuotaError(error))quotaPausedScopes.add(scope); };
+const canWriteTelemetry = scope => !quotaPausedScopes.has(scope) && canWriteCloud(scope) && document.visibilityState!=='hidden';
+const workflowSaveErrorText = (error,cloudConfigured) => {
+  const detail=(error?.code?'エラーコード：'+error.code+'\n':'')+(error?.message||'接続を確認してください。');
+  if(isDeviceQuotaError(error) || (!cloudConfigured && isQuotaError(error))) return '端末の保存容量が不足しているため保存できませんでした。下書きはポップアップ内に残しています。未保存内容を控えるまで再読み込み・編集の破棄・データ削除をしないでください。\n'+detail;
+  if(cloudConfigured && isQuotaError(error)) return 'クラウドの利用上限に達したため保存できませんでした。下書きはポップアップ内に残しています。\n管理者にFirebaseの利用状況・割り当ての確認を依頼してください。日次上限の場合はリセット後に「保存して閉じる」で再試行してください。連打・再読み込み・編集の破棄はしないでください。\n'+detail;
+  return '保存できませんでした。下書きはポップアップ内に残しています。\n'+detail+'\nこの詳細を確認してから再試行してください。';
 };
-const cloudGateContext = (configStr, room) => {
-  const scope = cloudScope(configStr, room);
+
+const cloudScope = (configStr, room, periodId=DEFAULT_PERIOD_ID) => {
+  try { const c = JSON.parse(configStr); return JSON.stringify([VIEW_CACHE_APP, ENV_SUFFIX, c.projectId || '', c.appId || '', c.authDomain || '', c.databaseURL || '', String(room),String(periodId)]); }
+  catch { return JSON.stringify([VIEW_CACHE_APP, ENV_SUFFIX, 'invalid-config', String(room),String(periodId)]); }
+};
+const cloudGateContext = (configStr, room, periodId) => {
+  const scope = cloudScope(configStr, room, periodId);
   const configured = !!String(configStr || '').trim();
   if (cloudWriteGate.scope !== scope || cloudWriteGate.configured !== configured) {
     Object.assign(cloudWriteGate, { scope, room: String(room), configured, ready: false, epoch: cloudWriteGate.epoch + 1 });
@@ -899,7 +925,7 @@ const guardedFirestore = (rawDb, room) => {
         const result = value.apply(target, args.map(unwrap));
         if (writing && result && typeof result.then === 'function') {
           cloudWriteGate.pending++; notifyCloudGate();
-          return result.finally(() => { cloudWriteGate.pending--; notifyCloudGate(); });
+          return result.catch(error=>{pauseTelemetryOnQuota(error,scope);throw error;}).finally(() => { cloudWriteGate.pending--; notifyCloudGate(); });
         }
         if (result && typeof result === 'object' && !result.then &&
             (typeof result.get === 'function' || typeof result.doc === 'function' || typeof result.commit === 'function')) return wrap(result);
@@ -944,118 +970,59 @@ const writeViewCache = (scope, students, periods) => {
 };
 const deleteViewCache = (scope) => viewCacheOperation('readwrite', (store) => store.delete(scope));
 
-function useFirestoreSync(firebaseConfigStr, roomKey) {
-  const scope = cloudGateContext(firebaseConfigStr, roomKey);
-  const cloudConfigured = !!firebaseConfigStr.trim();
-  const [state, setState] = useState({ scope: '', students: [], periods: [], savedAt: null });
-  const [isLoading, setIsLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState(cloudConfigured ? 'connecting' : 'local');
-  const [connectionError, setConnectionError] = useState('');
-  const [cacheNotice, setCacheNotice] = useState('');
-  const [cacheEnabled, setCacheEnabled] = useState(true);
-  const [pendingWrites, setPendingWrites] = useState(0);
-  const [retry, setRetry] = useState(0);
-  const scopeRef = useRef(scope); scopeRef.current = scope;
-  const studentsNotifyReadyRef = useRef(false);
-  const cacheEnabledRef = useRef(true);
-  const cacheQueueRef = useRef(Promise.resolve());
-  // Serialize cache writes/deletion so an old asynchronous write cannot resurrect a cleared copy.
-  const queueCache = (work) => { const p = cacheQueueRef.current.catch(() => {}).then(work); cacheQueueRef.current = p; return p; };
-  const students = state.scope === scope ? state.students : [];
-  const cachedPeriods = state.scope === scope ? state.periods : EMPTY_CACHE_LIST;
-  const cacheSavedAt = state.scope === scope ? state.savedAt : null;
-  const setStudents = (value) => setState((prev) => ({ ...prev, scope, students: typeof value === 'function' ? value(prev.scope === scope ? prev.students : []) : value }));
-  const retryConnection = () => setRetry((x) => x + 1);
-  const clearTemporaryCache = async () => {
-    const clearingScope = scope;
-    cacheEnabledRef.current = false; setCacheEnabled(false);
-    try {
-      await queueCache(() => deleteViewCache(clearingScope));
-      if (scopeRef.current !== clearingScope) return;
-      setState((s) => ({ ...s, savedAt: null, ...(cloudWriteGate.ready ? {} : { students: [], periods: [] }) }));
-      setCacheNotice('端末の一時データを削除しました。この画面では再保存しません。クラウドは変更していません。');
-    } catch { setCacheNotice('一時データを削除できませんでした。ブラウザーのサイトデータ設定をご確認ください。'); }
+// v3.38.1: students are subscribed only for the selected period. Metadata is small and separate.
+function useFirestoreSync(firebaseConfigStr,roomKey,periodId=DEFAULT_PERIOD_ID){
+ const scope=cloudGateContext(firebaseConfigStr,roomKey,periodId), cloudConfigured=!!firebaseConfigStr.trim();
+ const [state,setState]=useState({scope:'',students:[],periods:[],savedAt:null});
+ const [legacy,setLegacy]=useState({scope:'',rows:[]});const [legacyLoading,setLegacyLoading]=useState(false);
+ const [isLoading,setIsLoading]=useState(true),[connectionStatus,setConnectionStatus]=useState(cloudConfigured?'connecting':'local'),[connectionError,setConnectionError]=useState('');
+ const [cacheNotice,setCacheNotice]=useState(''),[cacheEnabled,setCacheEnabled]=useState(true),[pendingWrites,setPendingWrites]=useState(0),[retry,setRetry]=useState(0);
+ const scopeRef=useRef(scope);scopeRef.current=scope;const cacheEnabledRef=useRef(true),cacheQueueRef=useRef(Promise.resolve());
+ const queueCache=work=>{const p=cacheQueueRef.current.catch(()=>{}).then(work);cacheQueueRef.current=p;return p;};
+ const tagged=state.scope===scope?state.students:EMPTY_CACHE_LIST, cachedPeriods=state.scope===scope?state.periods:EMPTY_CACHE_LIST;
+ const students=useMemo(()=>{const map=new Map(tagged.map(s=>[s.id,s]));if(legacy.scope===scope)legacy.rows.forEach(s=>{if(!map.has(s.id))map.set(s.id,s)});return [...map.values()];},[tagged,legacy,scope]);
+ const cacheSavedAt=state.scope===scope?state.savedAt:null;
+ const setStudents=value=>setState(prev=>({...prev,scope,students:typeof value==='function'?value(students):value}));
+ const applyCommittedPatch=(id,patch)=>{setState(prev=>({...prev,students:prev.students.map(s=>s.id===id?{...s,...patch}:s)}));setLegacy(prev=>({...prev,rows:prev.rows.map(s=>s.id===id?{...s,...patch}:s)}));};
+ const retryConnection=()=>setRetry(x=>x+1);
+ const loadLegacyStudents=async()=>{
+  if(periodId!==DEFAULT_PERIOD_ID||legacyLoading)return;
+  const operationScope=scope;setLegacyLoading(true);
+  try{if(!canWriteCloud(scope))throw Error('最新の接続確認後に実行してください。');
+   // Explicit user action only: Firestore cannot query an absent field. Never migrate/write old rows automatically.
+   const snap=await guardedFirestore(window.firebase.app().firestore(),roomKey).collection('rooms').doc(roomKey).collection('students').get({source:'server'});
+   if(scopeRef.current!==operationScope)return;
+   const rows=[];snap.forEach(d=>{const s=d.data()||{};if(s.recordType!=='period'&&!s.periodId)rows.push({...s,id:d.id})});setLegacy({scope:operationScope,rows});
+   setCacheNotice(`実習期未設定の旧データ ${rows.length}件を今回だけ読み込みました。旧データは自動同期しません。再確認は同じボタンから行えます。`);
+  }catch(e){if(scopeRef.current===operationScope)setCacheNotice('旧データの読込に失敗しました：'+e.message)}finally{setLegacyLoading(false)}
+ };
+ const clearTemporaryCache=async()=>{cacheEnabledRef.current=false;setCacheEnabled(false);try{await queueCache(()=>deleteViewCache(scope));if(scopeRef.current!==scope)return;setState(s=>({...s,savedAt:null,...(!cloudWriteGate.ready?{students:[],periods:[]}:{})}));setCacheNotice('端末の一時データを削除しました。クラウドは変更していません。');}catch{setCacheNotice('一時データを削除できませんでした。')}};
+ useEffect(()=>{
+  let active=true,authoritative=false,timer=null,studentReady=false,metaReady=false,previousReady=false;const unsub=[];let rows=[],periods=[];
+  const epoch=++cloudWriteGate.epoch;cloudWriteGate.ready=false;setState({scope,students:[],periods:[],savedAt:null});setLegacy({scope:'',rows:[]});setConnectionError('');setIsLoading(true);setCacheNotice('');cacheEnabledRef.current=true;setCacheEnabled(true);
+  const current=()=>active&&scopeRef.current===scope&&cloudWriteGate.scope===scope&&cloudWriteGate.epoch===epoch;
+  const status=x=>{if(!current())return;cloudWriteGate.ready=x==='connected';setConnectionStatus(x);notifyCloudGate();};
+  const expire=until=>{clearTimeout(timer);timer=setTimeout(()=>{if(!current())return;queueCache(()=>deleteViewCache(scope)).catch(()=>{});if(!cloudWriteGate.ready){setState({scope,students:[],periods:[],savedAt:null});setLegacy({scope:'',rows:[]})}setCacheNotice('一時保存の期限が過ぎました。最新データを受信してください。');},Math.max(1,until-Date.now()));};
+  const publish=()=>{if(!current())return;const ready=studentReady&&metaReady;if(!ready){status('connecting');return;}authoritative=true;const now=Date.now();setState({scope,students:rows,periods,savedAt:cacheEnabledRef.current?now:null});status('connected');setIsLoading(false);setConnectionError('');if(cacheEnabledRef.current){expire(now+VIEW_CACHE_TTL);queueCache(()=>writeViewCache(scope,rows,periods)).catch(()=>{if(current())setCacheNotice('一時保存に失敗しました。クラウドは変更していません。')})}};
+  const offline=()=>{studentReady=false;metaReady=false;status('connecting');if(current())setConnectionError('通信が切れています。再接続後の最新データ確認までは保存できません。')};
+  const online=()=>{if(current())setConnectionError('再接続を確認しています。')};const pending=()=>{if(current())setPendingWrites(cloudWriteGate.pending)};
+  const fail=e=>{if(current()){status('error');setConnectionError(e.message||'読み込みに失敗しました。');setIsLoading(false)}};
+  window.addEventListener('offline',offline);window.addEventListener('online',online);window.addEventListener('jissyuu-cloud-gate',pending);
+  const init=async()=>{
+   if(!cloudConfigured){let local=MOCK_STUDENTS;try{const x=JSON.parse(localStorage.getItem(`local_students_${roomKey}`)||'null');if(Array.isArray(x))local=x}catch{}if(current()){setState({scope,students:local,periods:[],savedAt:null});setConnectionStatus('local');setIsLoading(false)}return;}
+   status('connecting');queueCache(()=>readViewCache(scope)).then(c=>{if(current()&&!authoritative&&c){setState({scope,students:c.students.filter(s=>(s.periodId||DEFAULT_PERIOD_ID)===periodId),periods:c.periods,savedAt:c.savedAt});setIsLoading(false);expire(c.expiresAt)}}).catch(()=>{});
+   try{const config=JSON.parse(firebaseConfigStr);const fb=await loadFirebaseSDK();if(!current())return;const app=fb.apps.length?fb.app():fb.initializeApp(config);if(app.options?.projectId!==config.projectId||app.options?.appId!==config.appId)throw Error('接続先の設定が変更されています。再読み込みが必要です。');await app.auth().signInAnonymously();if(!current())return;
+    const db=guardedFirestore(app.firestore(),roomKey),col=db.collection('rooms').doc(roomKey).collection('students');
+    // Legacy period names/locks only. Never read historical student records for the selector.
+    let legacyPeriods=[];try{const snap=await db.collection('rooms').doc(roomKey).collection('periods').get({source:'server'});snap.forEach(d=>legacyPeriods.push({...d.data(),id:d.id}))}catch{}if(!current())return;
+    unsub.push(col.where('recordType','==','period').onSnapshot({includeMetadataChanges:true},snap=>{if(!current())return;if(snap.metadata?.fromCache||navigator.onLine===false){metaReady=false;status('connecting');return;}if(snap.metadata?.hasPendingWrites)return;const map=new Map(legacyPeriods.map(p=>[p.id,p]));snap.forEach(d=>{const s=d.data()||{};map.set(s.periodId||d.id.replace(PERIOD_META_PREFIX,''),{...s,id:s.periodId||d.id.replace(PERIOD_META_PREFIX,'')})});periods=[...map.values()];metaReady=true;publish();},fail));
+    unsub.push(col.where('periodId','==',periodId).onSnapshot({includeMetadataChanges:true},snap=>{if(!current())return;if(snap.metadata?.fromCache||navigator.onLine===false){studentReady=false;status('connecting');setIsLoading(false);return;}if(snap.metadata?.hasPendingWrites)return;rows=[];snap.forEach(d=>{const s=d.data()||{};if(s.recordType!=='period'&&s.periodId===periodId)rows.push({...s,id:d.id})});studentReady=true;publish();if(previousReady){const changes=snap.docChanges().filter(c=>c.doc.data()?.recordType!=='period');if(changes.length)showDesktopNotification('実習データが更新されました',`${changes.length}件の変更`,'students-update')}previousReady=true;},fail));
+   }catch(e){fail(e)}
   };
-  useEffect(() => {
-    let active = true, unsubscribe = null, authoritative = false, expiryTimer = null;
-    const epoch = ++cloudWriteGate.epoch;
-    cloudWriteGate.ready = false;
-    cacheEnabledRef.current = true; setCacheEnabled(true); setCacheNotice('');
-    setState({ scope, students: [], periods: [], savedAt: null });
-    setConnectionError(''); setIsLoading(true);
-    const current = () => active && scopeRef.current === scope && cloudWriteGate.scope === scope && cloudWriteGate.epoch === epoch;
-    const gateStatus = (status) => { if (!current()) return; cloudWriteGate.ready = status === 'connected'; setConnectionStatus(status); notifyCloudGate(); };
-    const armExpiry = (expiresAt) => {
-      clearTimeout(expiryTimer);
-      expiryTimer = setTimeout(() => {
-        if (!current()) return;
-        queueCache(() => deleteViewCache(scope)).catch(() => {});
-        if (!cloudWriteGate.ready) setState({ scope, students: [], periods: [], savedAt: null });
-        setCacheNotice('一時データの保存期限（24時間）を過ぎました。最新データの受信をお待ちください。');
-      }, Math.max(1, expiresAt - Date.now()));
-    };
-    const offline = () => { if (current()) { gateStatus('connecting'); setConnectionError('通信が切れています。表示は参考情報です。編集はできません。'); } };
-    // The metadata listener must receive a new server snapshot before unlocking after reconnection.
-    const online = () => { if (current()) { setConnectionError('再接続して最新データを確認しています。'); } };
-    const pending = () => { if (current()) setPendingWrites(cloudWriteGate.pending); };
-    window.addEventListener('offline', offline); window.addEventListener('online', online); window.addEventListener('jissyuu-cloud-gate', pending);
-    const init = async () => {
-      if (!cloudConfigured) {
-        if (!current()) return;
-        let local = MOCK_STUDENTS;
-        try { const x = JSON.parse(localStorage.getItem(`local_students_${roomKey}`) || 'null'); if (Array.isArray(x)) local = x; } catch {}
-        setState({ scope, students: local, periods: [], savedAt: null }); setConnectionStatus('local'); setIsLoading(false); return;
-      }
-      gateStatus('connecting');
-      // Do not await cache I/O before networking. A late cache read never replaces server data (including a real empty result).
-      queueCache(() => readViewCache(scope)).then((cached) => {
-        if (!current() || authoritative || !cacheEnabledRef.current || !cached) return;
-        setState({ scope, students: cached.students, periods: cached.periods, savedAt: cached.savedAt }); setIsLoading(false); armExpiry(cached.expiresAt);
-      }).catch(() => { if (current()) setCacheNotice('この端末では一時保存を利用できません。クラウドから通常どおり読み込みます。'); });
-      try {
-        let configObj; try { configObj = JSON.parse(firebaseConfigStr); } catch { throw new Error('Configの形式(JSON)が正しくありません。'); }
-        const fb = await loadFirebaseSDK(); if (!current()) return;
-        const app = fb.apps.length ? fb.app() : fb.initializeApp(configObj);
-        if (String(app.options?.projectId || '') !== String(configObj.projectId || '') || String(app.options?.appId || '') !== String(configObj.appId || '')) throw new Error('接続先が変更されています。画面を再読み込みしてから接続してください。');
-        const db = guardedFirestore(app.firestore(), roomKey);
-        await app.auth().signInAnonymously(); if (!current()) return;
-        studentsNotifyReadyRef.current = false;
-        unsubscribe = db.collection('rooms').doc(roomKey).collection('students').onSnapshot({ includeMetadataChanges: true }, (snap) => {
-          if (!current()) return;
-          const meta = snap.metadata || {};
-          if (meta.fromCache || navigator.onLine === false) { gateStatus('connecting'); setIsLoading(false); return; }
-          // Never cache local pending writes as confirmed server data.
-          if (meta.hasPendingWrites) return;
-          authoritative = true;
-          const list = [], periodList = [];
-          snap.forEach((doc) => { const data = doc.data() || {}; if (data.recordType === 'period') periodList.push({ ...data, id: data.periodId || doc.id.replace(PERIOD_META_PREFIX, '') }); else list.push({ ...data, id: doc.id }); });
-          const now = Date.now();
-          setState({ scope, students: list, periods: periodList, savedAt: cacheEnabledRef.current ? now : null });
-          gateStatus('connected'); setIsLoading(false); setConnectionError('');
-          if (cacheEnabledRef.current) {
-            armExpiry(now + VIEW_CACHE_TTL);
-            queueCache(() => writeViewCache(scope, list, periodList)).catch(() => { if (current()) setCacheNotice('端末への一時保存に失敗しました。クラウドのデータは変更していません。'); });
-          }
-          if (studentsNotifyReadyRef.current) {
-            const changes = snap.docChanges().filter((ch) => ['added','modified'].includes(ch.type) && (ch.doc.data() || {}).recordType !== 'period');
-            if (changes.length === 1) { const s = changes[0].doc.data() || {}; showDesktopNotification(changes[0].type === 'added' ? '👤 生徒が追加されました' : '✏️ 進捗が更新されました', (s.name || '生徒') + (s.location ? '（' + s.location + '）' : ''), 'students-' + changes[0].doc.id); }
-            else if (changes.length > 1) showDesktopNotification('✏️ 生徒データが更新されました', changes.length + '件の変更がありました', 'students-bulk');
-          }
-          studentsNotifyReadyRef.current = true;
-        }, (error) => { if (current()) { gateStatus('error'); setConnectionError(`クラウドの読み込みに失敗しました。前回分は閲覧のみです。(${error.message})`); setIsLoading(false); } });
-      } catch (err) { if (current()) { gateStatus('error'); setConnectionError(err.message || 'Firebaseの接続に失敗しました。'); setIsLoading(false); } }
-    };
-    const localChange = (event) => {
-      if (!cloudConfigured && current() && event.key === `local_students_${roomKey}` && event.storageArea === localStorage) {
-        try { const rows = JSON.parse(event.newValue || '[]'); if (Array.isArray(rows)) setState({ scope, students: rows, periods: [], savedAt: null }); } catch {}
-      }
-    };
-    window.addEventListener('storage', localChange);
-    init();
-    return () => { window.removeEventListener('storage', localChange); active = false; clearTimeout(expiryTimer); if (unsubscribe) unsubscribe(); window.removeEventListener('offline', offline); window.removeEventListener('online', online); window.removeEventListener('jissyuu-cloud-gate', pending); if (cloudWriteGate.epoch === epoch) cloudWriteGate.ready = false; };
-  }, [firebaseConfigStr, roomKey, retry]);
-  const cloudReadOnly = cloudConfigured && !canWriteCloud(scope);
-  return { students, setStudents, isLoading, setIsLoading, connectionStatus, connectionError, cloudReadOnly, cloudConfigured, cachedPeriods, cacheSavedAt, cacheNotice, cacheEnabled, pendingWrites, clearTemporaryCache, retryConnection, cloudScopeKey: scope };
+  const localChange=e=>{if(!cloudConfigured&&current()&&e.key===`local_students_${roomKey}`){try{const list=JSON.parse(e.newValue||'[]');setState(s=>({...s,students:list}))}catch{}}};window.addEventListener('storage',localChange);init();
+  return()=>{active=false;unsub.forEach(f=>f());clearTimeout(timer);window.removeEventListener('offline',offline);window.removeEventListener('online',online);window.removeEventListener('jissyuu-cloud-gate',pending);window.removeEventListener('storage',localChange);if(cloudWriteGate.epoch===epoch)cloudWriteGate.ready=false;};
+ },[firebaseConfigStr,roomKey,periodId,retry]);
+ return {students,setStudents,isLoading,setIsLoading,connectionStatus,connectionError,cloudReadOnly:cloudConfigured&&!canWriteCloud(scope),cloudConfigured,cachedPeriods,cacheSavedAt,cacheNotice,cacheEnabled,pendingWrites,clearTemporaryCache,retryConnection,cloudScopeKey:scope,loadLegacyStudents,legacyLoading,applyCommittedPatch};
 }
 
 function useHistory(limit = 30) {
@@ -1120,225 +1087,6 @@ function useDialog() {
 // usePresence: rooms/{roomKey}/presence/{sessionId} にハートビートを書き、
 // 直近60秒以内に更新されたドキュメントを「接続中」とカウントする。
 // =============================================================================
-function usePresence(connectionStatus, roomKey, teacherName) {
-  const [onlineMembers, setOnlineMembers] = useState([]);
-  const sessionIdRef = useRef(null);
-  const teacherNameRef = useRef(teacherName);
-
-  useEffect(() => { teacherNameRef.current = teacherName; }, [teacherName]);
-
-  useEffect(() => {
-    if (connectionStatus !== 'connected' || !window.firebase) {
-      setOnlineMembers([]);
-      return;
-    }
-    if (!sessionIdRef.current) {
-      sessionIdRef.current = (typeof localStorage !== 'undefined' && localStorage.getItem('presence_session_id')) || ('sess-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10)); try { localStorage.setItem('presence_session_id', sessionIdRef.current); } catch (e) {}
-    }
-    const sessionId = sessionIdRef.current;
-    const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
-    const presenceRef = db.collection('rooms').doc(roomKey).collection('presence').doc(sessionId);
-    const collectionRef = db.collection('rooms').doc(roomKey).collection('presence');
-
-    const writeHeartbeat = async () => {
-      try {
-        await presenceRef.set({
-          lastSeen: window.firebase.firestore.FieldValue.serverTimestamp(),
-          lastSeenClient: Date.now(),
-          teacherName: teacherNameRef.current || '匿名',
-          ua: (navigator.userAgent || '').slice(0, 80)
-        }, { merge: true });
-      } catch (e) {
-        console.warn('presence heartbeat failed:', e.message);
-      }
-    };
-
-    writeHeartbeat();
-    // v3.10 fix: ハートビート間隔を 25s → 15s に短縮。切断検知のしきい値（35s）と
-    // 合わせて、最大 1〜2 回ハートビートを取りこぼせば「接続中」表示から消える。
-    const heartbeatInterval = setInterval(writeHeartbeat, 15000);
-
-    // 接続を見離したセッションを期限切れとして表示から隠すための定期再検証
-    // v3.10 fix: しきい値を 60s → 35s、再検証周期を 15s → 5s に短縮して、
-    // 端末クラッシュ／ネットワーク遮断などで delete が走らなかった場合でも、
-    // 「接続中」表示が長く残り続けないようにする。
-    const recountInterval = setInterval(() => {
-      setOnlineMembers((prev) => {
-        const now = Date.now();
-        return prev.filter((m) => now - m.lastSeen < 35000);
-      });
-    }, 5000);
-
-    const unsubscribe = collectionRef.onSnapshot((snap) => {
-      // v3.10 fix: snapshot がローカルキャッシュのみから来ている
-      //   （＝自分の端末が Firestore と切断中）ときは、古いオンライン情報を
-      //   そのまま表示し続けないよう、表示用リストを空にする。
-      if (snap.metadata && snap.metadata.fromCache) {
-        setOnlineMembers([]);
-        return;
-      }
-      const now = Date.now();
-      const members = [];
-      snap.forEach((doc) => {
-        const data = doc.data();
-        // v3.10 fix: serverTimestamp が遅延して null になることがあるため、
-        //   クライアント側の Date.now() を保存した lastSeenClient もフォールバックに使う。
-        //   しきい値も 60s → 35s に短縮し、切断後に「接続中」表示が長く残らないようにする。
-        const serverMs = data.lastSeen?.toMillis ? data.lastSeen.toMillis() : 0;
-        const clientMs = typeof data.lastSeenClient === 'number' ? data.lastSeenClient : 0;
-        const lastSeen = Math.max(serverMs, clientMs);
-        if (lastSeen && now - lastSeen < 35000) {
-          members.push({
-            id: doc.id,
-            teacherName: data.teacherName || '匿名',
-            lastSeen,
-            isSelf: doc.id === sessionId
-          });
-        }
-      });
-      members.sort((a, b) => b.lastSeen - a.lastSeen); const dedupMap = new Map(); for (const m of members) { const key = String(m.teacherName || '').trim() || ('__id__' + m.id); if (m.isSelf) dedupMap.set(key, m); else if (!dedupMap.has(key)) dedupMap.set(key, m); } members.length = 0; for (const m of dedupMap.values()) members.push(m); members.sort((a, b) => (Number(b.isSelf) - Number(a.isSelf)) || String(a.teacherName).localeCompare(String(b.teacherName), 'ja'));
-      setOnlineMembers(members);
-    }, (err) => {
-      console.warn('presence snapshot error:', err.message);
-    });
-
-    const cleanup = () => {
-      try { presenceRef.delete().catch(() => {}); } catch (e) {}
-    };
-    const onUnload = () => cleanup();
-    window.addEventListener('beforeunload', onUnload);
-    window.addEventListener('pagehide', onUnload);
-
-    return () => {
-      clearInterval(heartbeatInterval);
-      clearInterval(recountInterval);
-      unsubscribe();
-      cleanup();
-      window.removeEventListener('beforeunload', onUnload);
-      window.removeEventListener('pagehide', onUnload);
-    };
-  }, [connectionStatus, roomKey]);
-
-  return { onlineCount: onlineMembers.length, onlineMembers };
-}
-
-// =============================================================================
-// useBoardSync: 画面上部の掲示板。rooms/{roomKey}/board コレクションを
-// 購読、接続中はリアルタイム同期、ローカル時は localStorage を使う。
-// =============================================================================
-function useBoardSync(connectionStatus, roomKey, cloudConfigured, operationScope) {
-  const [posts, setPosts] = useState([]);
-  const unsubRef = useRef(null);
-  const boardNotifyReadyRef = useRef(false); // v3.24: 初回スナップショットでは通知しないための判定用
-  // v3.16: 削除済み投稿の履歴（ルーム単位・端末ごとに保存）。誰が・いつ削除したかも保持する。
-  const [deletedHistory, setDeletedHistory] = useState(() => { try { return JSON.parse(localStorage.getItem('board_deleted_history_' + roomKey) || '[]'); } catch (e) { return []; } });
-  // v3.16: 自分の画面で非表示にした投稿の履歴（この端末専用）。
-  const [hiddenHistory, setHiddenHistory] = useState(() => { try { return JSON.parse(localStorage.getItem('board_hidden_history_' + roomKey) || '[]'); } catch (e) { return []; } });
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('local_board_' + roomKey);
-      const __seedKey = 'board_seeded_' + roomKey; const __existing = stored ? JSON.parse(stored) : []; if (!localStorage.getItem(__seedKey)) { const __seed = { id: 'seed-init-' + roomKey + '-' + Date.now(), author: '加藤俊', message: '初期設定：この画面を開いたら次の設定をお願いします。\n１　メッセージで一緒に送られたファイルダウンロードする。\n２　環境設定を開く。\n３　ダウンロードしたファイルを点線で囲まれた configs・・・・・のようなところにドラッグアンドドロップする。', createdAt: Date.now() }; const __merged = [__seed, ...__existing].slice(0, 50); try { localStorage.setItem('local_board_' + roomKey, JSON.stringify(__merged)); localStorage.setItem(__seedKey, '1'); } catch (e) {} setPosts(__merged); } else { setPosts(__existing); }
-    } catch (e) { setPosts([]); }
-
-    if (connectionStatus === 'connected' && window.firebase) {
-      const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
-      const ref = db.collection('rooms').doc(roomKey).collection('board').orderBy('createdAt', 'desc').limit(50);
-      if (unsubRef.current) unsubRef.current();
-      boardNotifyReadyRef.current = false; // v3.24: 購読(再)開始時にリセット
-      unsubRef.current = ref.onSnapshot((snap) => {
-        const list = [];
-        snap.forEach((d) => list.push({ id: d.id, ...d.data() }));
-        setPosts(list);
-        // v3.24: 初回以降の「他の人による新規投稿」をデスクトップ通知する。
-        //   自分の投稿（hasPendingWrites／author が自分）とキャッシュ由来のスナップショットは通知しない。
-        if (!boardNotifyReadyRef.current) {
-          boardNotifyReadyRef.current = true;
-        } else if (!snap.metadata.hasPendingWrites && !snap.metadata.fromCache) {
-          const myName = (() => { try { return (localStorage.getItem('my_teacher_name') || '').trim(); } catch (e) { return ''; } })();
-          snap.docChanges().forEach((ch) => {
-            if (ch.type !== 'added') return;
-            const p = ch.doc.data() || {};
-            const author = String(p.author || '匿名');
-            if (myName && author === myName) return; // 自分の投稿は通知しない
-            showDesktopNotification('📢 掲示板に新しい投稿：' + author, String(p.message || ''), 'board-' + ch.doc.id);
-          });
-        }
-      }, (err) => { console.warn('board snapshot:', err.message); });
-    }
-
-    return () => { if (unsubRef.current) { unsubRef.current(); unsubRef.current = null; } };
-  }, [connectionStatus, roomKey]);
-
-  const addPost = async (author, message) => {
-    if ((cloudConfigured || cloudWriteGate.configured) && (!cloudConfigured || !canWriteCloud(operationScope))) { window.alert('クラウドの最新データ確認前は、掲示板の投稿・削除はできません。'); return false; }
-    if (connectionStatus === 'connected' && window.firebase) {
-      try {
-        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
-        await db.collection('rooms').doc(roomKey).collection('board').add({ author: author || '匿名', message, createdAt: window.firebase.firestore.FieldValue.serverTimestamp() });
-        return;
-      } catch (e) { window.alert('投稿を保存できませんでした: ' + e.message); return false; }
-    }
-    setPosts((prev) => {
-      const next = [{ id: 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6), author: author || '匿名', message, createdAt: Date.now() }, ...prev];
-      try { localStorage.setItem('local_board_' + roomKey, JSON.stringify(next.slice(0, 50))); } catch (e) {}
-      return next.slice(0, 50);
-    });
-  };
-
-  // v3.16: 削除前に投稿スナップショットを履歴へ保存し、誰がいつ削除したかも記録する。
-  const deletePost = async (postId, deletedBy) => {
-    if ((cloudConfigured || cloudWriteGate.configured) && (!cloudConfigured || !canWriteCloud(operationScope))) { window.alert('クラウドの最新データ確認前は、掲示板の投稿・削除はできません。'); return false; }
-    const snap = posts.find((p) => p.id === postId);
-    if (snap) {
-      const ts = snap.createdAt;
-      const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0);
-      const entry = { id: snap.id, author: snap.author || '匿名', message: snap.message || '', createdAt: ms || Date.now(), deletedAt: Date.now(), deletedBy: deletedBy || '匿名' };
-      setDeletedHistory((prev) => { const next = [entry, ...prev.filter((h) => h.id !== postId)].slice(0, 200); try { localStorage.setItem('board_deleted_history_' + roomKey, JSON.stringify(next)); } catch (e) {} return next; });
-    }
-    if (connectionStatus === 'connected' && window.firebase && !String(postId).startsWith('local-')) {
-      try {
-        const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
-        await db.collection('rooms').doc(roomKey).collection('board').doc(postId).delete();
-        return;
-      } catch (e) { window.alert('投稿を削除できませんでした: ' + e.message); return false; }
-    }
-    setPosts((prev) => {
-      const next = prev.filter((p) => p.id !== postId);
-      try { localStorage.setItem('local_board_' + roomKey, JSON.stringify(next)); } catch (e) {}
-      return next;
-    });
-  };
-
-  const [hiddenIds, setHiddenIds] = useState(() => { try { const v = localStorage.getItem('board_hidden_' + roomKey); return new Set(v ? JSON.parse(v) : []); } catch (e) { return new Set(); } });
-  useEffect(() => {
-    try { const v = localStorage.getItem('board_hidden_' + roomKey); setHiddenIds(new Set(v ? JSON.parse(v) : [])); } catch (e) { setHiddenIds(new Set()); }
-    try { setDeletedHistory(JSON.parse(localStorage.getItem('board_deleted_history_' + roomKey) || '[]')); } catch (e) { setDeletedHistory([]); }
-    try { setHiddenHistory(JSON.parse(localStorage.getItem('board_hidden_history_' + roomKey) || '[]')); } catch (e) { setHiddenHistory([]); }
-  }, [roomKey]);
-  // v3.16: 非表示にした投稿のスナップショットを履歴へ保存（端末ごと）。
-  const hidePost = (postId) => {
-    const snap = posts.find((p) => p.id === postId);
-    if (snap) {
-      const ts = snap.createdAt;
-      const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0);
-      const entry = { id: snap.id, author: snap.author || '匿名', message: snap.message || '', createdAt: ms || Date.now(), hiddenAt: Date.now() };
-      setHiddenHistory((prev) => { const next = [entry, ...prev.filter((h) => h.id !== postId)].slice(0, 200); try { localStorage.setItem('board_hidden_history_' + roomKey, JSON.stringify(next)); } catch (e) {} return next; });
-    }
-    setHiddenIds((prev) => { const next = new Set(prev); next.add(postId); try { localStorage.setItem('board_hidden_' + roomKey, JSON.stringify(Array.from(next))); } catch (e) {} return next; });
-  };
-  // v3.16: 非表示にした投稿を自分の画面に再表示する。
-  const restoreHiddenPost = (postId) => {
-    setHiddenIds((prev) => { const next = new Set(prev); next.delete(postId); try { localStorage.setItem('board_hidden_' + roomKey, JSON.stringify(Array.from(next))); } catch (e) {} return next; });
-    setHiddenHistory((prev) => { const next = prev.filter((h) => h.id !== postId); try { localStorage.setItem('board_hidden_history_' + roomKey, JSON.stringify(next)); } catch (e) {} return next; });
-  };
-  const clearDeletedHistory = () => { setDeletedHistory([]); try { localStorage.removeItem('board_deleted_history_' + roomKey); } catch (e) {} };
-  const clearHiddenHistory = () => { setHiddenHistory([]); try { localStorage.removeItem('board_hidden_history_' + roomKey); } catch (e) {} };
-  const visiblePosts = posts.filter((p) => !hiddenIds.has(p.id));
-
-  return { posts: visiblePosts, addPost, deletePost, hidePost, deletedHistory, hiddenHistory, restoreHiddenPost, clearDeletedHistory, clearHiddenHistory };
-}
-
 // v3.27.0: 既存のステータスを移行せずにワークフローとして表示する。
 const WORKFLOW_LOCKABLE_FIELDS = ['phoneStatus', 'greetingStatus', 'giftStatus', 'studentThankYouStatus'];
 const workflowExemptions = (s) => Array.isArray(s.workflowExemptions) ? s.workflowExemptions : [];
@@ -1404,7 +1152,7 @@ const getWorkflowDates = (student, task) => {
   const field = {phone:'phoneDate',doc:'docDate',greeting:'greetingDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'}[task.key];
   return field && workflowDayKey(student[field]) ? [student[field]] : [];
 };
-// v3.37.0: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
+// v3.38.1: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
 const getWorkflowPlan = (student, task) => {
   if (task.state === 'exempt') return null;
   const days = [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
@@ -1424,7 +1172,7 @@ const getWorkflowPlan = (student, task) => {
   return null;
 };
 
-// v3.37.0: 完了記録の表示と、日付マスからの直接追加。
+// v3.38.1: 完了記録の表示と、日付マスからの直接追加。
 const workflowCompletion = (student, task) => {
   if (task.state !== 'done' || task.key === 'dates') return null;
   const fields={phone:'phoneDate',doc:'docDate',greeting:'greetingCompletedDate',gift:'giftCompletedDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'};
@@ -1459,7 +1207,7 @@ function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, read
   const days=Array.from({length:31},(_,i)=>shiftWorkflowDay(start,i)),end=days.at(-1);
   const rangeLabel=`${start.slice(0,4)}年 ${Number(start.slice(5,7))}/${Number(start.slice(8))}〜${start.slice(0,4)!==end.slice(0,4)?end.slice(0,4)+'年 ':''}${Number(end.slice(5,7))}/${Number(end.slice(8))}`;
   const tasks=model.phases.flatMap(phase=>phase.tasks.map(task=>({...task,phase:phase.title})));
-  const stateText={done:'完了',todo:'未完了',unknown:'要確認',scheduled:'予定',exempt:'必要なし',deferred:'終了後'};
+  const stateText={done:'完了',todo:'未完了',unknown:'要確認',scheduled:'予定',exempt:'対象外',deferred:'終了後'};
   return <section className="gs-schedule" aria-label="業務工程表">
     <div className="gs-toolbar"><div><h3>業務工程表</h3><p>31日間表示・下のスライダーで日付移動・ダブルクリックで予定追加</p></div><div className="gs-navigation"><button type="button" aria-label="工程表を前月へ" onClick={()=>shiftMonth(-1)}>‹</button><strong aria-live="polite">{rangeLabel}</strong><button type="button" aria-label="工程表を翌月へ" onClick={()=>shiftMonth(1)}>›</button><button type="button" onClick={()=>setCenter(getTodayString())}>今日へ</button><button type="button" onClick={()=>setCenter(initial)}>実施日へ</button><button type="button" disabled={readOnly} onClick={()=>onQuickAdd(getTodayString(),'patrol')}>＋ 予定追加</button></div></div>
     <div ref={scheduleScrollRef} className="gs-scroll" tabIndex={0} role="region" aria-label="工程表。狭い画面では左右にスクロールできます">
@@ -1472,7 +1220,7 @@ function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, read
           const fullBanner=!!completion||task.state==='exempt'||(task.state==='todo'&&!plan);
           const shortTitle={doc:'保護者お知らせ',greeting:'事前あいさつ・打合せ',dates:'現場実習・見学',patrol:'巡回・同行',studentThankYou:'生徒お礼状',teacherThankYou:'教師お礼状',phone:'事前電話',gift:'菓子折'}[task.key];
           const cells=[];
-          if(fullBanner){const text=completion?.label||(task.state==='exempt'?'必要なし':'未完了');cells.push(<td key="banner" colSpan={days.length} data-gs-date-start={days[0]} data-gs-date-count={days.length} className={`gs-banner-cell gs-banner-${task.state} ${completion?'gs-completed-cell':''}`} style={{'--gs-month-days':days.length,backgroundImage:workflowCalendarFill(start,days.length)}}><button type="button" className={`gs-row-banner ${completion?'gs-completed-banner':''}`} aria-label={`${task.title}：${text}。押して編集`} onClick={e=>selectCell(e,task.key)}><span className="gs-banner-text">{text}</span></button></td>);}
+          if(fullBanner){const text=completion?.label||(task.state==='exempt'?'対象外':'未完了');cells.push(<td key="banner" colSpan={days.length} data-gs-date-start={days[0]} data-gs-date-count={days.length} className={`gs-banner-cell gs-banner-${task.state} ${completion?'gs-completed-cell':''}`} style={{'--gs-month-days':days.length,backgroundImage:workflowCalendarFill(start,days.length)}}><button type="button" className={`gs-row-banner ${completion?'gs-completed-banner':''}`} aria-label={`${task.title}：${text}。押して編集`} onClick={e=>selectCell(e,task.key)}>{task.state!=='exempt'&&<span className="gs-banner-text">{text}</span>}</button></td>);}
           else for(let i=0;i<days.length;i++){
             const day=days[i],dow=new Date(day+'T12:00:00Z').getUTCDay();
             if(plan&&dates.includes(day)){
@@ -2192,7 +1940,7 @@ function AppUtilityDialog({ title, onClose, children, wide = false, suspended = 
   return <div className="sb-utility-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`sb-utility-dialog ${wide ? 'sb-board-dialog' : ''} ${className}`}><header><h2>{title}</h2><button type="button" className="sb-icon-button" aria-label={`${title}を閉じる`} onClick={onClose}>×</button></header><div className="sb-utility-body">{children}</div></section></div>;
 }
 
-// v3.37.0: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
+// v3.38.1: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
 const WORKFLOW_OVERVIEW_COLUMNS=[
   {key:'phone',title:'事前電話連絡'}, {key:'doc',title:'保護者お知らせ'},
   {key:'greeting',title:'事前あいさつ・打合せ'}, {key:'gift',title:'菓子折'},
@@ -2258,15 +2006,15 @@ function WorkflowOverview({students,period,filters,onFilters,onOpenStudent,isAdm
       <table className="ow-table"><caption className="ow-sr-only">{period.name}の生徒別業務進捗一覧</caption><thead><tr><th scope="col" className="ow-person">生徒・実習先<span>学級／担当教員</span></th>{WORKFLOW_OVERVIEW_COLUMNS.map(c=><th key={c.key} scope="col">{c.key==='greeting'?<>事前あいさつ<br/>・打合せ</>:c.title}</th>)}</tr></thead>
       <tbody>{rows.map(({student:s,model,tasks})=><tr key={s.id} data-ow-student={s.id}><th scope="row" className="ow-person student-identity-color" style={studentIdentityStyle(s)} data-identity-grade={s.grade||'unset'} data-identity-type={s.internshipType==='observation'?'observation':'internship'}><button type="button" className="ow-person-button" aria-label={`${s.name||'氏名未設定'}のワークフローを開く`} onClick={()=>open(s,null)}><strong>{s.name||'氏名未設定'}（{s.location||'実習先未設定'}）</strong><span>{s.grade?(s.grade==='other'?'他':s.grade+'年'):'学年未設定'}{s.classVal?' '+s.classVal+'組':''} · {s.teacher||'担当未設定'}</span><small className={s.internshipType==='observation'?'ow-observation':'ow-internship'}>{s.internshipType==='observation'?'見学':'実習'}</small></button></th>{WORKFLOW_OVERVIEW_COLUMNS.map(c=>{
         const task=tasks.find(t=>t.key===c.key),plan=getWorkflowPlan(s,task),completion=workflowCompletion(s,task);
-        const state=task.state!=='done'&&plan?.kind==='thanks'?'scheduled':task.state;
-        const label=task.state==='unknown'&&task.key!=='dates'?'要確認':task.state==='deferred'&&!plan?'終了後に対応':task.state==='exempt'?'必要なし':task.key==='gift'&&task.state==='todo'?'持参待ち':plan?.kind==='thanks'&&task.state!=='done'?'送付予定':task.key==='dates'?(model.finished?'期間終了':model.started?'実施中':model.days.length?'実施予定':'日程未設定'):task.key==='patrol'&&task.state==='scheduled'?'予定あり':task.label;
+        const state=task.state==='exempt'?'exempt':task.state!=='done'&&plan?.kind==='thanks'?'scheduled':task.state;
+        const label=task.state==='unknown'&&task.key!=='dates'?'要確認':task.state==='deferred'&&!plan?'終了後に対応':task.state==='exempt'?'対象外':task.key==='gift'&&task.state==='todo'?'持参待ち':plan?.kind==='thanks'&&task.state!=='done'?'送付予定':task.key==='dates'?(model.finished?'期間終了':model.started?'実施中':model.days.length?'実施予定':'日程未設定'):task.key==='patrol'&&task.state==='scheduled'?'予定あり':task.label;
         let sub='';if(completion)sub=completion.date?formatShortDate(completion.date):'実施日未設定';else if(c.key==='dates'&&model.days.length)sub=formatShortDate(model.days[0])+(model.days.length>1?'〜'+formatShortDate(model.days.at(-1)):'');else if(c.key==='greeting'&&s.greetingDate)sub=formatShortDate(s.greetingDate);else if(c.key==='patrol'&&(s.patrols||[]).length){const ps=(s.patrols||[]).filter(p=>!p.done).map(p=>p.date).filter(workflowDayKey).sort();sub=ps[0]?formatShortDate(ps[0]):'';}else if(plan?.dates?.length)sub=formatShortDate(plan.dates[0])+(plan.dates.length>1?'〜'+formatShortDate(plan.dates.at(-1)):'');
         const locked=!!period.locked&&!isAdmin||!isAdmin&&((s.lockedFields||[]).includes(task.field)||(c.key==='patrol'&&(s.lockedFields||[]).includes('patrolStatus')));
-        return <td key={c.key}><button type="button" className={`ow-cell ow-${state}`} aria-label={`${s.name||'氏名未設定'}：${c.title}（${label}）を開く`} onClick={()=>open(s,c.key)}><WorkflowBadge state={state}>{label}</WorkflowBadge>{sub&&<span className="ow-cell-date">{sub}</span>}{locked&&<span className="ow-lock">🔒 閲覧のみ</span>}</button></td>;
+        return <td key={c.key} className={state==='exempt'?'ow-exempt-cell':undefined}><button type="button" className={`ow-cell ow-${state}`} aria-label={`${s.name||'氏名未設定'}：${c.title}（${label}）を開く`} onClick={()=>open(s,c.key)}>{state==='exempt'?<span className="ow-sr-only">対象外</span>:<><WorkflowBadge state={state}>{label}</WorkflowBadge>{sub&&<span className="ow-cell-date">{sub}</span>}</>}{locked&&<span className="ow-lock">🔒 閲覧のみ</span>}</button></td>;
       })}</tr>)}</tbody></table>
       {!rows.length&&<div className="ow-empty" role="status">{students.length?'条件に一致する生徒はいません。絞り込みを解除してください。':'この実習期には生徒が登録されていません。'}</div>}
     </div>
-    <footer className="ow-footer"><div className="ow-legend" title="状態を押して確認・編集。左右にスクロールして全業務を確認できます。未完了は予定・要確認を含み、終了後対応は除きます。"><span className="ow-legend-help">状態を押して編集</span><span>✓ 完了</span><span>○ 未完了</span><span>◷ 予定</span><span>? 要確認</span><span>— 必要なし</span></div></footer>
+    <footer className="ow-footer"><div className="ow-legend" title="状態を押して確認・編集。左右にスクロールして全業務を確認できます。未完了は予定・要確認を含み、終了後対応は除きます。"><span className="ow-legend-help">状態を押して編集</span><span>✓ 完了</span><span>○ 未完了</span><span>◷ 予定</span><span>? 要確認</span><span><i className="exempt-legend-swatch" aria-hidden="true"/> 対象外</span></div></footer>
   </div></section>;
 }
 
@@ -2277,7 +2025,7 @@ const chooseActivePeriod=(list,preferred)=>{
   return list.reduce((latest,p)=>!latest||Number(p.createdAtClient||0)>=Number(latest.createdAtClient||0)?p:latest,null)?.id||DEFAULT_PERIOD_ID;
 };
 
-// v3.37.0: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
+// v3.38.1: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
 const readWorkflowPage = () => {
   if (!location.hash.startsWith('#workflow?')) return null;
   const q = new URLSearchParams(location.hash.slice('#workflow?'.length));
@@ -2285,7 +2033,7 @@ const readWorkflowPage = () => {
   const valid = [student, room, period].every(v => v.length > 0 && v.length <= 512 && !v.includes('/') && !/[\x00-\x1f]/.test(v));
   return { student, room, period, project: q.get('project') || '', invalid: !valid };
 };
-// v3.37.0: in-memory popup drafts. No draft is persisted or automatically replayed.
+// v3.38.1: in-memory popup drafts. No draft is persisted or automatically replayed.
 const cloneWorkflowDraft = value => JSON.parse(JSON.stringify(value));
 const workflowComparable = value => {
   if (value === undefined) return null;
@@ -2315,6 +2063,13 @@ const assertWorkflowCommit = (draft, latest, patch, isAdmin, periodLocked) => {
     }
     if (patch.patrols && (locked.includes('patrolStatus') || (latest.patrols||[]).some(p=>locked.includes('patrol:'+p.id) && !sameWorkflowValue(p,patch.patrols.find(n=>n.id===p.id))))) throw Error('巡回・同行が管理者によってロックされています。');
   }
+};
+
+// v3.38.1: all views share one period-scoped, already-fetched snapshot.
+// This helper never performs I/O. Each popup retains the opening snapshot and clones only its edited row.
+const buildSharedStudentSnapshot=(scope,rows)=>{
+ const byId=new Map(rows.map(row=>[row.id,row])),periods=new Map();
+ return {scope,rows,byId,forPeriod(periodId){if(!periods.has(periodId))periods.set(periodId,rows.filter(row=>(row.periodId||DEFAULT_PERIOD_ID)===periodId));return periods.get(periodId);}};
 };
 
 function App() {
@@ -2348,11 +2103,22 @@ function App() {
   const [roomSwitchError, setRoomSwitchError] = useState('');
   const [myTeacherName, setMyTeacherName] = useState(() => localStorage.getItem('my_teacher_name') || '');
 
+  const [periods, setPeriods] = useState(()=>readLocalPeriods(roomKey));
+  const [activePeriodId, setActivePeriodIdState] = useState(()=>chooseActivePeriod(readLocalPeriods(roomKey),workflowPage?.period || readPeriodSelection(roomKey)));
+  const periodChoiceRef=useRef({room:roomKey,id:workflowPage?.period || readPeriodSelection(roomKey)});
+  const setActivePeriodId=useCallback((id)=>{
+    periodChoiceRef.current={room:roomKey,id};
+    setActivePeriodIdState(id);
+    if (!workflowPage) { try{localStorage.setItem(`active_internship_period${ENV_SUFFIX}_${roomKey}`,id);}catch{} }
+  },[roomKey]);
   const configuredProject = (() => { try { return JSON.parse(firebaseConfigStr || '{}').projectId || ''; } catch { return ''; } })();
   const workflowConfigMismatch = !!(workflowPage?.project && workflowPage.project !== configuredProject);
-  const { students: cloudStudents, setStudents, isLoading, setIsLoading, connectionStatus, connectionError, cloudReadOnly, cloudConfigured, cachedPeriods, cacheSavedAt, cacheNotice, cacheEnabled, pendingWrites, clearTemporaryCache, retryConnection, cloudScopeKey } =
-    useFirestoreSync(workflowConfigMismatch || workflowPage?.invalid ? '' : firebaseConfigStr, roomKey);
-  const students = useMemo(()=>workflowDraft ? workflowDraft.roster.map(s=>s.id===workflowDraft.base.id?workflowDraft.value:s) : cloudStudents,[workflowDraft,cloudStudents]);
+  const { students: cloudStudents, setStudents, isLoading, setIsLoading, connectionStatus, connectionError, cloudReadOnly, cloudConfigured, cachedPeriods, cacheSavedAt, cacheNotice, cacheEnabled, pendingWrites, clearTemporaryCache, retryConnection, cloudScopeKey, loadLegacyStudents, legacyLoading, applyCommittedPatch } =
+    useFirestoreSync(workflowConfigMismatch || workflowPage?.invalid ? '' : firebaseConfigStr, roomKey,periodChoiceRef.current.room===roomKey?activePeriodId:(workflowPage?.period||readPeriodSelection(roomKey)||DEFAULT_PERIOD_ID));
+  const sharedStudentData=useMemo(()=>buildSharedStudentSnapshot(cloudScopeKey,cloudStudents),[cloudScopeKey,cloudStudents]);
+  // While editing, incoming snapshots remain available for safety checks but do not rebuild the displayed draft.
+  const displayStudentData=useMemo(()=>workflowDraft?buildSharedStudentSnapshot(workflowDraft.scope,workflowDraft.roster.map(s=>s.id===workflowDraft.base.id?workflowDraft.value:s)):sharedStudentData,[workflowDraft,workflowDraft?null:sharedStudentData]);
+  const students=displayStudentData.rows;
   const { history, redo, push: pushHistory, popUndo, popRedo, clear: clearHistory } = useHistory(10);
   const { alertState, confirmState, showAlert, showConfirm, closeAlert } = useDialog();
   const requireWriteAccess = () => {
@@ -2370,14 +2136,6 @@ function App() {
 
 
   // v3.25: 実習期（前期・後期・年度別など）をルーム内で共有する。
-  const [periods, setPeriods] = useState(()=>readLocalPeriods(roomKey));
-  const [activePeriodId, setActivePeriodIdState] = useState(()=>chooseActivePeriod(readLocalPeriods(roomKey),workflowPage?.period || readPeriodSelection(roomKey)));
-  const periodChoiceRef=useRef({room:roomKey,id:workflowPage?.period || readPeriodSelection(roomKey)});
-  const setActivePeriodId=useCallback((id)=>{
-    periodChoiceRef.current={room:roomKey,id};
-    setActivePeriodIdState(id);
-    if (!workflowPage) { try{localStorage.setItem(`active_internship_period${ENV_SUFFIX}_${roomKey}`,id);}catch{} }
-  },[roomKey]);
   const [isPeriodManagerOpen, setIsPeriodManagerOpen] = useState(false);
   const [newPeriodName, setNewPeriodName] = useState('2026年度 後期');
   const [copyPreviousRoster, setCopyPreviousRoster] = useState(true);
@@ -2391,19 +2149,14 @@ function App() {
       if (!active) return;
       const map = new Map([[DEFAULT_PERIOD_ID, { ...DEFAULT_PERIOD }]]);
       source.forEach((p) => map.set(p.id, { ...p }));
+      if(periodChoiceRef.current.id&&!map.has(periodChoiceRef.current.id))map.set(periodChoiceRef.current.id,{id:periodChoiceRef.current.id,name:'実習期を確認中',locked:true});
       const list = Array.from(map.values()).sort((a,b) => (a.createdAtClient || 0) - (b.createdAtClient || 0));
-      setPeriods(list); setActivePeriodIdState(chooseActivePeriod(list, periodChoiceRef.current.id));
+      setPeriods(list); setActivePeriodIdState((periodChoiceRef.current.id || DEFAULT_PERIOD_ID));
     };
     if (!cloudConfigured) apply(readLocalPeriods(roomKey));
     else {
       apply(cachedPeriods);
-      if (connectionStatus === 'connected' && window.firebase) {
-        // Legacy metadata is read-only. Never auto-upload old/local metadata.
-        guardedFirestore(window.firebase.app().firestore(), roomKey).collection('rooms').doc(roomKey).collection('periods').get({ source: 'server' }).then((snap) => {
-          const legacy = []; snap.forEach(d => legacy.push({ ...d.data(), id: d.id }));
-          apply([...legacy, ...cachedPeriods]);
-        }).catch(() => {});
-      }
+
     }
     return () => { active = false; };
   }, [roomKey, cloudConfigured, cachedPeriods, connectionStatus, cloudScopeKey]);
@@ -2422,14 +2175,6 @@ function App() {
 
   // GitHub Pages / 端末保存時の自動削除リスクを下げる。
   useEffect(() => { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); }, []);
-  const { onlineCount, onlineMembers } = usePresence(connectionStatus, roomKey, myTeacherName);
-  const { posts: boardPosts, addPost: addBoardPost, deletePost: deleteBoardPost, hidePost: hideBoardPost, deletedHistory: boardDeletedHistory, hiddenHistory: boardHiddenHistory, restoreHiddenPost: restoreHiddenBoardPost, clearDeletedHistory: clearBoardDeletedHistory, clearHiddenHistory: clearBoardHiddenHistory } = useBoardSync(connectionStatus, roomKey, cloudConfigured, cloudScopeKey);
-  // v3.16: 掲示板の履歴モーダル開閉と表示タブ（'deleted' | 'hidden'）
-  const [isBoardHistoryOpen, setIsBoardHistoryOpen] = useState(false);
-  const [boardHistoryTab, setBoardHistoryTab] = useState('deleted');
-  const [boardInput, setBoardInput] = useState('');
-  const [isBoardOpen, setIsBoardOpen] = useState(true);
-  const [isOnlineListOpen, setIsOnlineListOpen] = useState(false);
   // v3.6: 接続した各端末で「編集者名」を個別に入力してもらうためのモーダル状態
   const [isNamePromptOpen, setIsNamePromptOpen] = useState(false);
   const [tempTeacherName, setTempTeacherName] = useState('');
@@ -2458,12 +2203,12 @@ function App() {
     }
     try { localStorage.setItem(NOTIFY_ENABLED_KEY, '1'); } catch (e) {}
     setNotifyEnabled(true);
-    try { new Notification('🔔 デスクトップ通知はオンです', { body: '掲示板の新規投稿や生徒データの更新をお知らせします（この画面を開いている間のみ）。' }); } catch (e) {}
+    try { new Notification('🔔 デスクトップ通知はオンです', { body: '選択中の実習期の生徒データの更新をお知らせします（この画面を開いている間のみ）。' }); } catch (e) {}
   };
 
   const activePeriod = periods.find((p) => p.id === activePeriodId) || periods[0] || DEFAULT_PERIOD;
   const isActivePeriodLocked = !!activePeriod.locked;
-  const activeStudents = useMemo(() => students.filter((s) => (s.periodId || DEFAULT_PERIOD_ID) === activePeriodId), [students, activePeriodId]);
+  const activeStudents = displayStudentData.forPeriod(activePeriodId);
 
   const todayTargetDate = getTodayString();
   const todayTargets = useMemo(() => students
@@ -2494,9 +2239,9 @@ function App() {
   const setSelectedStudentDetail = (student) => {
     if (!student) {workflowDraftRef.current=null;setWorkflowDraft(null);setSelectedStudentDetailState(null);return;}
     if (workflowDraftRef.current) return;
-    const base=cloneWorkflowDraft(student);
+    const base=cloneWorkflowDraft(sharedStudentData.byId.get(student.id)||student);
     const period=periods.find(p=>p.id===(base.periodId||DEFAULT_PERIOD_ID));
-    const draft={token:'draft-'+Date.now()+'-'+Math.random().toString(36).slice(2),base,value:cloneWorkflowDraft(base),roster:cloneWorkflowDraft(cloudStudents),scope:cloudScopeKey,room:roomKey,initialReadOnly:cloudReadOnly || (!!period?.locked&&!isAdmin)};
+    const draft={token:'draft-'+Date.now()+'-'+Math.random().toString(36).slice(2),base,value:cloneWorkflowDraft(base),roster:sharedStudentData.rows,scope:cloudScopeKey,room:roomKey,initialReadOnly:cloudReadOnly || (!!period?.locked&&!isAdmin)};
     workflowDraftRef.current=draft;setWorkflowDraft(draft);setSelectedStudentDetailState(base);
   };
   const stageWorkflowPatch = (studentId,partial) => {
@@ -2525,7 +2270,7 @@ function App() {
     setTimeout(() => setWorkflowCloseNotice(true), 100);
   };
   const [workflowCloseNotice, setWorkflowCloseNotice] = useState(false);
-  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.37.0'; }, [workflowPage]);
+  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.38.1'; }, [workflowPage]);
   const finishWorkflowClose = () => {
     workflowDraftRef.current=null; setWorkflowDraft(null); setSelectedStudentDetailState(null);
     setWorkflowInitialTask(null); if(workflowReturnToOverview)setCurrentView('workflow'); setWorkflowReturnToOverview(false);
@@ -2557,7 +2302,7 @@ function App() {
           assertWorkflowCommit(draft,latest,patch,isAdmin,locked);
           requireCloudWrite(draft.scope,rawStudent.path);
           transaction.update(rawStudent,patch);
-        });
+        }, {maxAttempts:1});
       } else {
         // Read the current local store, not the frozen popup roster, to preserve unrelated changes.
         const local=JSON.parse(localStorage.getItem(`local_students_${roomKey}`)||'[]');
@@ -2568,12 +2313,14 @@ function App() {
         const next=local.map(s=>s.id===draft.base.id?{...s,...patch}:s);
         localStorage.setItem(`local_students_${roomKey}`,JSON.stringify(next));setStudents(next);
       }
+      applyCommittedPatch(draft.base.id,patch);
       const before=Object.fromEntries(Object.keys(patch).map(key=>[key,draft.base[key]??'']));
       pushHistory({kind:'update',studentId:draft.base.id,before,after:patch});
       try { window.__bumpVisitorEditCount?.(1); } catch {}
       finishWorkflowClose();
     } catch (error) {
-      showAlert('保存できませんでした。下書きはポップアップ内に残しています。\n'+(error.message||'接続を確認してください。'));
+      pauseTelemetryOnQuota(error,draft.scope);
+      showAlert(workflowSaveErrorText(error,cloudConfigured));
     } finally { workflowSavingRef.current=false;setWorkflowSaving(false); }
   };
   const discardWorkflowDetail = () => {
@@ -2697,180 +2444,31 @@ function App() {
   const [adminSetupNewPw, setAdminSetupNewPw] = useState('');
   const [adminSetupNewPw2, setAdminSetupNewPw2] = useState('');
 
-  // v3.9: 今日の訪問者履歴（編集者名を設定して開いた人だけを記録）
-  const [todayVisitors, setTodayVisitors] = useState({});
-  const [isTodayVisitorsOpen, setIsTodayVisitorsOpen] = useState(false);
-
-  // v3.13: ルーム登録者一覧（全期間）。teacherName を key とし、
-  //   { firstSeenAt, lastSeenAt, editCount, lastDateKey } を保持する。
-  //   visitors コレクション全体（dateKey フィルタなし）を購読し、
-  //   ローカルモードでは local_visitors_<rk>_* のキーを全期間スキャンして統合する。
-  const [allMembers, setAllMembers] = useState({});
-
-  // v3.9: 訪問者ハートビート + 購読。名前 + 最終接続時刻 + 編集件数を rooms/{rk}/visitors に保存。ローカルモードは localStorage。
-  useEffect(() => {
-    const todayKey = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
-    const rk = roomKey || '3-1';
-    const lsKey = `local_visitors_${rk}_${todayKey}`;
-    const fbConnected = connectionStatus === 'connected' && window.firebase;
-
-    // 編集件数を +n するグローバルヘルパー。recordUpdate / recordCreate / recordDelete から呼ぶ。
-    window.__bumpVisitorEditCount = async (n = 1) => {
-      if (!myTeacherName) return;
-      try {
-        if (fbConnected) {
-          const db = guardedFirestore(window.firebase.firestore(), roomKey);
-          await db.collection('rooms').doc(rk).collection('visitors').doc(`${todayKey}_${myTeacherName}`).set({ teacherName: myTeacherName, dateKey: todayKey, editCount: window.firebase.firestore.FieldValue.increment(n), lastSeenAt: Date.now() }, { merge: true });
-        } else {
-          const cur = JSON.parse(localStorage.getItem(lsKey) || '{}');
-          if (!cur[myTeacherName]) cur[myTeacherName] = { firstSeenAt: Date.now(), lastSeenAt: Date.now(), editCount: 0 };
-          cur[myTeacherName].editCount = (cur[myTeacherName].editCount || 0) + n;
-          cur[myTeacherName].lastSeenAt = Date.now();
-          localStorage.setItem(lsKey, JSON.stringify(cur));
-          setTodayVisitors({ ...cur });
-        }
-      } catch (e) { /* ignore */ }
-    };
-
-    let unsubscribe = null;
-    let hbTimer = null;
-    if (fbConnected) {
-      const visitorsRef = guardedFirestore(window.firebase.firestore(), roomKey).collection('rooms').doc(rk).collection('visitors');
-      unsubscribe = visitorsRef.where('dateKey', '==', todayKey).onSnapshot((snap) => {
-        const next = {};
-        snap.forEach((d) => { const v = d.data(); if (v && v.teacherName) next[v.teacherName] = { firstSeenAt: v.firstSeenAt || 0, lastSeenAt: v.lastSeenAt || 0, editCount: v.editCount || 0 }; });
-        setTodayVisitors(next);
-      }, () => {});
-      if (myTeacherName) {
-        const beat = async () => {
-          try {
-            const ref = visitorsRef.doc(`${todayKey}_${myTeacherName}`);
-            const snap = await ref.get();
-            if (!snap.exists) await ref.set({ teacherName: myTeacherName, dateKey: todayKey, firstSeenAt: Date.now(), lastSeenAt: Date.now(), editCount: 0 });
-            else await ref.update({ lastSeenAt: Date.now() });
-          } catch (e) { /* ignore */ }
-        };
-        beat();
-        hbTimer = setInterval(beat, 25000);
-      }
-    } else {
-      try { setTodayVisitors(JSON.parse(localStorage.getItem(lsKey) || '{}')); } catch (e) { setTodayVisitors({}); }
-      if (myTeacherName) {
-        const beat = () => {
-          try {
-            const cur = JSON.parse(localStorage.getItem(lsKey) || '{}');
-            if (!cur[myTeacherName]) cur[myTeacherName] = { firstSeenAt: Date.now(), lastSeenAt: Date.now(), editCount: 0 };
-            else cur[myTeacherName].lastSeenAt = Date.now();
-            localStorage.setItem(lsKey, JSON.stringify(cur));
-            setTodayVisitors({ ...cur });
-          } catch (e) { /* ignore */ }
-        };
-        beat();
-        hbTimer = setInterval(beat, 25000);
-      }
-    }
-    return () => { if (unsubscribe) { try { unsubscribe(); } catch (e) {} } if (hbTimer) clearInterval(hbTimer); window.__bumpVisitorEditCount = null; };
-  }, [connectionStatus, roomKey, myTeacherName]);
-
-  // v3.14: ルーム登録者一覧（全期間 + 過去ソース統合）の購読。
-  //   visitors コレクションは v3.9 で導入されたため、それ以前にこのルームを
-  //   使っていた人は visitors には記録が残らない。そのため次の追加ソースも
-  //   統合して「過去にこのルームで活動したことのある人」を漏れなく拾う：
-  //     ① rooms/{rk}/visitors（v3.9 以降の訪問記録：firstSeen/lastSeen/editCount）
-  //     ② rooms/{rk}/presence の全ドキュメント（teacherName を持つもの。
-  //        期限切れセッションも履歴として統合する）
-  //     ③ 現在ロード済みの students[].teacher（過去に担当教員名として登録された名前）
-  //     ④ 現在ロード済みの boardPosts[].author（掲示板に書き込んだ名前）
-  //   ローカルモードでも local_visitors_<rk>_<dateKey> 全期間に加え、
-  //   students[].teacher / boardPosts[].author を統合する。
-  useEffect(() => {
-    const rk = roomKey || '3-1';
-    const fbConnected = connectionStatus === 'connected' && window.firebase;
-    const mergeName = (acc, rawName, info, source) => {
-      const name = String(rawName || '').trim();
-      if (!name || name === '匿名') return;
-      const firstSeen = (info && typeof info.firstSeenAt === 'number') ? info.firstSeenAt : 0;
-      const lastSeen = (info && typeof info.lastSeenAt === 'number') ? info.lastSeenAt : 0;
-      const editCount = (info && typeof info.editCount === 'number') ? info.editCount : 0;
-      const dk = (info && info.lastDateKey) || '';
-      if (!acc[name]) {
-        acc[name] = { firstSeenAt: firstSeen || lastSeen, lastSeenAt: lastSeen, editCount, lastDateKey: dk, sources: new Set([source]) };
-      } else {
-        const prev = acc[name];
-        const candidateFirst = firstSeen || lastSeen;
-        if (candidateFirst && (!prev.firstSeenAt || candidateFirst < prev.firstSeenAt)) prev.firstSeenAt = candidateFirst;
-        if (lastSeen > prev.lastSeenAt) prev.lastSeenAt = lastSeen;
-        prev.editCount = (prev.editCount || 0) + editCount;
-        if (dk > (prev.lastDateKey || '')) prev.lastDateKey = dk;
-        prev.sources.add(source);
-      }
-    };
-    const finalize = (acc) => {
-      const out = {};
-      Object.entries(acc).forEach(([k, v]) => { out[k] = { firstSeenAt: v.firstSeenAt, lastSeenAt: v.lastSeenAt, editCount: v.editCount, lastDateKey: v.lastDateKey, sources: Array.from(v.sources || []) }; });
-      return out;
-    };
-    const mergeExtraSources = (acc) => {
-      // students[].teacher（過去に担当教員として割り当てられた名前を全部拾う）
-      (students || []).forEach((s) => { if (s && s.teacher) mergeName(acc, s.teacher, {}, 'student'); });
-      // boardPosts[].author（掲示板に書き込んだ人。createdAt があれば最終訪問日として使う）
-      (boardPosts || []).forEach((p) => {
-        if (!p || !p.author) return;
-        const ts = typeof p.createdAt === 'number' ? p.createdAt : (p.createdAt && typeof p.createdAt.toMillis === 'function' ? p.createdAt.toMillis() : 0);
-        mergeName(acc, p.author, { firstSeenAt: ts, lastSeenAt: ts }, 'board');
-      });
-    };
-    if (fbConnected) {
-      const db = guardedFirestore(window.firebase.firestore(), roomKey);
-      const visitorsRef = db.collection('rooms').doc(rk).collection('visitors');
-      const presenceRef = db.collection('rooms').doc(rk).collection('presence');
-      let visitorsSnap = null;
-      let presenceSnap = null;
-      const recompute = () => {
-        const acc = {};
-        if (visitorsSnap) {
-          visitorsSnap.forEach((d) => {
-            const v = d.data();
-            if (!v || !v.teacherName) return;
-            mergeName(acc, v.teacherName, { firstSeenAt: v.firstSeenAt, lastSeenAt: v.lastSeenAt, editCount: v.editCount, lastDateKey: v.dateKey }, 'visitors');
-          });
-        }
-        if (presenceSnap) {
-          presenceSnap.forEach((d) => {
-            const v = d.data();
-            if (!v || !v.teacherName) return;
-            const serverMs = v.lastSeen && typeof v.lastSeen.toMillis === 'function' ? v.lastSeen.toMillis() : 0;
-            const clientMs = typeof v.lastSeenClient === 'number' ? v.lastSeenClient : 0;
-            const lastSeen = Math.max(serverMs, clientMs);
-            mergeName(acc, v.teacherName, { firstSeenAt: lastSeen, lastSeenAt: lastSeen, editCount: 0 }, 'presence');
-          });
-        }
-        mergeExtraSources(acc);
-        setAllMembers(finalize(acc));
-      };
-      const unsubV = visitorsRef.onSnapshot((snap) => { visitorsSnap = snap; recompute(); }, (err) => { console.warn('all visitors snapshot:', err.message); });
-      const unsubP = presenceRef.onSnapshot((snap) => { presenceSnap = snap; recompute(); }, (err) => { console.warn('all presence snapshot:', err.message); });
-      return () => { try { unsubV(); } catch (e) {} try { unsubP(); } catch (e) {} };
-    } else {
-      // ローカルモード：local_visitors_<rk>_<dateKey> 全期間 + students + boardPosts を統合
-      try {
-        const acc = {};
-        const prefix = `local_visitors_${rk}_`;
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (!k || !k.startsWith(prefix)) continue;
-          const dk = k.slice(prefix.length);
-          let map = {};
-          try { map = JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { map = {}; }
-          Object.entries(map).forEach(([name, info]) => {
-            mergeName(acc, name, { firstSeenAt: info && info.firstSeenAt, lastSeenAt: info && info.lastSeenAt, editCount: info && info.editCount, lastDateKey: dk }, 'visitors');
-          });
-        }
-        mergeExtraSources(acc);
-        setAllMembers(finalize(acc));
-      } catch (e) { setAllMembers({}); }
-    }
-  }, [connectionStatus, roomKey, todayVisitors, students, boardPosts]);
+  // No presence/visitor subscriptions or heartbeat timers. Only explicit one-shot requests.
+  const [memberView,setMemberView]=useState(null),[memberRows,setMemberRows]=useState([]),[memberBusy,setMemberBusy]=useState(false),[memberError,setMemberError]=useState('');
+  const memberRequestRef=useRef(0);
+  const loadMembers=async(kind)=>{
+    const request=++memberRequestRef.current,scope=cloudScopeKey;setMemberView(kind);setMemberRows([]);setMemberError('');setMemberBusy(true);
+    try{
+      if(!cloudConfigured||!canWriteCloud(scope))throw Error('クラウドの最新データを確認してから開いてください。');
+      const db=guardedFirestore(window.firebase.app().firestore(),roomKey),room=db.collection('rooms').doc(roomKey);let query;
+      if(kind==='presence'){let sessionId;try{sessionId=localStorage.getItem('presence_session_id')||('manual-'+Date.now());localStorage.setItem('presence_session_id',sessionId)}catch{sessionId='manual-'+Date.now()}await room.collection('presence').doc(sessionId).set({teacherName:myTeacherName||'匿名',lastSeenClient:Date.now()},{merge:true});query=room.collection('presence').where('lastSeenClient','>=',Date.now()-300000).limit(100);}
+      else if(kind==='today')query=room.collection('visitors').where('dateKey','==',getTodayString());
+      else query=room.collection('visitors').orderBy('lastSeenAt','desc').limit(200);
+      const snap=await query.get({source:'server'}),rows=[];snap.forEach(d=>rows.push({...d.data(),id:d.id}));
+      if(request!==memberRequestRef.current||cloudWriteGate.scope!==scope)return;setMemberRows(rows);
+    }catch(e){if(request===memberRequestRef.current)setMemberError(e.message||'取得できませんでした。')}finally{if(request===memberRequestRef.current)setMemberBusy(false)}
+  };
+  useEffect(()=>{memberRequestRef.current++;setMemberView(null);setMemberRows([]);setMemberBusy(false);setMemberError('');},[roomKey,cloudScopeKey]);
+  // Visit recording is once per named session/day, with no get, polling, editing counter, or replay.
+  useEffect(()=>{
+    window.__bumpVisitorEditCount=null;
+    if(connectionStatus!=='connected'||!myTeacherName||!canWriteCloud(cloudScopeKey))return;
+    const key=JSON.stringify(['jissyuu_visit_once',configuredProject,roomKey,myTeacherName,getTodayString()]);
+    try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'attempted')}catch{}
+    const ref=guardedFirestore(window.firebase.app().firestore(),roomKey).collection('rooms').doc(roomKey).collection('visitors').doc(`${getTodayString()}_${myTeacherName}`);
+    ref.set({teacherName:myTeacherName,dateKey:getTodayString(),lastSeenAt:Date.now()},{merge:true}).catch(()=>{});
+  },[connectionStatus,roomKey,myTeacherName,configuredProject,cloudScopeKey]);
 
   // v3.9: 「登録」ボタンを押すまで実データを作成しない方式に変更。
   // 以前は ＋ ボタンや FAB を押した時点で Firestore / localStorage に
@@ -2906,7 +2504,6 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchDraft, setSearchDraft] = useState('');
-  const [isBoardPanelOpen, setIsBoardPanelOpen] = useState(false);
   const sidebarRef = useRef(null);
   const menuButtonRef = useRef(null);
   const [filterProgress, setFilterProgress] = useState('all');
@@ -2931,6 +2528,7 @@ function App() {
       try {
         const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
         await db.collection('rooms').doc(roomKey).collection('students').doc(studentId).update(partial);
+        applyCommittedPatch(studentId,partial);
       } catch (e) {
         showAlert(`リアルタイム更新に失敗しました: ${e.message}`);
         return false;
@@ -2945,7 +2543,7 @@ function App() {
 
   const patchWorkflowStudent = async (student, partial) => {
     if (!requireWriteAccess()) return false;
-    const current = students.find((item) => item.id === student.id) || student;
+    const current = displayStudentData.byId.get(student.id) || student;
     const period = workflowDraftRef.current?.base.id===student.id ? {locked:workflowDraftRef.current.initialReadOnly} : periods.find((item) => item.id === (current.periodId || DEFAULT_PERIOD_ID));
     if (period?.locked && !isAdmin) { showAlert('この実習期は終了済みのため編集できません。'); return false; }
     if (!isAdmin) {
@@ -3335,7 +2933,7 @@ function App() {
         try { localStorage.setItem(`admin_password_hash_${roomKey}`, cloudHash); } catch (e) {}
         // クラウドと一致しない “以前設定した管理者状態” を強制クリアしない（他端末で変更しただけの可能性もあるため）
       } else if (localHash) {
-        // v3.37.0: local credentials must never be uploaded automatically.
+        // v3.38.1: local credentials must never be uploaded automatically.
       }
     }, (err) => { console.warn('admin hash snapshot:', err.message); });
     return () => { try { unsub(); } catch (e) {} };
@@ -3450,7 +3048,6 @@ function App() {
           roomRef.get().then((s) => !!s.exists).catch(() => false),
           roomRef.collection('students').limit(1).get().then((s) => !s.empty).catch(() => false),
           roomRef.collection('presence').limit(1).get().then((s) => !s.empty).catch(() => false),
-          roomRef.collection('board').limit(1).get().then((s) => !s.empty).catch(() => false),
           roomRef.collection('visitors').limit(1).get().then((s) => !s.empty).catch(() => false),
         ]);
         if (checks.some(Boolean)) return true;
@@ -3944,7 +3541,7 @@ function App() {
     const labelOf = {
       phone:    (s) => s === 'completed' ? '完了'   : s === 'none' ? '不要' : '未完了',
       doc:      (s) => s === 'completed' ? '完了'   : s === 'none' ? '不要' : '未完了',
-      greeting: (s) => s === 'completed' ? '挨拶終了' : s === 'scheduled' ? '挨拶日決定' : s === 'unadjusted' ? '未調整' : '必要なし'
+      greeting: (s) => s === 'completed' ? '挨拶終了' : s === 'scheduled' ? '挨拶日決定' : s === 'unadjusted' ? '未調整' : '対象外'
     };
     const rows = filteredStudents.map((s) => [
       s.name || '', s.grade ? `${s.grade}年` : '', s.classVal ? `${s.classVal}組` : '', s.teacher || '',
@@ -4058,8 +3655,11 @@ function App() {
     } catch (e) { showAlert('ロック変更に失敗しました: ' + e.message); }
   };
 
-  const handleExportAllData = () => {
-    const payload = { app: 'internship-manager', version: 325, exportedAt: new Date().toISOString(), roomKey, periods, students };
+  const handleExportAllData = async () => {
+    let exportStudents=students;
+    if(cloudConfigured){try{if(!canWriteCloud(cloudScopeKey))throw Error('接続確認後に実行してください。');const snap=await guardedFirestore(window.firebase.app().firestore(),roomKey).collection('rooms').doc(roomKey).collection('students').get({source:'server'});exportStudents=[];snap.forEach(d=>{const v=d.data()||{};if(v.recordType!=='period')exportStudents.push({...v,id:d.id})});}catch(e){showAlert('全期間バックアップを取得できませんでした。'+e.message);return;}}
+    else{try{exportStudents=JSON.parse(localStorage.getItem(`local_students_${roomKey}`)||'[]')}catch{showAlert('端末データを読み込めませんでした。');return;}}
+    const payload = { app: 'internship-manager', version: 325, exportedAt: new Date().toISOString(), roomKey, periods, students:exportStudents };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob); const a = document.createElement('a');
     a.href = url; a.download = `現場実習_全期間バックアップ_${getTodayString()}.json`; a.click(); URL.revokeObjectURL(url);
@@ -4274,7 +3874,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.37.0 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.38.1 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
@@ -4284,7 +3884,7 @@ function App() {
           <div className="sb-header-controls">
             <div className="flex items-center gap-1.5 bg-violet-50 border border-violet-200 rounded-full px-2 py-1 shadow-sm" title="表示する実習期を切り替えます">
               <span className="text-xs">🗂️</span>
-              <select aria-label="サイドバーの実習期" value={activePeriodId} onChange={(e) => setActivePeriodId(e.target.value)} className="bg-transparent text-xs font-bold text-violet-900 outline-none cursor-pointer max-w-[170px]">
+              <select disabled={!!workflowDraft||workflowSaving} aria-label="サイドバーの実習期" value={activePeriodId} onChange={(e) => setActivePeriodId(e.target.value)} className="bg-transparent text-xs font-bold text-violet-900 outline-none cursor-pointer max-w-[170px]">
                 {periods.map((p) => <option key={p.id} value={p.id}>{p.locked ? '🔒 ' : ''}{p.name}</option>)}
               </select>
               <button type="button" onClick={() => { setSidebarOpen(false); setIsPeriodManagerOpen(true); }} className="w-6 h-6 rounded-full bg-white border border-violet-200 hover:bg-violet-100 text-violet-800 font-bold cursor-pointer" title="実習期を管理">＋</button>
@@ -4317,130 +3917,18 @@ function App() {
                 <span>本日の実習・見学 {todayTargets.length}名</span>
               </button>
             )}
-            {/* v3.24: デスクトップ通知トグル。オンのとき掲示板投稿・生徒更新を OS の通知センターへ表示 */}
+            {/* v3.24: デスクトップ通知トグル。オンのとき生徒更新を OS の通知センターへ表示 */}
             <button
               type="button"
               onClick={handleToggleNotify}
-              title={notifyEnabled ? 'デスクトップ通知をオフにする' : 'デスクトップ通知をオンにする（掲示板の新規投稿・生徒データの更新をWindowsの通知センター等に表示します）'}
+              title={notifyEnabled ? 'デスクトップ通知をオフにする' : 'デスクトップ通知をオンにする（選択中の実習期の生徒データの更新をWindowsの通知センター等に表示します）'}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border cursor-pointer ${notifyEnabled ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'}`}
             >
               {notifyEnabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
               <span>{notifyEnabled ? '通知オン' : '通知オフ'}</span>
             </button>
-            {connectionStatus === 'connected' && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsOnlineListOpen((v) => !v)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 active:bg-sky-200 border border-sky-200 text-sky-800 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer"
-                  title={onlineMembers.length > 0 ? 'クリックで接続中の先生の一覧を表示' : '同期接続中の人数'}
-                >
-                  <span className="text-sm leading-none">👥</span>
-                  <span>{onlineCount} 名 接続中</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform ${isOnlineListOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {isOnlineListOpen && (
-                  <>
-                    <div className="sb-inline-panel">
-                      <div className="text-[10px] font-bold text-slate-500 px-2 py-1 border-b border-slate-100 mb-1">
-                        同期接続中 ({onlineCount}名)
-                      </div>
-                      {onlineMembers.length === 0 ? (
-                        <div className="text-xs text-slate-400 italic px-2 py-2 text-center">接続中のセッションはありません</div>
-                      ) : (
-                        <div className="max-h-64 overflow-y-auto scrollbar-thin">
-                          {onlineMembers.map((m) => (
-                            <div key={m.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span>
-                              <span className="text-xs text-slate-800 font-bold flex-1 truncate">{m.teacherName}</span>
-                              {m.isSelf && <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-mono">あなた</span>}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <div className="text-[10px] text-slate-400 px-2 pt-2 pb-1 border-t border-slate-100 mt-1 leading-snug">
-                        ※ 同じルーム名({roomKey})の部屋を開いている端末を表示します。<br />15秒ごとに更新、最終更新から35秒以上経ったセッションは離脱として扱います。
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-            {/* v3.9: 今日の訪問者ボタン（管理者のみ表示） */}
-            {isAdmin && (
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsTodayVisitorsOpen((v) => !v)}
-                title="今日このルームを開いた編集者の一覧（名前を設定した人だけ記録されます）"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 hover:bg-violet-100 active:bg-violet-200 border border-violet-200 text-violet-800 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer"
-              >
-                <span className="text-sm leading-none">📜</span>
-                <span>今日の訪問者 {Object.keys(todayVisitors).length}名</span>
-                <ChevronDown className={`w-3 h-3 transition-transform ${isTodayVisitorsOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {isTodayVisitorsOpen && (
-                <>
-                  <div className="sb-inline-panel">
-                    <div className="text-[10px] font-bold text-slate-500 px-2 py-1 border-b border-slate-100 mb-1 flex items-center justify-between gap-2">
-                      <span>今日の訪問者 ({Object.keys(todayVisitors).length}名)</span>
-                      <span className="font-mono text-slate-400">{(() => { const d = new Date(); return `${d.getMonth()+1}/${d.getDate()}`; })()}</span>
-                    </div>
-                    {Object.keys(todayVisitors).length === 0 ? (
-                      <div className="text-xs text-slate-400 italic px-2 py-3 text-center leading-relaxed">今日はまだ訪問者がいません。<br />※ 編集者名を設定した端末のみ記録されます。</div>
-                    ) : (
-                      <div className="max-h-72 overflow-y-auto scrollbar-thin">
-                        {Object.entries(todayVisitors).sort((a, b) => (b[1].lastSeenAt || 0) - (a[1].lastSeenAt || 0)).map(([name, v]) => {
-                          const lastDate = v.lastSeenAt ? new Date(v.lastSeenAt) : null;
-                          const lastStr = lastDate ? `${String(lastDate.getHours()).padStart(2,'0')}:${String(lastDate.getMinutes()).padStart(2,'0')}` : '?';
-                          const isSelf = name === myTeacherName;
-                          return (
-                            <div key={name} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 ${isSelf ? 'bg-indigo-50/50' : ''}`}>
-                              <span className="text-sm leading-none">{isSelf ? '🙋' : '👤'}</span>
-                              <span className="text-xs text-slate-800 font-bold flex-1 truncate" title={name}>{name}</span>
-                              <span className="text-[10px] font-mono text-slate-500 shrink-0" title="最終接続時刻">{lastStr}</span>
-                              <span className="text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-200 px-1.5 py-0.5 rounded shrink-0" title="今日の編集件数">{v.editCount || 0}件</span>
-                              {isSelf && <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1 py-0.5 rounded font-mono">あなた</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                    {/* v3.13: ルーム登録者（過去全期間：このルームを編集者名付きで開いたことのある人全員） */}
-                    <div className="mt-2 pt-2 border-t border-slate-200">
-                      <div className="text-[10px] font-bold text-slate-500 px-2 py-1 flex items-center justify-between gap-2">
-                        <span>📋 ルーム登録者 ({Object.keys(allMembers).length}名)</span>
-                        <span className="font-mono text-slate-400">全期間</span>
-                      </div>
-                      {Object.keys(allMembers).length === 0 ? (
-                        <div className="text-xs text-slate-400 italic px-2 py-3 text-center leading-relaxed">登録者はまだいません。<br />※ 編集者名を設定して開いた人だけが記録されます。</div>
-                      ) : (
-                        <div className="max-h-72 overflow-y-auto scrollbar-thin">
-                          {Object.entries(allMembers).sort((a, b) => (b[1].lastSeenAt || 0) - (a[1].lastSeenAt || 0)).map(([name, v]) => {
-                            const lastDate = v.lastSeenAt ? new Date(v.lastSeenAt) : null;
-                            const lastStr = lastDate ? `${lastDate.getFullYear()}/${lastDate.getMonth()+1}/${lastDate.getDate()}` : '?';
-                            const isSelf = name === myTeacherName;
-                            const isToday = !!todayVisitors[name];
-                            return (
-                              <div key={'all-' + name} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 ${isSelf ? 'bg-indigo-50/50' : ''}`}>
-                                <span className="text-sm leading-none">{isSelf ? '🙋' : '👤'}</span>
-                                <span className="text-xs text-slate-800 font-bold flex-1 truncate" title={name}>{name}</span>
-                                {isToday && <span className="text-[9px] bg-emerald-100 text-emerald-700 border border-emerald-200 px-1 py-0.5 rounded font-mono shrink-0" title="今日も訪問">今日</span>}
-                                <span className="text-[10px] font-mono text-slate-500 shrink-0" title="最終訪問日">{lastStr}</span>
-                                <span className="text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-200 px-1.5 py-0.5 rounded shrink-0" title="累計編集件数">{v.editCount || 0}件</span>
-                                {isSelf && <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1 py-0.5 rounded font-mono">あなた</span>}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-[10px] text-slate-400 px-2 pt-2 pb-1 border-t border-slate-100 mt-1 leading-snug">※ 今日（{(() => { const d = new Date(); return `${d.getMonth()+1}月${d.getDate()}日`; })()}）に編集者名を設定してこのルームを開いた人だけが「今日の訪問者」に記録されます。<br />※ 名前未設定の端末は履歴に残りません。<br />※ 「ルーム登録者」には visitors（v3.9以降の訪問記録）に加え、過去のオンライン履歴・各生徒の担当教員名・掲示板の投稿者名も統合して表示します（v3.9 以前から使っていた人も拾います）。</div>
-                  </div>
-                </>
-              )}
-            </div>
-            )}
+            <button type="button" className="sb-demand-button" onClick={()=>loadMembers('presence')}>接続記録を確認</button>
+            {isAdmin&&<button type="button" className="sb-demand-button" onClick={()=>loadMembers('today')}>訪問履歴を確認</button>}
             <button
               onClick={() => { setTempRoomKey(roomKey); setSidebarOpen(false); setIsConfigOpen(true); }}
               title="Firebase接続設定・ルーム名の切替・担当教員名の保存を行います"
@@ -4452,7 +3940,6 @@ function App() {
           </div>
         </div>
       </header>
-          <section className="sb-sidebar-section"><h2>連絡・掲示板</h2><div className="sb-board-actions"><button type="button" onClick={() => { setSidebarOpen(false); setIsBoardOpen(true); setIsBoardPanelOpen(true); }}>📣 掲示板 {boardPosts.length}件</button><button type="button" onClick={() => { setSidebarOpen(false); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }}>履歴</button></div></section>
           <section className="sb-sidebar-section"><h2>データ操作・絞り込み</h2>
         <div className="sb-tools">
           <div className="sb-operations">
@@ -4567,70 +4054,19 @@ function App() {
         </div>
       </aside>
       <div className="sb-topbar no-print">
-        <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : currentView === 'workflow' ? '業務一覧' : 'リスト一覧'}</strong><select className="sb-current-period" aria-label="表示中の実習期" value={activePeriodId} onChange={e=>setActivePeriodId(e.target.value)}>{periods.map(p=><option key={p.id} value={p.id}>{p.locked?'🔒 ':''}{p.name}</option>)}</select></div>
+        <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : currentView === 'workflow' ? '業務一覧' : 'リスト一覧'}</strong><select className="sb-current-period" disabled={!!workflowDraft||workflowSaving} aria-label="表示中の実習期" value={activePeriodId} onChange={e=>setActivePeriodId(e.target.value)}>{periods.map(p=><option key={p.id} value={p.id}>{p.locked?'🔒 ':''}{p.name}</option>)}</select></div>
         <div className="sb-filter-chips">{searchQuery && <span className="sb-keyword-chip"><Search className="w-4 h-4"/><span>検索：{searchQuery}</span><button type="button" aria-label="検索条件を解除" onClick={() => setSearchQuery('')}>×</button></span>}{currentView !== 'workflow' && hasActiveFilter && <button type="button" className="sb-icon-button" onClick={clearFilters}>絞り込み解除</button>}</div>
       </div>
       {connectionStatus === 'local' && <div className="sb-demo-note no-print"><span>体験デモ（クラウド未接続）。共有には環境設定が必要です。</span><button type="button" onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}>環境設定を開く</button></div>}
       {isSearchOpen && <AppUtilityDialog title="検索" onClose={() => setIsSearchOpen(false)}><form className="sb-search-form" onSubmit={(e) => { e.preventDefault(); setSearchQuery(searchDraft.trim()); setIsSearchOpen(false); }}><p>生徒名・実習先・期間などで絞り込みます。表示切替後も検索条件を維持します。</p><label htmlFor="app-search-input">キーワード</label><input id="app-search-input" type="search" value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="生徒名、実習先、期間など"/><div className="sb-dialog-actions"><button type="button" onClick={() => { setSearchQuery(''); setSearchDraft(''); setIsSearchOpen(false); }}>検索を解除</button><button type="button" onClick={() => setIsSearchOpen(false)}>キャンセル</button><button type="submit" className="sb-primary">検索する</button></div></form></AppUtilityDialog>}
-      {isBoardPanelOpen && <AppUtilityDialog title="掲示板" wide suspended={isBoardHistoryOpen || !!confirmState || !!alertState} onClose={() => setIsBoardPanelOpen(false)}><div className="sb-board-panel">
-      {/* v3.7: 画面上部の掲示板。ルーム単位で共有され、投稿者名と削除ボタン付き。 */}
-      <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-300 shadow-sm no-print">
-        <div className="w-full max-w-none px-3 sm:px-4 py-2">
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setIsBoardOpen((v) => !v)} className="flex items-center gap-2 text-xs font-bold text-amber-900 hover:text-amber-700 cursor-pointer">
-              <span className="text-base">📣</span>
-              <span>掲示板</span>
-              <span className="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full text-[10px] font-mono">{boardPosts.length}件</span>
-              <ChevronDown className={"w-3.5 h-3.5 transition-transform " + (isBoardOpen ? "rotate-180" : "")} />
-            </button>
-            <button type="button" onClick={(e) => { e.stopPropagation(); setBoardHistoryTab('deleted'); setIsBoardHistoryOpen(true); }} title="掲示板の「削除された投稿」と「非表示にした投稿」の履歴を表示します" className="shrink-0 inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-indigo-50 active:bg-indigo-100 text-slate-700 hover:text-indigo-700 border border-slate-200 hover:border-indigo-300 rounded-lg text-[10px] font-bold cursor-pointer shadow-sm transition-all">
-<span className="text-[11px] leading-none">📜</span>
-<span>履歴</span>
-{((boardDeletedHistory || []).length + (boardHiddenHistory || []).length) > 0 && (
-<span className="text-[9px] font-mono bg-slate-100 text-slate-600 border border-slate-200 rounded px-1 py-0.5">{(boardDeletedHistory || []).length + (boardHiddenHistory || []).length}</span>
-)}
-</button>
-{!isBoardOpen && boardPosts[0] && (
-              <div className="text-[11px] text-amber-900 truncate flex-1 min-w-0">
-                <span className="font-bold">{boardPosts[0].author || '匿名'}:</span> {boardPosts[0].message}
-              </div>
-            )}
-          </div>
-          {isBoardOpen && (
-            <div className="mt-2 space-y-2">
-              <form onSubmit={(e) => { e.preventDefault(); if (!boardInput.trim()) return; addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); }} className="flex items-start gap-2">
-                <div className="flex-shrink-0 bg-amber-100 border border-amber-300 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-amber-900 whitespace-nowrap" title="投稿者名。「編集者名」と同じ。">
-                  {myTeacherName || '匿名'}
-                </div>
-                <textarea value={boardInput} onChange={(e) => setBoardInput(e.target.value)} placeholder="連絡事項やお知らせを入力（CtrlまたはCmd + Enter で投稿）" rows={1} onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (boardInput.trim()) { addBoardPost(myTeacherName || '匿名', boardInput.trim()); setBoardInput(''); } } }} className="flex-1 bg-white border border-amber-300 focus:border-amber-500 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-300 text-slate-800 resize-y min-h-[34px]" />
-                <button type="submit" disabled={!boardInput.trim()} className={"px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 " + (boardInput.trim() ? "bg-amber-600 hover:bg-amber-700 text-white cursor-pointer shadow-sm" : "bg-slate-200 text-slate-400 cursor-not-allowed")}>投稿</button>
-              </form>
-              {boardPosts.length === 0 ? (
-                <p className="text-[11px] text-amber-700/70 italic text-center py-2">まだ投稿はありません。</p>
-              ) : (
-                <div className="space-y-1 max-h-56 overflow-y-auto scrollbar-thin pr-1">
-                  {boardPosts.map((p) => { const ts = p.createdAt; const ms = ts && typeof ts === 'object' && ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0); const timeStr = ms ? new Date(ms).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; const canDelete = !myTeacherName || !p.author || p.author === '匿名' || p.author === myTeacherName; return (
-                    <div key={p.id} className="flex items-start gap-2 bg-white/80 border border-amber-200 rounded-lg px-3 py-2 text-xs">
-                      <div className="shrink-0 min-w-[80px]">
-                        <div className="font-bold text-amber-900 text-[11px] truncate">{p.author || '匿名'}</div>
-                        <div className="text-[9px] text-slate-500 font-mono">{timeStr}</div>
-                      </div>
-                      <div className="flex-1 text-slate-800 whitespace-pre-wrap break-words leading-relaxed">{p.message}</div>
-                      <div className="shrink-0 flex flex-col gap-1">{myTeacherName && p.author === myTeacherName ? (<><button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button><button type="button" onClick={() => showConfirm('この投稿を全員の画面から削除しますか？この操作は取り消せません。', () => deleteBoardPost(p.id, myTeacherName || '匿名'))} title="自分の投稿を全員の画面から削除します" className="px-2 py-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">全員削除</button></>) : (<button type="button" onClick={() => hideBoardPost(p.id)} title="この投稿を自分の画面から非表示にします（他の人の画面には残ります）" className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap">非表示</button>)}</div>
-                    </div>
-                  ); })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-
-
+      {memberView&&<AppUtilityDialog title={memberView==='presence'?'最近の接続記録':'訪問履歴'} onClose={()=>{memberRequestRef.current++;setMemberView(null)}}><div className="demand-members">
+        <p>開いたときだけ取得します。自動更新はしません。</p>
+        {memberView==='presence'?<p>この確認操作で自分の接続記録を更新し、過去5分の記録を最大100件取得します。常時監視ではないため、実際の接続人数とは異なります。</p>:<p>{memberView==='today'?'本日の訪問記録':'直近200件までの過去の訪問記録'}。訪問は編集者名付きのタブで1日1回記録し、編集件数の自動集計は行いません。</p>}
+        <div className="demand-actions"><button disabled={memberBusy} onClick={()=>loadMembers(memberView)}>再取得</button>{memberView!=='presence'&&<><button disabled={memberBusy} onClick={()=>loadMembers('today')}>本日</button><button disabled={memberBusy} onClick={()=>loadMembers('history')}>過去の履歴を取得（最大200件）</button></>}</div>
+        {memberBusy?<p role="status">取得中…</p>:memberError?<p role="alert">{memberError}</p>:<><p>取得結果：{memberRows.length}件</p><ul>{memberRows.map((r,i)=><li key={r.id||i}><strong>{r.teacherName||'匿名'}</strong><span>{r.dateKey||''} {r.lastSeenAt||r.lastSeenClient?new Date(r.lastSeenAt||r.lastSeenClient).toLocaleString('ja-JP'):''}</span></li>)}</ul>{!memberRows.length&&<p>表示できる記録はありません。</p>}</>}
       </div></AppUtilityDialog>}
-
       <main className="flex-1 w-full max-w-none mx-auto p-2 sm:p-3 lg:p-4 space-y-6" style={{ paddingBottom: currentView === 'workflow' ? '8px' : '180px' }}>
+        {cloudConfigured&&activePeriodId===DEFAULT_PERIOD_ID&&<section className="legacy-demand"><span>実習期が未設定の旧データは通常の絞り込み取得に含まれません。</span><button type="button" disabled={legacyLoading||cloudReadOnly||!!workflowDraft} onClick={loadLegacyStudents}>{legacyLoading?'取得中…':'未設定の旧データを今回だけ取得'}</button><small>この操作に限り全件を一度確認します。自動移行・自動同期はしません。</small>{cacheNotice&&<p>{cacheNotice}</p>}</section>}
         {currentView !== 'workflow' && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-4 no-print">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
@@ -4826,7 +4262,7 @@ function App() {
                           </td>
                           <td data-list-column="phone" style={columnCellStyle('phone')} className="p-4 align-top">
                             <div className="space-y-1.5">
-                              <ProgressToggleButton icon={Phone} label={s.phoneStatus === 'completed' ? '連絡済み' : s.phoneStatus === 'none' ? '必要なし' : '未連絡'}
+                              <ProgressToggleButton icon={Phone} label={s.phoneStatus === 'completed' ? '連絡済み' : s.phoneStatus === 'none' ? '対象外' : '未連絡'}
                                 status={s.phoneStatus} palette={phonePalette}
                                 onClick={() => handleInstantToggle(s, 'phoneStatus', s.phoneStatus)} cellHandlers={statusCellHandlers(s.id, 'phone')} clickGate={statusClickGate(s.id, 'phone')}
                                 locked={(s.lockedFields || []).includes('phoneStatus')} onToggleLock={isAdmin ? () => toggleLockField(s, 'phoneStatus') : null} isAdmin={isAdmin}
@@ -4839,7 +4275,7 @@ function App() {
                           </td>
                           <td data-list-column="doc" style={columnCellStyle('doc')} className="p-4 align-top">
                             <div className="space-y-1.5">
-                              <ProgressToggleButton icon={FileText} label={s.docStatus === 'completed' ? '配付済み' : s.docStatus === 'none' ? '配付の必要なし' : '未配付'}
+                              <ProgressToggleButton icon={FileText} label={s.docStatus === 'completed' ? '配付済み' : s.docStatus === 'none' ? '対象外' : '未配付'}
                                 status={s.docStatus} palette={docPalette}
                                 onClick={() => handleInstantToggle(s, 'docStatus', s.docStatus)} cellHandlers={statusCellHandlers(s.id, 'doc')} clickGate={statusClickGate(s.id, 'doc')}
                                 suffix={''} />
@@ -5142,7 +4578,7 @@ function App() {
 
       <TextEditModal state={textEditState} onClose={() => setTextEditState(null)} />
       <SelectEditModal state={selectEditState} onClose={() => setSelectEditState(null)} />
-      {statusEditState && (() => { const sd = students.find((s) => s.id === statusEditState.studentId); if (!sd) return null; const field = statusEditState.field; const title = field === 'phone' ? '事前電話の編集' : field === 'doc' ? '保護者お知らせの編集' : '事前挨拶の編集'; const statusKey = field + 'Status'; const dateKey = field + 'Date'; const currentStatus = sd[statusKey] || 'pending'; const phoneOpts = [['pending', '未連絡'], ['completed', '連絡済み'], ['none', '必要なし']]; const docOpts = [['pending', '未配付'], ['completed', '配付済み'], ['none', '配付の必要なし']]; const greetingOpts = [['pending', 'ー'], ['unadjusted', '未調整'], ['scheduled', '挨拶日決定'], ['completed', '挨拶終了']]; const opts = field === 'phone' ? phoneOpts : field === 'doc' ? docOpts : greetingOpts; const close = () => setStatusEditState(null); const saveStatus = (v) => { const update = { [statusKey]: v }; if(field==='greeting')update.greetingCompletedDate=v==='completed'?(sd.greetingCompletedDate||getTodayString()):''; if (field !== 'greeting') { if (v === 'completed' && !sd[dateKey]) update[dateKey] = getTodayString(); if (v !== 'completed') update[dateKey] = ''; } const before = Object.fromEntries(Object.keys(update).map((k) => [k, sd[k] != null ? sd[k] : ''])); recordUpdate(sd.id, before, update); persistPartial(sd.id, update); }; return (<div className="fixed inset-0 z-[105] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={close}><div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-scaleIn"><div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between"><h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Edit className="w-4 h-4 text-indigo-600" /><span>{sd.name} - {title}</span></h3><button type="button" onClick={close} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button></div><div className="p-4 space-y-3"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">ステータス</div><div className="space-y-1">{opts.map(([val, lbl]) => (<button key={val} type="button" onClick={() => saveStatus(val)} className={'w-full text-left px-3 py-2 rounded-lg text-xs font-bold cursor-pointer transition-colors ' + (currentStatus === val ? 'bg-indigo-600 text-white' : 'bg-slate-50 hover:bg-indigo-50 text-slate-700 border border-slate-200')}>{currentStatus === val ? '● ' : '○ '}{lbl}</button>))}</div></div>{field !== 'greeting' && currentStatus === 'completed' && (<div><div className="text-[11px] font-bold text-slate-600 mb-1.5">{field === 'phone' ? '連絡日' : '配付日'}</div><button type="button" onClick={() => setDatePickerState({ value: sd[dateKey] || '', title: title, onSelect: (v) => persistPartial(sd.id, { [dateKey]: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd[dateKey] ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd[dateKey] ? formatShortDate(sd[dateKey]) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div>)}{field === 'greeting' && currentStatus !== 'pending' && (<div className="space-y-2"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">挨拶日</div><button type="button" onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: '事前挨拶日', onSelect: (v) => persistPartial(sd.id, { greetingDate: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd.greetingDate ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">時間</div><input type="text" placeholder="例: 13:30" defaultValue={sd.greetingTime || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingTime || '')) persistPartial(sd.id, { greetingTime: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">引率教員</div><input type="text" placeholder="例: 鈴木 先生" defaultValue={sd.greetingVisitor || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingVisitor || '')) persistPartial(sd.id, { greetingVisitor: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div></div>)}<div className="text-[10px] text-slate-500 leading-relaxed pt-1 border-t border-slate-100">※ クリック（タップ）で従来通りステータスを切替、長押し（0.5秒）またはダブルクリックでこの編集モーダルを開きます。</div></div><div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2"><button type="button" onClick={close} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer">閉じる</button></div></div></div>); })()}
+      {statusEditState && (() => { const sd = students.find((s) => s.id === statusEditState.studentId); if (!sd) return null; const field = statusEditState.field; const title = field === 'phone' ? '事前電話の編集' : field === 'doc' ? '保護者お知らせの編集' : '事前挨拶の編集'; const statusKey = field + 'Status'; const dateKey = field + 'Date'; const currentStatus = sd[statusKey] || 'pending'; const phoneOpts = [['pending', '未連絡'], ['completed', '連絡済み'], ['none', '対象外']]; const docOpts = [['pending', '未配付'], ['completed', '配付済み'], ['none', '対象外']]; const greetingOpts = [['pending', 'ー'], ['unadjusted', '未調整'], ['scheduled', '挨拶日決定'], ['completed', '挨拶終了']]; const opts = field === 'phone' ? phoneOpts : field === 'doc' ? docOpts : greetingOpts; const close = () => setStatusEditState(null); const saveStatus = (v) => { const update = { [statusKey]: v }; if(field==='greeting')update.greetingCompletedDate=v==='completed'?(sd.greetingCompletedDate||getTodayString()):''; if (field !== 'greeting') { if (v === 'completed' && !sd[dateKey]) update[dateKey] = getTodayString(); if (v !== 'completed') update[dateKey] = ''; } const before = Object.fromEntries(Object.keys(update).map((k) => [k, sd[k] != null ? sd[k] : ''])); recordUpdate(sd.id, before, update); persistPartial(sd.id, update); }; return (<div className="fixed inset-0 z-[105] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={close}><div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-scaleIn"><div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between"><h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Edit className="w-4 h-4 text-indigo-600" /><span>{sd.name} - {title}</span></h3><button type="button" onClick={close} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button></div><div className="p-4 space-y-3"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">ステータス</div><div className="space-y-1">{opts.map(([val, lbl]) => (<button key={val} type="button" onClick={() => saveStatus(val)} className={'w-full text-left px-3 py-2 rounded-lg text-xs font-bold cursor-pointer transition-colors ' + (currentStatus === val ? 'bg-indigo-600 text-white' : 'bg-slate-50 hover:bg-indigo-50 text-slate-700 border border-slate-200')}>{currentStatus === val ? '● ' : '○ '}{lbl}</button>))}</div></div>{field !== 'greeting' && currentStatus === 'completed' && (<div><div className="text-[11px] font-bold text-slate-600 mb-1.5">{field === 'phone' ? '連絡日' : '配付日'}</div><button type="button" onClick={() => setDatePickerState({ value: sd[dateKey] || '', title: title, onSelect: (v) => persistPartial(sd.id, { [dateKey]: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd[dateKey] ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd[dateKey] ? formatShortDate(sd[dateKey]) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div>)}{field === 'greeting' && currentStatus !== 'pending' && (<div className="space-y-2"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">挨拶日</div><button type="button" onClick={() => setDatePickerState({ value: sd.greetingDate || '', title: '事前挨拶日', onSelect: (v) => persistPartial(sd.id, { greetingDate: v }) })} className="w-full bg-white border border-slate-300 hover:border-indigo-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={sd.greetingDate ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{sd.greetingDate ? formatShortDate(sd.greetingDate) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-indigo-500" /></button></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">時間</div><input type="text" placeholder="例: 13:30" defaultValue={sd.greetingTime || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingTime || '')) persistPartial(sd.id, { greetingTime: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">引率教員</div><input type="text" placeholder="例: 鈴木 先生" defaultValue={sd.greetingVisitor || ''} onBlur={(e) => { if (e.target.value !== (sd.greetingVisitor || '')) persistPartial(sd.id, { greetingVisitor: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" /></div></div>)}<div className="text-[10px] text-slate-500 leading-relaxed pt-1 border-t border-slate-100">※ クリック（タップ）で従来通りステータスを切替、長押し（0.5秒）またはダブルクリックでこの編集モーダルを開きます。</div></div><div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2"><button type="button" onClick={close} className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold cursor-pointer">閉じる</button></div></div></div>); })()}
 
       {patrolEditState && (() => { const sd = students.find((s) => s.id === patrolEditState.studentId); if (!sd) return null; const p = (sd.patrols || []).find((pp) => pp.id === patrolEditState.patrolId); if (!p) return null; const close = () => setPatrolEditState(null); const updatePatrol = (changes) => { const current = sd.patrols || []; const next = current.map((pp) => pp.id === p.id ? { ...pp, ...changes } : pp); recordUpdate(sd.id, { patrols: current }, { patrols: next }); persistPartial(sd.id, { patrols: next }); }; return (<div className="fixed inset-0 z-[105] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={close}><div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-scaleIn"><div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between"><h3 className="text-sm font-bold text-slate-900 flex items-center gap-2"><Edit className="w-4 h-4 text-violet-600" /><span>{sd.name} - 巡回・同行予定の編集</span></h3><button type="button" onClick={close} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button></div><div className="p-4 space-y-3"><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">日付</div><button type="button" onClick={() => setDatePickerState({ value: p.date || '', title: '巡回・同行日', onSelect: (v) => updatePatrol({ date: v }) })} className="w-full bg-white border border-slate-300 hover:border-violet-400 rounded-xl px-3 py-2 text-xs text-left cursor-pointer flex items-center justify-between transition-colors"><span className={p.date ? 'text-slate-800 font-bold' : 'text-slate-400 italic'}>{p.date ? formatShortDate(p.date) : 'タップして日付を選択'}</span><Calendar className="w-3.5 h-3.5 text-violet-500" /></button></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">時間</div><input type="text" placeholder="例: 10:00" defaultValue={p.time || ''} onBlur={(e) => { if (e.target.value !== (p.time || '')) updatePatrol({ time: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-violet-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-violet-400 text-slate-800" /></div><div><div className="text-[11px] font-bold text-slate-600 mb-1.5">担当教員</div><input type="text" placeholder="例: 鈴木 先生" defaultValue={p.teacher || ''} onBlur={(e) => { if (e.target.value !== (p.teacher || '')) updatePatrol({ teacher: e.target.value }); }} className="w-full bg-white border border-slate-300 focus:border-violet-400 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-violet-400 text-slate-800" /></div><label className="flex items-center gap-2 cursor-pointer p-2 bg-slate-50 rounded-lg border border-slate-200 hover:bg-slate-100"><input type="checkbox" checked={!!p.done} onChange={(e) => updatePatrol({ done: e.target.checked })} className="cursor-pointer accent-violet-600 w-4 h-4" /><span className="text-xs font-bold text-slate-700">完了済みにする</span></label><div className="text-[10px] text-slate-500 leading-relaxed pt-1 border-t border-slate-100">※ チップを長押し（0.5秒）するとこの編集モーダルが開きます。通常クリックは従来通り完了/未完了の切替えです。</div></div><div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2"><button type="button" onClick={() => { showConfirm('この巡回・同行予定を削除しますか？', () => { handleRemovePatrol(sd, p.id); close(); }); }} className="px-3 py-1.5 bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 rounded-lg text-xs font-bold cursor-pointer">この予定を削除</button><button type="button" onClick={close} className="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-bold cursor-pointer">閉じる</button></div></div></div>); })()}
 
@@ -5528,78 +4964,6 @@ function App() {
         </div>
       )}
 
-      {/* 掲示板履歴モーダル */}
-{isBoardHistoryOpen && (
-<div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsBoardHistoryOpen(false)}>
-<div onClick={(e) => e.stopPropagation()} className="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden animate-scaleIn flex flex-col max-h-[85vh]">
-<div className="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-<h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-<span className="text-base leading-none">📜</span>
-<span>掲示板の履歴</span>
-</h3>
-<button type="button" onClick={() => setIsBoardHistoryOpen(false)} className="text-slate-400 hover:text-slate-900 font-bold text-xl cursor-pointer">×</button>
-</div>
-<div className="flex items-center bg-slate-100 px-3 pt-3 gap-1 border-b border-slate-200">
-<button type="button" onClick={() => setBoardHistoryTab('deleted')} className={`px-3 py-1.5 rounded-t-lg text-xs font-bold cursor-pointer transition-all ${boardHistoryTab === 'deleted' ? 'bg-white text-indigo-700 border-t border-l border-r border-slate-200 -mb-px' : 'text-slate-600 hover:text-slate-900'}`}>🗑 削除された投稿<span className="ml-1 text-[10px] font-mono bg-slate-200 text-slate-700 rounded px-1.5 py-0.5">{(boardDeletedHistory || []).length}件</span></button>
-<button type="button" onClick={() => setBoardHistoryTab('hidden')} className={`px-3 py-1.5 rounded-t-lg text-xs font-bold cursor-pointer transition-all ${boardHistoryTab === 'hidden' ? 'bg-white text-indigo-700 border-t border-l border-r border-slate-200 -mb-px' : 'text-slate-600 hover:text-slate-900'}`}>🙈 非表示にした投稿<span className="ml-1 text-[10px] font-mono bg-slate-200 text-slate-700 rounded px-1.5 py-0.5">{(boardHiddenHistory || []).length}件</span></button>
-</div>
-<div className="p-4 overflow-y-auto flex-1">
-{boardHistoryTab === 'deleted' ? (
-<div className="space-y-2">
-<p className="text-[10px] text-slate-500 leading-relaxed bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">※ 削除された投稿はクラウド上の履歴として全員で共有されます。投稿そのものは復元できませんが、内容と削除者・削除時刻の記録は残ります。</p>
-{(boardDeletedHistory || []).length === 0 ? (
-<div className="text-center py-8 text-xs text-slate-400 italic">削除された投稿はありません</div>
-) : (<>
-{[...(boardDeletedHistory || [])].sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0)).map((it, i) => (
-<div key={'del-' + (it.id || i)} className="border border-rose-200 bg-rose-50/40 rounded-xl p-3 space-y-1.5">
-<div className="flex items-center justify-between gap-2 flex-wrap text-[10px] text-slate-600">
-<span className="font-bold">投稿者: <span className="text-slate-800">{it.author || '匿名'}</span></span>
-<span className="font-mono">{it.createdAt ? new Date(it.createdAt).toLocaleString('ja-JP') : '?'}</span>
-</div>
-<div className="text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">{it.message}</div>
-<div className="text-[10px] text-rose-700 font-bold border-t border-rose-100 pt-1.5 flex items-center justify-between gap-2 flex-wrap">
-<span>🗑 削除: {it.deletedBy || '匿名'}</span>
-<span className="font-mono text-rose-600">{it.deletedAt ? new Date(it.deletedAt).toLocaleString('ja-JP') : '?'}</span>
-</div>
-</div>
-))}
-<div className="pt-2 flex justify-end">
-<button type="button" onClick={() => showConfirm('削除された投稿の履歴をすべて消去しますか？この操作は取り消せません。', () => clearBoardDeletedHistory())} className="px-3 py-1.5 bg-white border border-rose-300 hover:bg-rose-50 text-rose-700 rounded-lg text-xs font-bold cursor-pointer">履歴をクリア</button>
-</div>
-</>)}
-</div>
-) : (
-<div className="space-y-2">
-<p className="text-[10px] text-slate-500 leading-relaxed bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">※ 「非表示」はこの端末でのみ有効です。下の「一覧に復元」を押すと、掲示板の一覧に戻ります。</p>
-{(boardHiddenHistory || []).length === 0 ? (
-<div className="text-center py-8 text-xs text-slate-400 italic">非表示にした投稿はありません</div>
-) : (<>
-{[...(boardHiddenHistory || [])].sort((a, b) => (b.hiddenAt || 0) - (a.hiddenAt || 0)).map((it, i) => (
-<div key={'hid-' + (it.id || i)} className="border border-slate-200 bg-slate-50/60 rounded-xl p-3 space-y-1.5">
-<div className="flex items-center justify-between gap-2 flex-wrap text-[10px] text-slate-600">
-<span className="font-bold">投稿者: <span className="text-slate-800">{it.author || '匿名'}</span></span>
-<span className="font-mono">{it.createdAt ? new Date(it.createdAt).toLocaleString('ja-JP') : '?'}</span>
-</div>
-<div className="text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">{it.message}</div>
-<div className="border-t border-slate-100 pt-1.5 flex items-center justify-between gap-2 flex-wrap">
-<span className="text-[10px] text-slate-500 font-mono">🙈 {it.hiddenAt ? new Date(it.hiddenAt).toLocaleString('ja-JP') : '?'}</span>
-<button type="button" onClick={() => restoreHiddenBoardPost(it.id)} className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg text-[11px] font-bold cursor-pointer flex items-center gap-1"><RotateCcw className="w-3 h-3" />一覧に復元</button>
-</div>
-</div>
-))}
-<div className="pt-2 flex justify-end">
-<button type="button" onClick={() => showConfirm('この端末の「非表示」履歴をすべて消去しますか？元の投稿には影響しません。', () => clearBoardHiddenHistory())} className="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-bold cursor-pointer">履歴をクリア</button>
-</div>
-</>)}
-</div>
-)}
-</div>
-<div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
-<button type="button" onClick={() => setIsBoardHistoryOpen(false)} className="px-4 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">閉じる</button>
-</div>
-</div>
-</div>
-)}
       {/* v3.25.6: 今日の実習・見学対象者ポップアップ */}
       {isTodayTargetsOpen && todayTargets.length > 0 && (
         <div className="fixed inset-0 z-[175] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 no-print" onClick={() => setIsTodayTargetsOpen(false)}>
@@ -5863,7 +5227,7 @@ function App() {
                 <div className="border-t border-slate-200 pt-4 text-[11px] text-slate-500 bg-slate-50 rounded-xl p-3">新しい実習期の作成とロック変更は、管理者モードで行えます。</div>
               )}
               <div className="border-t border-slate-200 pt-4">
-                <div className="text-xs font-bold text-slate-700 mb-2">全期間バックアップ</div>
+                <div className="text-xs font-bold text-slate-700 mb-2">全期間バックアップ（書き出し時のみ全件取得）</div>
                 <div className="flex gap-2">
                   <button onClick={handleExportAllData} className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold cursor-pointer">JSON書き出し</button>
                   <button disabled={!isAdmin} onClick={() => periodBackupInputRef.current?.click()} className={`flex-1 py-2 border rounded-xl text-xs font-bold ${isAdmin ? 'bg-sky-50 hover:bg-sky-100 border-sky-200 text-sky-800 cursor-pointer' : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'}`}>JSON読み込み</button>
