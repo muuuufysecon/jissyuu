@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.36.1</title>
+<title>現場実習進捗マネージャー v3.36.2</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -339,7 +339,7 @@
 @media(max-width:640px) { .gs-row-banner { text-align:left; padding-left:8px; } .gs-row-banner .gs-banner-text { position:sticky; left:140px; font-size:20px !important; letter-spacing:.08em; padding:2px 6px; } }
 
 
-/* v3.36.1: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
+/* v3.36.2: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
 .gs-table .gs-window-cell { padding:3px; background:#fff; }
 .gs-window-band { padding:0; width:100%; min-height:46px; border:1px solid #cc9b52; border-radius:4px; background:#fff0d8; color:#754610 !important; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e3cda9 calc(100% - 1px)); background-size:calc(100% / var(--gs-window-days)) 100%; }
 .gs-window-band>span { display:inline-block; max-width:100%; font-size:21px !important; line-height:1.2; font-weight:800; letter-spacing:.04em; padding:2px 3px; color:#754610 !important; }
@@ -351,7 +351,7 @@
 @media(max-width:640px) { .gs-window-band { text-align:left; padding-left:3px; } .gs-window-band>span { position:sticky; left:140px; background:inherit; font-size:19px !important; } .gs-window-short>span { font-size:14px !important; } }
 
 
-/* v3.36.1: 元の曜日色と罫線を保った透明な完了表示。 */
+/* v3.36.2: 元の曜日色と罫線を保った透明な完了表示。 */
 .gs-table tr.gs-row-done>td { background-color:#fff; }
 .gs-table tr.gs-row-done:nth-child(even)>td { background-color:#f3f6f8; }
 .gs-table tr.gs-row-done>td.gs-weekend { background-color:#fff0dd; }
@@ -376,7 +376,7 @@
 @media(max-width:640px){.gs-completed-banner .gs-banner-text{max-width:calc(100vw - 180px);white-space:normal;font-size:16px !important;letter-spacing:0;line-height:1.4;}.gs-doc-heading{align-items:flex-start;}.gs-related-documents{padding:10px;}.gs-document-buttons button{width:100%;}}
 
 
-/* v3.36.1: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
+/* v3.36.2: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
 .gs-related-documents { border:3px solid #5489bd; background:#edf6ff; box-shadow:0 2px 8px rgba(45,94,143,.12); }
 .gs-doc-heading strong { font-size:17px; color:#214d79 !important; }
 .gs-document-buttons button { border-color:#8eafd0; background:white; font-weight:600; }
@@ -388,7 +388,7 @@
 @media(max-width:540px){.sb-current-period{max-width:calc(100vw - 175px);}.gs-navigation strong{font-size:14px;}.gs-doc-heading strong{font-size:16px;}}
 
 
-/* v3.36.1: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
+/* v3.36.2: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
 .sb-view-switch { max-width:100%; flex-wrap:wrap; justify-content:flex-end; }
 .sb-view-switch .ow-launch { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border:1px solid #a8bfdb; border-radius:24px; background:#edf5ff; font-size:14px; font-weight:700; white-space:nowrap; }
 .sb-view-switch .ow-launch:hover { background:#dcecff; }
@@ -445,7 +445,7 @@
 @media(max-width:640px){.ow-filter-bar{flex:none;}.ow-table-scroll{flex:1 0 300px;}.ow-dialog .ow-help{margin:0;}}
 
 
-/* v3.36.1: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
+/* v3.36.2: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
 .wf-patrol-row { gap:10px; padding:14px; }
 .wf-patrol-info { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; }
 .wf-patrol-info strong { font-size:16px; }.wf-patrol-info .wf-muted { font-size:14px; }
@@ -457,7 +457,7 @@
 @media(max-width:540px){.wf-patrol-row{padding:12px;}.wf-dialog .wf-patrol-complete{font-size:16px;min-height:60px;padding:12px 8px;}}
 
 
-/* v3.36.1: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
+/* v3.36.2: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
 .ow-dialog .sb-utility-body { gap:8px; padding:12px 20px; }
 .ow-compact-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; flex-shrink:0; }
 .ow-period { margin-right:auto; min-width:0; overflow-wrap:anywhere; }
@@ -486,7 +486,7 @@
 }
 
 
-/* v3.36.1: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
+/* v3.36.2: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
 .gs-horizontal-control { padding:8px 16px; border-top:1px solid #dbe4ee; background:#f7fafe; }
 .gs-horizontal-caption { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px 12px; font-size:14px; }
 .gs-horizontal-caption label { font-weight:700; }
@@ -498,12 +498,12 @@
 @media(max-width:640px) { .gs-horizontal-control { padding:8px 12px; }.gs-horizontal-track { gap:8px; } }
 
 
-/* v3.36.1: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
+/* v3.36.2: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
 .gs-slider-dates { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:#52657a !important; }
 .gs-slider-dates span { color:inherit !important; }
 @media(max-width:420px) { .gs-slider-dates { flex-wrap:wrap; }.gs-slider-dates span:nth-child(2) { order:3; width:100%; text-align:center; } }
 
-/* v3.36.1: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
+/* v3.36.2: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
 .ow-page { width:100%; min-width:0; display:flex; flex-direction:column; height:var(--ow-page-height,calc(100dvh - 150px)); min-height:320px; background:#fff; border:1px solid #d4dfeb; border-radius:12px; color:#233044 !important; font-size:15px; }
 .ow-page * { box-sizing:border-box; }
 .ow-page .sb-utility-body { min-height:0; overflow-y:auto; }
@@ -517,9 +517,9 @@
 @media(max-width:640px) { .ow-page { min-height:320px; }.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; } }
 @media print { .ow-page { height:auto; min-height:0; border:0; }.ow-page .sb-utility-body,.ow-page .ow-table-scroll { overflow:visible; display:block; }.ow-page .ow-table { min-width:0; font-size:11px; }.ow-page .ow-table .ow-person { width:150px; position:static; }.ow-page .ow-table th { position:static; }.ow-page .ow-filter-bar,.ow-page .ow-filters { display:none; } }
 
-/* v3.36.1: cache management lives only in Settings, not on the main page. */
+/* v3.36.2: cache management lives only in Settings, not on the main page. */
 .cache-settings{margin-bottom:24px;padding:16px;border:1px solid #dce4ed;border-radius:10px;font-size:14px;line-height:1.6;background:#f8fafc}.cache-settings h4{font-weight:800;margin:0 0 8px}.cache-settings p{margin:4px 0}.cache-settings>div{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cache-settings button{min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;background:white;border-radius:8px;cursor:pointer}.cache-settings button:disabled{opacity:.5;cursor:not-allowed}.cache-settings button:focus-visible{outline:3px solid #2783de;outline-offset:2px}
-/* v3.36.1: document-scrolling workflow page; existing popup stays unchanged for list screens. */
+/* v3.36.2: document-scrolling workflow page; existing popup stays unchanged for list screens. */
 .workflow-page-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 20px;background:white;border-bottom:1px solid #dce4ed;font-size:14px;line-height:1.5}
 .workflow-page-nav>div{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}.workflow-page-nav>div:first-child{align-items:flex-start;flex-direction:column;gap:2px}.workflow-page-nav span{font-size:13px}
 .workflow-page-nav a,.workflow-page-nav button,.workflow-page-message button,.workflow-page-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:white;cursor:pointer;text-decoration:none}
@@ -527,6 +527,9 @@
 .wf-page-surface{position:static;padding:0 16px 24px;width:100%;min-width:0}.wf-dialog.gs-dialog.wf-page-dialog{width:100%;height:auto;max-height:none;overflow:visible;box-shadow:none;border-radius:12px;margin:0 auto;max-width:1800px}.wf-page-dialog .wf-scroll{flex:none;min-height:0;overflow:visible}.wf-page-dialog .wf-header{border-radius:12px 12px 0 0}.wf-page-dialog .wf-footer{border-radius:0 0 12px 12px}.wf-page-dialog #wf-title:focus{outline:none}a[data-calendar-workflow-link]:focus-visible{outline:3px solid #2783de;outline-offset:1px}
 @media(max-width:640px){.workflow-page-nav{padding:12px;align-items:flex-start;flex-direction:column;gap:10px}.workflow-page-nav>div:last-child{width:100%;gap:8px}.workflow-page-nav>div:last-child>*{flex:1;text-align:center}.wf-page-surface{padding:0 8px 16px}.wf-dialog.gs-dialog.wf-page-dialog{height:auto;max-height:none}.workflow-page-empty{padding:16px}}
 @media print{.wf-page-surface{padding:0}.wf-page-dialog .wf-close,.wf-page-dialog .wf-footer{display:none!important}.wf-dialog.gs-dialog.wf-page-dialog{border:0}}
+
+/* v3.36.2: keep the save indicator inside a stable header line; never shift the page on acknowledgement. */
+.wf-page-dialog .wf-header h2 .wf-save-status{display:inline-block;min-width:10em;min-height:20px;line-height:20px;vertical-align:middle;margin-left:8px;font-size:12px;font-weight:400;white-space:nowrap;color:#617085!important}
 
 </style>
 
@@ -852,7 +855,7 @@ const showDesktopNotification = (title, body, tag) => {
 // カスタムフック / Hooks
 // =============================================================================
 
-// v3.36.1: Display-only, expiring cache. NEVER replay it into Firestore.
+// v3.36.2: Display-only, expiring cache. NEVER replay it into Firestore.
 const EMPTY_CACHE_LIST = Object.freeze([]);
 const VIEW_CACHE_TTL = 24 * 60 * 60 * 1000;
 const VIEW_CACHE_DB = `jissyuu_view_cache${ENV_SUFFIX}`;
@@ -1403,7 +1406,7 @@ const getWorkflowDates = (student, task) => {
   const field = {phone:'phoneDate',doc:'docDate',greeting:'greetingDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'}[task.key];
   return field && workflowDayKey(student[field]) ? [student[field]] : [];
 };
-// v3.36.1: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
+// v3.36.2: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
 const getWorkflowPlan = (student, task) => {
   if (task.state === 'exempt') return null;
   const days = [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
@@ -1423,7 +1426,7 @@ const getWorkflowPlan = (student, task) => {
   return null;
 };
 
-// v3.36.1: 完了記録の表示と、日付マスからの直接追加。
+// v3.36.2: 完了記録の表示と、日付マスからの直接追加。
 const workflowCompletion = (student, task) => {
   if (task.state !== 'done' || task.key === 'dates') return null;
   const fields={phone:'phoneDate',doc:'docDate',greeting:'greetingCompletedDate',gift:'giftCompletedDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'};
@@ -1501,7 +1504,7 @@ function WorkflowSchedule({ student, model, selected, onSelect, onQuickAdd, read
   </section>;
 }
 
-function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdmin, suspended, initialTask = null, returnToOverview = false, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onOpenMaterial, onEditPatrol, onConfirm }) {
+function StudentWorkflowDialog({ student: s, standalone = false, pendingWrites = 0, readOnly, isAdmin, suspended, initialTask = null, returnToOverview = false, onClose, onPatch, onText, onSelect, onPickDate, onMaterials, onOpenMaterial, onEditPatrol, onConfirm }) {
   const rootRef = useRef(null);
   const [quickAdd,setQuickAdd]=useState(null);
   const [quickError,setQuickError]=useState('');
@@ -1535,11 +1538,14 @@ function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdm
     return () => document.removeEventListener('keydown', keydown);
   }, [standalone, suspended, quickAdd, onClose]);
   const scrollToTask = (key) => setSelectedTask(key);
+  // Refresh highlighting after data changes, but scroll only on an explicit task selection.
   useEffect(() => {
     const cards = rootRef.current?.querySelectorAll('[data-wf-task]') || [];
     cards.forEach(card => card.classList.toggle('gs-active-task', card.dataset.wfTask === selectedTask));
-    if (selectedTask) rootRef.current?.querySelector('.gs-active-task')?.scrollIntoView({block:'center',behavior:'auto'});
   }, [selectedTask, s]);
+  useEffect(() => {
+    if (selectedTask) rootRef.current?.querySelector(`[data-wf-task="${selectedTask}"]`)?.scrollIntoView({block:'center',behavior:'auto'});
+  }, [selectedTask]);
   const editText = (field, title, multiline = false, extra = {}) => onText({ value: s[field] || '', title, label: title, multiline, onSave: (v) => onPatch(s, { [field]: v, ...extra }) });
   const changeTask = (task, value) => {
     if (fieldLocked(task.field)) return;
@@ -1615,7 +1621,7 @@ function StudentWorkflowDialog({ student: s, standalone = false, readOnly, isAdm
 
   return <><div className={standalone ? "wf-page-surface" : "wf-overlay no-print"} onMouseDown={(event) => { if (!standalone && event.target === event.currentTarget) onClose(); }}>
     <div ref={rootRef} role={standalone ? "region" : "dialog"} aria-modal={standalone ? undefined : true} aria-labelledby="wf-title" className={`wf-dialog gs-dialog ${standalone ? "wf-page-dialog" : ""}`}>
-      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・見学</p><h2 id="wf-title" tabIndex={standalone ? -1 : undefined}>業務ワークフロー <span>工程表</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label={standalone ? "業務フローのタブを閉じる" : "ワークフローを閉じる"} onClick={onClose}>×</button></header>
+      <header className="wf-header"><div><p className="wf-eyebrow">現場実習・見学</p><h2 id="wf-title" tabIndex={standalone ? -1 : undefined}>業務ワークフロー <span>工程表{standalone && <span className="wf-save-status" role="status" aria-live="polite">{pendingWrites > 0 ? `保存確認待ち：${pendingWrites}件` : ''}</span>}</span></h2></div><button type="button" className="wf-close" data-wf-close aria-label={standalone ? "業務フローのタブを閉じる" : "ワークフローを閉じる"} onClick={onClose}>×</button></header>
       <div className="wf-scroll">
         {readOnly && <p className="wf-readonly" role="status">🔒 閲覧のみです。クラウド接続確認中、または終了済み実習期のため編集できません。</p>}
         <div className="gs-person-summary student-identity-color" style={studentIdentityStyle(s)} data-identity-grade={s.grade||'unset'} data-identity-type={s.internshipType==='observation'?'observation':'internship'}><strong>{s.name || '氏名未設定'}（{s.location || '実習先未設定'}）</strong><span>{s.grade ? `${s.grade}年${s.classVal || '―'}組` : ''} {s.teacher || '担当未設定'}</span><span className="gs-identity-kind">{s.internshipType==='observation'?'見学':'実習'}</span><button type="button" className="gs-detail-toggle" aria-expanded={showBasics} onClick={()=>setShowBasics(v=>!v)}>基本情報 {showBasics?'を閉じる':'を編集'}</button></div>
@@ -2189,7 +2195,7 @@ function AppUtilityDialog({ title, onClose, children, wide = false, suspended = 
   return <div className="sb-utility-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`sb-utility-dialog ${wide ? 'sb-board-dialog' : ''} ${className}`}><header><h2>{title}</h2><button type="button" className="sb-icon-button" aria-label={`${title}を閉じる`} onClick={onClose}>×</button></header><div className="sb-utility-body">{children}</div></section></div>;
 }
 
-// v3.36.1: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
+// v3.36.2: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
 const WORKFLOW_OVERVIEW_COLUMNS=[
   {key:'phone',title:'事前電話連絡'}, {key:'doc',title:'保護者お知らせ'},
   {key:'greeting',title:'事前あいさつ・打合せ'}, {key:'gift',title:'菓子折'},
@@ -2274,7 +2280,7 @@ const chooseActivePeriod=(list,preferred)=>{
   return list.reduce((latest,p)=>!latest||Number(p.createdAtClient||0)>=Number(latest.createdAtClient||0)?p:latest,null)?.id||DEFAULT_PERIOD_ID;
 };
 
-// v3.36.1: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
+// v3.36.2: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
 const readWorkflowPage = () => {
   if (!location.hash.startsWith('#workflow?')) return null;
   const q = new URLSearchParams(location.hash.slice('#workflow?'.length));
@@ -2466,7 +2472,7 @@ function App() {
     setTimeout(() => setWorkflowCloseNotice(true), 100);
   };
   const [workflowCloseNotice, setWorkflowCloseNotice] = useState(false);
-  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.36.1'; }, [workflowPage]);
+  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.36.2'; }, [workflowPage]);
   const closeWorkflowDetail=()=>{setSelectedStudentDetail(null);setWorkflowInitialTask(null);if(workflowReturnToOverview)setCurrentView('workflow');setWorkflowReturnToOverview(false);};
   const [draggingStudentId, setDraggingStudentId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
@@ -3216,7 +3222,7 @@ function App() {
         try { localStorage.setItem(`admin_password_hash_${roomKey}`, cloudHash); } catch (e) {}
         // クラウドと一致しない “以前設定した管理者状態” を強制クリアしない（他端末で変更しただけの可能性もあるため）
       } else if (localHash) {
-        // v3.36.1: local credentials must never be uploaded automatically.
+        // v3.36.2: local credentials must never be uploaded automatically.
       }
     }, (err) => { console.warn('admin hash snapshot:', err.message); });
     return () => { try { unsub(); } catch (e) {} };
@@ -4155,7 +4161,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.36.1 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.36.2 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
@@ -5001,7 +5007,7 @@ function App() {
 
       </>}
       {workflowPage && <>
-        <nav className="workflow-page-nav no-print" aria-label="業務フローページの操作"><div><strong>業務フロー専用ページ</strong><span>元のカレンダーは別タブに残っています</span></div><div><a href={calendarHref}>このタブでカレンダーを開く</a><button type="button" onClick={()=>{setTempRoomKey(roomKey);setIsConfigOpen(true);}}>設定</button><button type="button" onClick={closeWorkflowPage}>このタブを閉じる</button>{pendingWrites > 0 && <span role="status">保存確認待ち：{pendingWrites}件</span>}</div></nav>
+        <nav className="workflow-page-nav no-print" aria-label="業務フローページの操作"><div><strong>業務フロー専用ページ</strong><span>元のカレンダーは別タブに残っています</span></div><div><a href={calendarHref}>このタブでカレンダーを開く</a><button type="button" onClick={()=>{setTempRoomKey(roomKey);setIsConfigOpen(true);}}>設定</button><button type="button" onClick={closeWorkflowPage}>このタブを閉じる</button></div></nav>
           {workflowCloseNotice && <p className="workflow-page-message" role="status">このタブを自動で閉じられませんでした。ブラウザーのタブを閉じるか、上のカレンダーのリンクをご利用ください。</p>}
         {(!cloudConfigured && !workflowConfigMismatch && !workflowPage.invalid) && <div className="workflow-page-message"><p>端末保存モードです。クラウドの内容を確認する場合は接続設定を読み込んでください。</p><button type="button" onClick={()=>{setTempRoomKey(roomKey);setIsConfigOpen(true);}}>環境設定を開く</button></div>}
         {!workflowPageStudent && <section className="workflow-page-empty" aria-live="polite"><h1>業務ワークフロー</h1><p>{workflowPage.invalid ? 'リンクの形式が正しくありません。元のカレンダーから開き直してください。' : workflowConfigMismatch ? '接続先がリンクと一致しません。元のカレンダーで接続設定を確認し、開き直してください。' : cloudConfigured && cloudReadOnly ? '対象のデータを確認しています。接続できない場合は再試行してください。' : isLoading ? '対象のデータを読み込んでいます。' : '対象の記録が見つかりません。削除や実習期の変更がないか、元のカレンダーで確認してください。'}</p><a href={calendarHref}>カレンダーを開く</a></section>}
@@ -5011,7 +5017,7 @@ function App() {
         const student = workflowPage ? workflowPageStudent : students.find((item) => item.id === selectedStudentDetail.id);
         if (!student) return null;
         const period = periods.find((item) => item.id === (student.periodId || DEFAULT_PERIOD_ID));
-        return <StudentWorkflowDialog key={student.id} standalone={!!workflowPage} student={student} initialTask={workflowInitialTask} returnToOverview={workflowReturnToOverview} readOnly={cloudReadOnly || (!!period?.locked && !isAdmin)} isAdmin={isAdmin}
+        return <StudentWorkflowDialog key={student.id} standalone={!!workflowPage} pendingWrites={pendingWrites} student={student} initialTask={workflowInitialTask} returnToOverview={workflowReturnToOverview} readOnly={cloudReadOnly || (!!period?.locked && !isAdmin)} isAdmin={isAdmin}
           suspended={!!(textEditState || selectEditState || datePickerState || materialModalStudentId || materialPreview || patrolEditState || alertState || confirmState)}
           onClose={workflowPage ? closeWorkflowPage : closeWorkflowDetail} onPatch={patchWorkflowStudent}
           onText={setTextEditState} onSelect={setSelectEditState} onPickDate={setDatePickerState}
