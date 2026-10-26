@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.38.1</title>
+<title>現場実習進捗マネージャー v3.38.2</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -338,7 +338,7 @@
 @media(max-width:640px) { .gs-row-banner { text-align:left; padding-left:8px; } .gs-row-banner .gs-banner-text { position:sticky; left:140px; font-size:20px !important; letter-spacing:.08em; padding:2px 6px; } }
 
 
-/* v3.38.1: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
+/* v3.38.2: 日程に連動した対応期間の帯。土日のマスにはお礼状帯を置かない。 */
 .gs-table .gs-window-cell { padding:3px; background:#fff; }
 .gs-window-band { padding:0; width:100%; min-height:46px; border:1px solid #cc9b52; border-radius:4px; background:#fff0d8; color:#754610 !important; background-image:linear-gradient(to right,transparent calc(100% - 1px),#e3cda9 calc(100% - 1px)); background-size:calc(100% / var(--gs-window-days)) 100%; }
 .gs-window-band>span { display:inline-block; max-width:100%; font-size:21px !important; line-height:1.2; font-weight:800; letter-spacing:.04em; padding:2px 3px; color:#754610 !important; }
@@ -350,7 +350,7 @@
 @media(max-width:640px) { .gs-window-band { text-align:left; padding-left:3px; } .gs-window-band>span { position:sticky; left:140px; background:inherit; font-size:19px !important; } .gs-window-short>span { font-size:14px !important; } }
 
 
-/* v3.38.1: 元の曜日色と罫線を保った透明な完了表示。 */
+/* v3.38.2: 元の曜日色と罫線を保った透明な完了表示。 */
 .gs-table tr.gs-row-done>td { background-color:#fff; }
 .gs-table tr.gs-row-done:nth-child(even)>td { background-color:#f3f6f8; }
 .gs-table tr.gs-row-done>td.gs-weekend { background-color:#fff0dd; }
@@ -375,7 +375,7 @@
 @media(max-width:640px){.gs-completed-banner .gs-banner-text{max-width:calc(100vw - 180px);white-space:normal;font-size:16px !important;letter-spacing:0;line-height:1.4;}.gs-doc-heading{align-items:flex-start;}.gs-related-documents{padding:10px;}.gs-document-buttons button{width:100%;}}
 
 
-/* v3.38.1: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
+/* v3.38.2: 関連文書を強調し、現在の実習期を閉じたサイドバーの外にも表示。 */
 .gs-related-documents { border:3px solid #5489bd; background:#edf6ff; box-shadow:0 2px 8px rgba(45,94,143,.12); }
 .gs-doc-heading strong { font-size:17px; color:#214d79 !important; }
 .gs-document-buttons button { border-color:#8eafd0; background:white; font-weight:600; }
@@ -387,7 +387,7 @@
 @media(max-width:540px){.sb-current-period{max-width:calc(100vw - 175px);}.gs-navigation strong{font-size:14px;}.gs-doc-heading strong{font-size:16px;}}
 
 
-/* v3.38.1: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
+/* v3.38.2: 一人一行の業務別一覧。ステータスは文字と色の両方で表示。 */
 .sb-view-switch { max-width:100%; flex-wrap:wrap; justify-content:flex-end; }
 .sb-view-switch .ow-launch { min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border:1px solid #a8bfdb; border-radius:24px; background:#edf5ff; font-size:14px; font-weight:700; white-space:nowrap; }
 .sb-view-switch .ow-launch:hover { background:#dcecff; }
@@ -444,7 +444,7 @@
 @media(max-width:640px){.ow-filter-bar{flex:none;}.ow-table-scroll{flex:1 0 300px;}.ow-dialog .ow-help{margin:0;}}
 
 
-/* v3.38.1: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
+/* v3.38.2: 巡回・同行は小さなチェック欄ではなく、編集・削除の前に大きな完了ボタン。 */
 .wf-patrol-row { gap:10px; padding:14px; }
 .wf-patrol-info { display:flex; flex-wrap:wrap; align-items:center; gap:4px 14px; }
 .wf-patrol-info strong { font-size:16px; }.wf-patrol-info .wf-muted { font-size:14px; }
@@ -456,7 +456,7 @@
 @media(max-width:540px){.wf-patrol-row{padding:12px;}.wf-dialog .wf-patrol-complete{font-size:16px;min-height:60px;padding:12px 8px;}}
 
 
-/* v3.38.1: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
+/* v3.38.2: 集計と絞り込みを一列に集約し、進捗表の表示領域を優先。 */
 .ow-dialog .sb-utility-body { gap:8px; padding:12px 20px; }
 .ow-compact-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; flex-shrink:0; }
 .ow-period { margin-right:auto; min-width:0; overflow-wrap:anywhere; }
@@ -485,7 +485,7 @@
 }
 
 
-/* v3.38.1: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
+/* v3.38.2: 指・マウス・キーボードで操作できる常設の横移動スライダー。 */
 .gs-horizontal-control { padding:8px 16px; border-top:1px solid #dbe4ee; background:#f7fafe; }
 .gs-horizontal-caption { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px 12px; font-size:14px; }
 .gs-horizontal-caption label { font-weight:700; }
@@ -497,12 +497,12 @@
 @media(max-width:640px) { .gs-horizontal-control { padding:8px 12px; }.gs-horizontal-track { gap:8px; } }
 
 
-/* v3.38.1: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
+/* v3.38.2: スライダーはスクロール量ではなく表示日付を動かす。広い画面でも操作可能。 */
 .gs-slider-dates { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:#52657a !important; }
 .gs-slider-dates span { color:inherit !important; }
 @media(max-width:420px) { .gs-slider-dates { flex-wrap:wrap; }.gs-slider-dates span:nth-child(2) { order:3; width:100%; text-align:center; } }
 
-/* v3.38.1: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
+/* v3.38.2: 業務一覧はメイン画面。オーバーレイ・フォーカストラップは使わない。 */
 .ow-page { width:100%; min-width:0; display:flex; flex-direction:column; height:var(--ow-page-height,calc(100dvh - 150px)); min-height:320px; background:#fff; border:1px solid #d4dfeb; border-radius:12px; color:#233044 !important; font-size:15px; }
 .ow-page * { box-sizing:border-box; }
 .ow-page .sb-utility-body { min-height:0; overflow-y:auto; }
@@ -516,9 +516,9 @@
 @media(max-width:640px) { .ow-page { min-height:320px; }.ow-page .ow-table-scroll { flex:1 1 250px; min-height:180px; } }
 @media print { .ow-page { height:auto; min-height:0; border:0; }.ow-page .sb-utility-body,.ow-page .ow-table-scroll { overflow:visible; display:block; }.ow-page .ow-table { min-width:0; font-size:11px; }.ow-page .ow-table .ow-person { width:150px; position:static; }.ow-page .ow-table th { position:static; }.ow-page .ow-filter-bar,.ow-page .ow-filters { display:none; } }
 
-/* v3.38.1: cache management lives only in Settings, not on the main page. */
+/* v3.38.2: cache management lives only in Settings, not on the main page. */
 .cache-settings{margin-bottom:24px;padding:16px;border:1px solid #dce4ed;border-radius:10px;font-size:14px;line-height:1.6;background:#f8fafc}.cache-settings h4{font-weight:800;margin:0 0 8px}.cache-settings p{margin:4px 0}.cache-settings>div{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cache-settings button{min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;background:white;border-radius:8px;cursor:pointer}.cache-settings button:disabled{opacity:.5;cursor:not-allowed}.cache-settings button:focus-visible{outline:3px solid #2783de;outline-offset:2px}
-/* v3.38.1: document-scrolling workflow page; existing popup stays unchanged for list screens. */
+/* v3.38.2: document-scrolling workflow page; existing popup stays unchanged for list screens. */
 .workflow-page-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 20px;background:white;border-bottom:1px solid #dce4ed;font-size:14px;line-height:1.5}
 .workflow-page-nav>div{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}.workflow-page-nav>div:first-child{align-items:flex-start;flex-direction:column;gap:2px}.workflow-page-nav span{font-size:13px}
 .workflow-page-nav a,.workflow-page-nav button,.workflow-page-message button,.workflow-page-empty a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:white;cursor:pointer;text-decoration:none}
@@ -530,11 +530,16 @@
 
 .wf-dialog[aria-busy="true"]>.wf-scroll{pointer-events:none}.wf-close-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.wf-footer>p{min-width:0}.wf-close-actions{flex-shrink:0}
 
-/* v3.38.1: 対象外は文字ではなく斜線。印刷にも模様を維持。 */
+/* v3.38.2: 対象外は黒い斜線1本。行ホバーの背景更新から独立させる。 */
 .ow-table td.ow-exempt-cell, .gs-banner-exempt .gs-row-banner, .exempt-legend-swatch {
+  position:relative;
   background-color:#f2f4f6;
-  background-image:repeating-linear-gradient(135deg,transparent 0,transparent 9px,#b9c4cf 9px,#b9c4cf 10px,transparent 10px,transparent 19px);
-  background-size:auto;
+  background-image:none;
+  print-color-adjust:exact; -webkit-print-color-adjust:exact;
+}
+.ow-table td.ow-exempt-cell::after, .gs-banner-exempt .gs-row-banner::after, .exempt-legend-swatch::after {
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 100L100 0' fill='none' stroke='%23000' stroke-width='1.2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   print-color-adjust:exact; -webkit-print-color-adjust:exact;
 }
 .ow-cell.ow-exempt, .ow-cell.ow-exempt:hover { background:transparent; }
@@ -866,7 +871,7 @@ const showDesktopNotification = (title, body, tag) => {
 // カスタムフック / Hooks
 // =============================================================================
 
-// v3.38.1: Display-only, expiring cache. NEVER replay it into Firestore.
+// v3.38.2: Display-only, expiring cache. NEVER replay it into Firestore.
 const EMPTY_CACHE_LIST = Object.freeze([]);
 const VIEW_CACHE_TTL = 24 * 60 * 60 * 1000;
 const VIEW_CACHE_DB = `jissyuu_view_cache${ENV_SUFFIX}`;
@@ -970,7 +975,7 @@ const writeViewCache = (scope, students, periods) => {
 };
 const deleteViewCache = (scope) => viewCacheOperation('readwrite', (store) => store.delete(scope));
 
-// v3.38.1: students are subscribed only for the selected period. Metadata is small and separate.
+// v3.38.2: students are subscribed only for the selected period. Metadata is small and separate.
 function useFirestoreSync(firebaseConfigStr,roomKey,periodId=DEFAULT_PERIOD_ID){
  const scope=cloudGateContext(firebaseConfigStr,roomKey,periodId), cloudConfigured=!!firebaseConfigStr.trim();
  const [state,setState]=useState({scope:'',students:[],periods:[],savedAt:null});
@@ -1152,7 +1157,7 @@ const getWorkflowDates = (student, task) => {
   const field = {phone:'phoneDate',doc:'docDate',greeting:'greetingDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'}[task.key];
   return field && workflowDayKey(student[field]) ? [student[field]] : [];
 };
-// v3.38.1: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
+// v3.38.2: 利用者指定の業務期間。登録日程から計算し、保存データは変更しない。
 const getWorkflowPlan = (student, task) => {
   if (task.state === 'exempt') return null;
   const days = [...new Set(student.internshipDates || [])].filter(workflowDayKey).sort();
@@ -1172,7 +1177,7 @@ const getWorkflowPlan = (student, task) => {
   return null;
 };
 
-// v3.38.1: 完了記録の表示と、日付マスからの直接追加。
+// v3.38.2: 完了記録の表示と、日付マスからの直接追加。
 const workflowCompletion = (student, task) => {
   if (task.state !== 'done' || task.key === 'dates') return null;
   const fields={phone:'phoneDate',doc:'docDate',greeting:'greetingCompletedDate',gift:'giftCompletedDate',studentThankYou:'studentThankYouDate',teacherThankYou:'teacherThankYouDate'};
@@ -1940,7 +1945,7 @@ function AppUtilityDialog({ title, onClose, children, wide = false, suspended = 
   return <div className="sb-utility-overlay no-print" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section ref={ref} role="dialog" aria-modal="true" aria-label={title} className={`sb-utility-dialog ${wide ? 'sb-board-dialog' : ''} ${className}`}><header><h2>{title}</h2><button type="button" className="sb-icon-button" aria-label={`${title}を閉じる`} onClick={onClose}>×</button></header><div className="sb-utility-body">{children}</div></section></div>;
 }
 
-// v3.38.1: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
+// v3.38.2: 生徒を1人1行に並べた業務別進捗一覧。状態変更は既存の個別画面で行う。
 const WORKFLOW_OVERVIEW_COLUMNS=[
   {key:'phone',title:'事前電話連絡'}, {key:'doc',title:'保護者お知らせ'},
   {key:'greeting',title:'事前あいさつ・打合せ'}, {key:'gift',title:'菓子折'},
@@ -2025,7 +2030,7 @@ const chooseActivePeriod=(list,preferred)=>{
   return list.reduce((latest,p)=>!latest||Number(p.createdAtClient||0)>=Number(latest.createdAtClient||0)?p:latest,null)?.id||DEFAULT_PERIOD_ID;
 };
 
-// v3.38.1: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
+// v3.38.2: same HTML, dedicated workflow page in a new tab. URL contains IDs only.
 const readWorkflowPage = () => {
   if (!location.hash.startsWith('#workflow?')) return null;
   const q = new URLSearchParams(location.hash.slice('#workflow?'.length));
@@ -2033,7 +2038,7 @@ const readWorkflowPage = () => {
   const valid = [student, room, period].every(v => v.length > 0 && v.length <= 512 && !v.includes('/') && !/[\x00-\x1f]/.test(v));
   return { student, room, period, project: q.get('project') || '', invalid: !valid };
 };
-// v3.38.1: in-memory popup drafts. No draft is persisted or automatically replayed.
+// v3.38.2: in-memory popup drafts. No draft is persisted or automatically replayed.
 const cloneWorkflowDraft = value => JSON.parse(JSON.stringify(value));
 const workflowComparable = value => {
   if (value === undefined) return null;
@@ -2065,7 +2070,7 @@ const assertWorkflowCommit = (draft, latest, patch, isAdmin, periodLocked) => {
   }
 };
 
-// v3.38.1: all views share one period-scoped, already-fetched snapshot.
+// v3.38.2: all views share one period-scoped, already-fetched snapshot.
 // This helper never performs I/O. Each popup retains the opening snapshot and clones only its edited row.
 const buildSharedStudentSnapshot=(scope,rows)=>{
  const byId=new Map(rows.map(row=>[row.id,row])),periods=new Map();
@@ -2270,7 +2275,7 @@ function App() {
     setTimeout(() => setWorkflowCloseNotice(true), 100);
   };
   const [workflowCloseNotice, setWorkflowCloseNotice] = useState(false);
-  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.38.1'; }, [workflowPage]);
+  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.38.2'; }, [workflowPage]);
   const finishWorkflowClose = () => {
     workflowDraftRef.current=null; setWorkflowDraft(null); setSelectedStudentDetailState(null);
     setWorkflowInitialTask(null); if(workflowReturnToOverview)setCurrentView('workflow'); setWorkflowReturnToOverview(false);
@@ -2933,7 +2938,7 @@ function App() {
         try { localStorage.setItem(`admin_password_hash_${roomKey}`, cloudHash); } catch (e) {}
         // クラウドと一致しない “以前設定した管理者状態” を強制クリアしない（他端末で変更しただけの可能性もあるため）
       } else if (localHash) {
-        // v3.38.1: local credentials must never be uploaded automatically.
+        // v3.38.2: local credentials must never be uploaded automatically.
       }
     }, (err) => { console.warn('admin hash snapshot:', err.message); });
     return () => { try { unsub(); } catch (e) {} };
@@ -3874,7 +3879,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.38.1 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.38.2 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
