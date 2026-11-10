@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.38.2</title>
+<title>現場実習進捗マネージャー v3.38.3</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -379,6 +379,17 @@
 .gs-related-documents { border:3px solid #5489bd; background:#edf6ff; box-shadow:0 2px 8px rgba(45,94,143,.12); }
 .gs-doc-heading strong { font-size:17px; color:#214d79 !important; }
 .gs-document-buttons button { border-color:#8eafd0; background:white; font-weight:600; }
+.room-shortcut { min-height:44px; max-width:min(300px,70vw); display:inline-flex; align-items:center; gap:6px; padding:8px 10px; border:1px solid #bacde2; border-radius:8px; background:#fff; font-size:14px; font-weight:700; cursor:pointer; }
+.room-shortcut:hover { background:#edf4fb; }
+.room-shortcut span:first-child { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.room-shortcut span:last-child { flex-shrink:0; }
+@media(max-width:540px) { .sb-topbar-title { display:grid; grid-template-columns:44px minmax(0,1fr) minmax(0,1fr); width:100%; } .sb-topbar-title strong { grid-column:2 / 4; } .sb-topbar-title .sb-current-period { grid-column:1 / 3; width:100%; max-width:none; } .sb-topbar-title .room-shortcut { grid-column:3; width:100%; max-width:none; } }
+.room-list { display:flex; flex-direction:column; gap:8px; }
+.room-list button { min-height:44px; padding:10px 12px; border:1px solid #cbd6e2; border-radius:8px; background:#fff; text-align:left; font-size:14px; font-weight:700; overflow-wrap:anywhere; }
+.room-list button:hover { background:#edf4fb; }
+.room-list button[aria-current=true] { background:#e5f2fc; border-color:#93bde1; }
+.room-list-footer { display:flex; justify-content:flex-end; margin-top:16px; }
+.room-list-footer button { min-height:44px; padding:8px 12px; border:1px solid #cfd9e4; border-radius:8px; background:#fff; }
 .sb-current-period { min-height:44px; max-width:min(400px,55vw); padding:8px 28px 8px 10px; border:1px solid #bacde2; border-radius:8px; background:#f3f7ff; font-size:14px; font-weight:700; }
 .gs-table thead th:not(.gs-label):not(.gs-status-heading)>span { font-size:14px; letter-spacing:-.2px; white-space:nowrap; }
 .gs-table td.gs-today { box-shadow:inset 2px 0 #2783de,inset -2px 0 #2783de; }
@@ -2104,7 +2115,10 @@ function App() {
   const [availableRooms, setAvailableRooms] = useState([]);
   const [isLoadingRooms, setIsLoadingRooms] = useState(false);
   const [roomSwitchTarget, setRoomSwitchTarget] = useState(null);
-  const [roomSwitchPassword, setRoomSwitchPassword] = useState('');
+  const [isRoomPickerOpen, setIsRoomPickerOpen] = useState(false);
+  const [roomSwitchBusy, setRoomSwitchBusy] = useState(false);
+  const roomSwitchBusyRef = useRef(false);
+  const [roomListWarning, setRoomListWarning] = useState('');
   const [roomSwitchError, setRoomSwitchError] = useState('');
   const [myTeacherName, setMyTeacherName] = useState(() => localStorage.getItem('my_teacher_name') || '');
 
@@ -2275,7 +2289,7 @@ function App() {
     setTimeout(() => setWorkflowCloseNotice(true), 100);
   };
   const [workflowCloseNotice, setWorkflowCloseNotice] = useState(false);
-  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.38.2'; }, [workflowPage]);
+  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.38.3'; }, [workflowPage]);
   const finishWorkflowClose = () => {
     workflowDraftRef.current=null; setWorkflowDraft(null); setSelectedStudentDetailState(null);
     setWorkflowInitialTask(null); if(workflowReturnToOverview)setCurrentView('workflow'); setWorkflowReturnToOverview(false);
@@ -3061,33 +3075,44 @@ function App() {
     return false;
   }, [connectionStatus]);
 
+  // Never change scope while a workflow draft or any cloud write is pending.
+  const roomChangeAllowed = () => {
+    if (workflowPage) { showAlert('業務フロー専用ページではルームを変更できません。元の画面で切り替えてください。'); return false; }
+    if (workflowDraftRef.current || workflowSavingRef.current) { showAlert('編集中の内容を保存して閉じてから、ルームを切り替えてください。'); return false; }
+    if (cloudWriteGate.pending > 0) { showAlert('保存処理中です。保存完了を確認してから、ルームを切り替えてください。'); return false; }
+    return true;
+  };
+  const commitRoomChange = (target) => {
+    if (!roomChangeAllowed()) return false;
+    localStorage.setItem('school_room_key', target);
+    setTempRoomKey(target); setRoomKey(target);
+    setRoomSwitchTarget(null); setIsRoomPickerOpen(false); setIsConfigOpen(false);
+    return true;
+  };
   const handleRoomKeyChange = async (e) => {
     e.preventDefault();
     const target = String(tempRoomKey || '').trim();
     if (!target) return;
     if (target === roomKey) { setIsConfigOpen(false); return; }
+    if (!roomChangeAllowed()) return;
     // v3.10 fix: 既存ルームでない場合、一般利用者には新規作成を許可しない。
     //   管理者は確認ダイアログを経たうえで新規ルームとして作成できる。
     const exists = await roomExists(target);
     if (!exists) {
       if (!isAdmin) {
-        showAlert('このルームは存在しません。\nルーム名（合言葉）を確認するか、管理者にルームの作成を依頼してください。');
+        showAlert('このルームは存在しません。\nルーム名を確認するか、管理者にルームの作成を依頼してください。');
         return;
       }
       showConfirm(`ルーム「${target}」はまだ存在しません。\n管理者として新規ルームを作成しますか？`, () => {
-        localStorage.setItem('school_room_key', target);
-        setRoomKey(target);
-        setIsConfigOpen(false);
+        commitRoomChange(target);
       });
       return;
     }
     // v3.11 fix: 既存ルームへの切替時も、合言葉の入力ミスで意図しない別の部屋に
     //   入ってしまうのを防ぐため、「現在のルーム名」と「これから入るルーム名」を
     //   明示した確認ダイアログを挟む。OKを押した時にだけ実際に切り替える。
-    showConfirm(`これから「${target}」というルームに入ります。\n（現在は「${roomKey}」のルームを開いています）\n\n合言葉が合っているか、もう一度確認してください。\nこのルームに入ってよろしいですか？`, () => {
-      localStorage.setItem('school_room_key', target);
-      setRoomKey(target);
-      setIsConfigOpen(false);
+    showConfirm(`これから「${target}」というルームに入ります。\n（現在は「${roomKey}」のルームを開いています）\n\nルーム名が合っているか、もう一度確認してください。\nこのルームに入ってよろしいですか？`, () => {
+      commitRoomChange(target);
     });
   };
 
@@ -3095,6 +3120,7 @@ function App() {
   //        ローカルは localStorage の "local_students_*" キーから、クラウドは rooms コレクションを get() で列挙する。
   const fetchAllRooms = useCallback(async () => {
     setIsLoadingRooms(true);
+    setRoomListWarning('');
     try {
       const rooms = new Set();
       for (let i = 0; i < localStorage.length; i++) {
@@ -3111,7 +3137,7 @@ function App() {
           const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
           const snap = await db.collection('rooms').get();
           snap.forEach((doc) => rooms.add(doc.id));
-        } catch (e) { console.warn('rooms list error:', e.message); }
+        } catch (e) { console.warn('rooms list error:', e.message); setRoomListWarning('クラウドのルーム一覧を取得できませんでした。端末の履歴のみ表示しています。'); }
       }
       if (roomKey) rooms.add(roomKey);
       setAvailableRooms(Array.from(rooms).sort());
@@ -3122,28 +3148,26 @@ function App() {
     }
   }, [connectionStatus, roomKey, showAlert]);
 
-  const handleConfirmRoomSwitch = async (e) => {
-    e.preventDefault();
-    if (String(roomSwitchPassword || '').trim() !== '@kirari') {
-      setRoomSwitchError('パスワードが違います。');
-      return;
-    }
+  const openRoomPicker = () => {
+    if (!roomChangeAllowed()) return;
+    setRoomSwitchError(''); setIsRoomPickerOpen(true); fetchAllRooms();
+  };
+  const chooseRoom = (target) => {
+    if (target === roomKey || !roomChangeAllowed()) return;
+    setRoomSwitchError(''); setRoomSwitchTarget(target);
+  };
+  const handleConfirmRoomSwitch = async () => {
+    if (roomSwitchBusyRef.current || !roomChangeAllowed()) return;
     const target = roomSwitchTarget;
-    if (!target) return;
-    // v3.10 fix: 一覧から選んだルームでも、念のため存在を再確認。
-    //   一般利用者には存在しないルームへの切替（＝新規作成）を許可しない。
-    const exists = await roomExists(target);
-    if (!exists && !isAdmin) {
-      setRoomSwitchError('このルームは存在しません。');
-      return;
-    }
-    setRoomSwitchTarget(null);
-    setRoomSwitchPassword('');
-    setRoomSwitchError('');
-    localStorage.setItem('school_room_key', target);
-    setTempRoomKey(target);
-    setRoomKey(target);
-    setIsConfigOpen(false);
+    if (!target || target === roomKey) return;
+    roomSwitchBusyRef.current = true; setRoomSwitchBusy(true); setRoomSwitchError('');
+    try {
+      const exists = await roomExists(target);
+      if (!exists) { setRoomSwitchError('ルームを確認できません。接続状態を確認するか、一覧を更新してください。'); return; }
+      commitRoomChange(target);
+    } catch (error) {
+      setRoomSwitchError('ルームを確認できませんでした。接続状態を確認して再試行してください。');
+    } finally { roomSwitchBusyRef.current = false; setRoomSwitchBusy(false); }
   };
 
   // v3.7: 訪問したルーム名を localStorage に履歴として記録する。これにより、別のルームに切り替えても以前いたルームを一覧に表示できる。
@@ -3879,7 +3903,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.38.2 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.38.3 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
@@ -4059,10 +4083,19 @@ function App() {
         </div>
       </aside>
       <div className="sb-topbar no-print">
-        <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : currentView === 'workflow' ? '業務一覧' : 'リスト一覧'}</strong><select className="sb-current-period" disabled={!!workflowDraft||workflowSaving} aria-label="表示中の実習期" value={activePeriodId} onChange={e=>setActivePeriodId(e.target.value)}>{periods.map(p=><option key={p.id} value={p.id}>{p.locked?'🔒 ':''}{p.name}</option>)}</select></div>
+        <div className="sb-topbar-title"><button ref={menuButtonRef} type="button" className="sb-icon-button" aria-label="メニューを切り替え" aria-controls="app-sidebar" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen(v => !v)}><List className="w-5 h-5" aria-hidden="true" /></button><strong>{currentView === 'calendar' ? 'カレンダー' : currentView === 'workflow' ? '業務一覧' : 'リスト一覧'}</strong><select className="sb-current-period" disabled={!!workflowDraft||workflowSaving} aria-label="表示中の実習期" value={activePeriodId} onChange={e=>setActivePeriodId(e.target.value)}>{periods.map(p=><option key={p.id} value={p.id}>{p.locked?'🔒 ':''}{p.name}</option>)}</select><button type="button" className="room-shortcut" onClick={openRoomPicker} aria-label={`ルームを選択。現在のルーム: ${roomKey}`}><span>🚪 ルーム：{roomKey}</span><span aria-hidden="true">▾</span></button></div>
         <div className="sb-filter-chips">{searchQuery && <span className="sb-keyword-chip"><Search className="w-4 h-4"/><span>検索：{searchQuery}</span><button type="button" aria-label="検索条件を解除" onClick={() => setSearchQuery('')}>×</button></span>}{currentView !== 'workflow' && hasActiveFilter && <button type="button" className="sb-icon-button" onClick={clearFilters}>絞り込み解除</button>}</div>
       </div>
       {connectionStatus === 'local' && <div className="sb-demo-note no-print"><span>体験デモ（クラウド未接続）。共有には環境設定が必要です。</span><button type="button" onClick={() => { setTempRoomKey(roomKey); setIsConfigOpen(true); }}>環境設定を開く</button></div>}
+      {isRoomPickerOpen && !roomSwitchTarget && <AppUtilityDialog title="ルームを選択" onClose={() => setIsRoomPickerOpen(false)}>
+        <p>現在のルーム：<strong>{roomKey}</strong></p>
+        <p>切り替え先を選んでください。</p>
+        {roomListWarning && <p role="status">{roomListWarning}</p>}
+        {isLoadingRooms && <p role="status">ルーム一覧を取得中…</p>}
+        <div className="room-list">{availableRooms.map(rm => <button key={rm} type="button" aria-current={rm === roomKey ? 'true' : undefined} onClick={() => chooseRoom(rm)}>{rm}{rm === roomKey ? ' （現在）' : ''}</button>)}</div>
+        {!isLoadingRooms && availableRooms.length === 0 && <p>表示できるルームはありません。</p>}
+        <div className="room-list-footer"><button type="button" onClick={fetchAllRooms} disabled={isLoadingRooms}>一覧を更新</button></div>
+      </AppUtilityDialog>}
       {isSearchOpen && <AppUtilityDialog title="検索" onClose={() => setIsSearchOpen(false)}><form className="sb-search-form" onSubmit={(e) => { e.preventDefault(); setSearchQuery(searchDraft.trim()); setIsSearchOpen(false); }}><p>生徒名・実習先・期間などで絞り込みます。表示切替後も検索条件を維持します。</p><label htmlFor="app-search-input">キーワード</label><input id="app-search-input" type="search" value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="生徒名、実習先、期間など"/><div className="sb-dialog-actions"><button type="button" onClick={() => { setSearchQuery(''); setSearchDraft(''); setIsSearchOpen(false); }}>検索を解除</button><button type="button" onClick={() => setIsSearchOpen(false)}>キャンセル</button><button type="submit" className="sb-primary">検索する</button></div></form></AppUtilityDialog>}
       {memberView&&<AppUtilityDialog title={memberView==='presence'?'最近の接続記録':'訪問履歴'} onClose={()=>{memberRequestRef.current++;setMemberView(null)}}><div className="demand-members">
         <p>開いたときだけ取得します。自動更新はしません。</p>
@@ -4554,7 +4587,7 @@ function App() {
             <p className="mt-0.5">Google Firebase Infrastructure 連携対応</p>
           </div>
           <div className="flex items-center gap-4 font-medium text-slate-400">
-            <span>匿名認証・合言葉部屋分割・BOM付きCSV出力・Undo/Redo・カレンダー日付入力</span>
+            <span>匿名認証・ルーム別データ管理・BOM付きCSV出力・Undo/Redo・カレンダー日付入力</span>
           </div>
         </div>
       </footer>
@@ -4816,7 +4849,7 @@ function App() {
                 <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                   <h4 className="text-xs font-bold text-indigo-800 flex items-center gap-1.5 mb-1">
                     <Key className="w-4 h-4 text-indigo-600" />
-                    学年・クラス部屋キーの設定 (合言葉)
+                    ルーム名の設定
                   </h4>
                   <p className="text-[11px] text-indigo-900 leading-relaxed">学校独自のFirebaseプロジェクトの中で、さらに「学級」「年度」ごとに部屋を細かく分けることができます。（例：3-1、3-2、2026-all など）</p>
                 </div>
@@ -4824,7 +4857,7 @@ function App() {
                 <form onSubmit={handleRoomKeyChange} className="flex gap-2">
                   <input type="text" required placeholder="例: 3-1" value={tempRoomKey} onChange={(e) => setTempRoomKey(e.target.value)}
                     className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 text-slate-800" />
-                  <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm shrink-0 cursor-pointer">合言葉を変更</button>
+                  <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm shrink-0 cursor-pointer">ルーム名を変更</button>
                 </form>
               </div>
 
@@ -4881,14 +4914,14 @@ function App() {
               ) : (
                 <div className="flex flex-wrap gap-1.5">
                   {availableRooms.map((rm) => (
-                    <button key={rm} type="button" onClick={() => { if (rm === roomKey) return; setRoomSwitchTarget(rm); setRoomSwitchPassword(''); setRoomSwitchError(''); }} className={"inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all " + (rm === roomKey ? 'bg-indigo-600 border-indigo-600 text-white cursor-default' : 'bg-white border-slate-300 text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 cursor-pointer')}>
+                    <button key={rm} type="button" onClick={() => chooseRoom(rm)} className={"inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all " + (rm === roomKey ? 'bg-indigo-600 border-indigo-600 text-white cursor-default' : 'bg-white border-slate-300 text-slate-700 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 cursor-pointer')}>
                       <span className="font-mono">{rm}</span>
                       {rm === roomKey && <span className="text-[9px] bg-white/25 px-1 rounded">現在</span>}
                     </button>
                   ))}
                 </div>
               )}
-              <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">※ 別のルームを開くにはパスワードの入力が必要です。<br />※ 切り替えると、Firebase / ローカル両方の保存先がそのルームに切り替わります。</p>
+              <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">※ ルームの選択後に切替先を確認します。<br />※ 切り替えると、Firebase / ローカル両方の保存先がそのルームに切り替わります。</p>
             </div>
             {/* v3.9: 管理者モード設定（パスワード登録 / ログイン / 変更 / ログアウト） */}
             <div className="space-y-3 p-4 bg-amber-50/40 border border-amber-300 rounded-xl">
@@ -5075,33 +5108,15 @@ function App() {
         </div>
       )}
 
-      {/* 日付選択モーダル */}
-      {roomSwitchTarget && (
-        <div className="fixed inset-0 z-[140] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-scaleIn">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-5 text-white">
-              <div className="flex items-center gap-3">
-                <Key className="w-6 h-6" />
-                <div>
-                  <div className="text-base font-extrabold">ルームを開く</div>
-                  <div className="text-xs text-indigo-100">「<span className="font-mono font-bold">{roomSwitchTarget}</span>」を開くにはパスワードが必要です</div>
-                </div>
-              </div>
-            </div>
-            <form onSubmit={handleConfirmRoomSwitch} className="p-6 space-y-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 mb-1.5 block">パスワード</label>
-                <input type="password" autoFocus value={roomSwitchPassword} onChange={(e) => { setRoomSwitchPassword(e.target.value); setRoomSwitchError(''); }} className="w-full px-4 py-2.5 border-2 border-slate-200 focus:border-indigo-400 rounded-xl text-sm font-bold outline-none transition-colors" placeholder="続行するにはパスワードを入力してください" />
-                {roomSwitchError && <div className="mt-2 text-xs text-rose-700 font-bold">⚠ {roomSwitchError}</div>}
-              </div>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => { setRoomSwitchTarget(null); setRoomSwitchPassword(''); setRoomSwitchError(''); }} className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors cursor-pointer">キャンセル</button>
-                <button type="submit" className="flex-1 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-extrabold transition-colors shadow-sm cursor-pointer">このルームを開く</button>
-              </div>
-            </form>
-          </div>
+      {/* ルーム切替確認：パスワードは求めず、既存ルームのみ選択する。 */}
+      {roomSwitchTarget && <AppUtilityDialog title="ルーム切替の確認" onClose={() => { if (!roomSwitchBusyRef.current) { setRoomSwitchTarget(null); setRoomSwitchError(''); } }}>
+        <p>「<strong>{roomKey}</strong>」から「<strong>{roomSwitchTarget}</strong>」へ切り替えますか？</p>
+        {roomSwitchError && <p role="alert">{roomSwitchError}</p>}
+        <div className="sb-dialog-actions">
+          <button type="button" disabled={roomSwitchBusy} onClick={() => { setRoomSwitchTarget(null); setRoomSwitchError(''); }}>キャンセル</button>
+          <button type="button" className="sb-primary" disabled={roomSwitchBusy} onClick={handleConfirmRoomSwitch}>{roomSwitchBusy ? '確認中…' : '切り替える'}</button>
         </div>
-      )}
+      </AppUtilityDialog>}
 
       {datePickerState && (
         <DatePickerModal
