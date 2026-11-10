@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場実習進捗マネージャー v3.38.3</title>
+<title>現場実習進捗マネージャー v3.38.4</title>
 
 <!-- Tailwind v4 (browser build) -->
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -388,6 +388,12 @@
 .room-list button { min-height:44px; padding:10px 12px; border:1px solid #cbd6e2; border-radius:8px; background:#fff; text-align:left; font-size:14px; font-weight:700; overflow-wrap:anywhere; }
 .room-list button:hover { background:#edf4fb; }
 .room-list button[aria-current=true] { background:#e5f2fc; border-color:#93bde1; }
+.room-lookup { margin-top:20px; padding-top:16px; border-top:1px solid #e1e7ee; }
+.room-lookup label { display:block; margin-bottom:8px; font-size:14px; font-weight:700; }
+.room-lookup-fields { display:flex; flex-wrap:wrap; gap:8px; }
+.room-lookup-fields input { min-width:0; flex:1 1 200px; min-height:44px; padding:8px 10px; border:1px solid #b7c9da; border-radius:8px; font-size:16px; }
+.room-lookup-fields button { min-height:44px; padding:8px 12px; border:1px solid #a4c9e9; border-radius:8px; background:#e5f2fc; font-size:14px; font-weight:700; }
+.room-lookup p { margin-top:8px; }
 .room-list-footer { display:flex; justify-content:flex-end; margin-top:16px; }
 .room-list-footer button { min-height:44px; padding:8px 12px; border:1px solid #cfd9e4; border-radius:8px; background:#fff; }
 .sb-current-period { min-height:44px; max-width:min(400px,55vw); padding:8px 28px 8px 10px; border:1px solid #bacde2; border-radius:8px; background:#f3f7ff; font-size:14px; font-weight:700; }
@@ -2119,6 +2125,9 @@ function App() {
   const [roomSwitchBusy, setRoomSwitchBusy] = useState(false);
   const roomSwitchBusyRef = useRef(false);
   const [roomListWarning, setRoomListWarning] = useState('');
+  const [roomLookup, setRoomLookup] = useState('');
+  const [roomLookupError, setRoomLookupError] = useState('');
+  const [roomSwitchIsLookup, setRoomSwitchIsLookup] = useState(false);
   const [roomSwitchError, setRoomSwitchError] = useState('');
   const [myTeacherName, setMyTeacherName] = useState(() => localStorage.getItem('my_teacher_name') || '');
 
@@ -2289,7 +2298,7 @@ function App() {
     setTimeout(() => setWorkflowCloseNotice(true), 100);
   };
   const [workflowCloseNotice, setWorkflowCloseNotice] = useState(false);
-  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.38.3'; }, [workflowPage]);
+  useEffect(() => { if (workflowPage) document.title = '業務ワークフロー | 現場実習 v3.38.4'; }, [workflowPage]);
   const finishWorkflowClose = () => {
     workflowDraftRef.current=null; setWorkflowDraft(null); setSelectedStudentDetailState(null);
     setWorkflowInitialTask(null); if(workflowReturnToOverview)setCurrentView('workflow'); setWorkflowReturnToOverview(false);
@@ -3150,11 +3159,36 @@ function App() {
 
   const openRoomPicker = () => {
     if (!roomChangeAllowed()) return;
-    setRoomSwitchError(''); setIsRoomPickerOpen(true); fetchAllRooms();
+    setRoomSwitchError(''); setRoomLookup(''); setRoomLookupError(''); setIsRoomPickerOpen(true); fetchAllRooms();
   };
   const chooseRoom = (target) => {
     if (target === roomKey || !roomChangeAllowed()) return;
-    setRoomSwitchError(''); setRoomSwitchTarget(target);
+    setRoomSwitchIsLookup(false); setRoomSwitchError(''); setRoomSwitchTarget(target);
+  };
+  const handleRoomLookup = (event) => {
+    event.preventDefault();
+    const target = roomLookup.trim();
+    if (!target) { setRoomLookupError('合い言葉を入力してください。'); return; }
+    if (target === roomKey) { setRoomLookupError('このルームは現在開いています。'); return; }
+    if (!roomChangeAllowed()) return;
+    setRoomLookupError(''); setRoomSwitchIsLookup(true); setRoomSwitchError(''); setRoomSwitchTarget(target);
+  };
+  // Manual lookup never treats browser visit history alone as proof of a cloud room.
+  // Query the named room, not the entire rooms collection, and never create one.
+  const verifyLookupRoom = async (target) => {
+    if (!cloudConfigured) return !!localStorage.getItem(`local_students_${target}`);
+    if (connectionStatus !== 'connected' || !window.firebase) throw Error('クラウドへの接続を確認できません。');
+    const db = guardedFirestore(window.firebase.app().firestore(), roomKey);
+    const ref = db.collection('rooms').doc(target);
+    const checks = await Promise.allSettled([
+      ref.get({source:'server'}).then(s=>!!s.exists),
+      ref.collection('students').limit(1).get({source:'server'}).then(s=>!s.empty),
+      ref.collection('presence').limit(1).get({source:'server'}).then(s=>!s.empty),
+      ref.collection('visitors').limit(1).get({source:'server'}).then(s=>!s.empty),
+    ]);
+    if (checks.some(r=>r.status==='fulfilled' && r.value)) return true;
+    if (checks.some(r=>r.status==='rejected')) throw Error('ルームを確認できません。接続状況や読み取り権限、利用上限をご確認ください。');
+    return false;
   };
   const handleConfirmRoomSwitch = async () => {
     if (roomSwitchBusyRef.current || !roomChangeAllowed()) return;
@@ -3162,11 +3196,11 @@ function App() {
     if (!target || target === roomKey) return;
     roomSwitchBusyRef.current = true; setRoomSwitchBusy(true); setRoomSwitchError('');
     try {
-      const exists = await roomExists(target);
-      if (!exists) { setRoomSwitchError('ルームを確認できません。接続状態を確認するか、一覧を更新してください。'); return; }
+      const exists = roomSwitchIsLookup ? await verifyLookupRoom(target) : await roomExists(target);
+      if (!exists) { setRoomSwitchError('ルームを確認できません。入力内容と接続状態をご確認ください。'); return; }
       commitRoomChange(target);
     } catch (error) {
-      setRoomSwitchError('ルームを確認できませんでした。接続状態を確認して再試行してください。');
+      setRoomSwitchError(error?.message || 'ルームを確認できませんでした。接続状態を確認して再試行してください。');
     } finally { roomSwitchBusyRef.current = false; setRoomSwitchBusy(false); }
   };
 
@@ -3903,7 +3937,7 @@ function App() {
             <div>
               <div className="sb-brand-title">
                 <h1 className="text-lg font-bold tracking-tight text-slate-900">現場実習・施設見学</h1>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.38.3 HTML</span>
+                <span className="text-[10px] bg-slate-100 text-slate-600 font-mono px-1.5 py-0.5 rounded border border-slate-200">v3.38.4 HTML</span>
                 {isConfigFromFile && <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono px-1.5 py-0.5 rounded border border-emerald-200" title="config.js から Firebase 接続情報を読み込んでいます">config.js 適用中</span>}
               </div>
               <p className="text-xs text-slate-500">進捗管理・情報共有</p>
@@ -4095,6 +4129,12 @@ function App() {
         <div className="room-list">{availableRooms.map(rm => <button key={rm} type="button" aria-current={rm === roomKey ? 'true' : undefined} onClick={() => chooseRoom(rm)}>{rm}{rm === roomKey ? ' （現在）' : ''}</button>)}</div>
         {!isLoadingRooms && availableRooms.length === 0 && <p>表示できるルームはありません。</p>}
         <div className="room-list-footer"><button type="button" onClick={fetchAllRooms} disabled={isLoadingRooms}>一覧を更新</button></div>
+        <form className="room-lookup" onSubmit={handleRoomLookup}>
+          <label htmlFor="room-lookup-input">ルームの合い言葉を入力</label>
+          <div className="room-lookup-fields"><input id="room-lookup-input" type="text" value={roomLookup} onChange={e=>{setRoomLookup(e.target.value);setRoomLookupError('');}} autoComplete="off" placeholder="ルーム名を入力" /><button type="submit">ルームを探す</button></div>
+          <p>入力したルーム名を確認してから切り替えます。新規作成はしません。</p>
+          {roomLookupError && <p role="alert">{roomLookupError}</p>}
+        </form>
       </AppUtilityDialog>}
       {isSearchOpen && <AppUtilityDialog title="検索" onClose={() => setIsSearchOpen(false)}><form className="sb-search-form" onSubmit={(e) => { e.preventDefault(); setSearchQuery(searchDraft.trim()); setIsSearchOpen(false); }}><p>生徒名・実習先・期間などで絞り込みます。表示切替後も検索条件を維持します。</p><label htmlFor="app-search-input">キーワード</label><input id="app-search-input" type="search" value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="生徒名、実習先、期間など"/><div className="sb-dialog-actions"><button type="button" onClick={() => { setSearchQuery(''); setSearchDraft(''); setIsSearchOpen(false); }}>検索を解除</button><button type="button" onClick={() => setIsSearchOpen(false)}>キャンセル</button><button type="submit" className="sb-primary">検索する</button></div></form></AppUtilityDialog>}
       {memberView&&<AppUtilityDialog title={memberView==='presence'?'最近の接続記録':'訪問履歴'} onClose={()=>{memberRequestRef.current++;setMemberView(null)}}><div className="demand-members">
@@ -5111,6 +5151,7 @@ function App() {
       {/* ルーム切替確認：パスワードは求めず、既存ルームのみ選択する。 */}
       {roomSwitchTarget && <AppUtilityDialog title="ルーム切替の確認" onClose={() => { if (!roomSwitchBusyRef.current) { setRoomSwitchTarget(null); setRoomSwitchError(''); } }}>
         <p>「<strong>{roomKey}</strong>」から「<strong>{roomSwitchTarget}</strong>」へ切り替えますか？</p>
+        <p>切り替え時にルームを確認します。確認できない場合は切り替えません。</p>
         {roomSwitchError && <p role="alert">{roomSwitchError}</p>}
         <div className="sb-dialog-actions">
           <button type="button" disabled={roomSwitchBusy} onClick={() => { setRoomSwitchTarget(null); setRoomSwitchError(''); }}>キャンセル</button>
